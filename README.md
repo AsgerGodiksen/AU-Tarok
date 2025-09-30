@@ -1,2 +1,2 @@
-# AU---Tarok
+# AU-Tarok
 Aarhus University quadrapods - Tarok
