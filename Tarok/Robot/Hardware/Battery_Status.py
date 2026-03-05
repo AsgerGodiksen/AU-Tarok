@@ -9,7 +9,6 @@ from Robot.Hardware.Motor_Readings import*
 def Voltage_Mapping():
     # Voltage to Procentage Mapping.
     # Values are found from the battery datasheet for one cell
-
     Voltage_Mapping = [
         (100, 4.17),
         (90, 4.07),

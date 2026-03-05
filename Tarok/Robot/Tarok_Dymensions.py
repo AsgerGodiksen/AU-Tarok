@@ -40,6 +40,16 @@ class Tarok_Dimensions_Class:
 
         # Total Weight of the Robot
         self.Tarok_Weight = self.Torso + 4 * self.Leg # kg
+        
+    def Shoulder_Positions(self):
+        """ Gives the Shoulder Positions for the Torso
+        """
+        FL = [self.Torso_Lenght/2   , -self.Torso_Width/2 , 0]
+        FR = [self.Torso_Lenght/2   , self.Torso_Width/2  , 0] 
+        HL = [-self.Torso_Lenght/2  , -self.Torso_Width/2 , 0] 
+        HR = [-self.Torso_Lenght/2  , self.Torso_Width/2  , 0]
+        
+        
 
         
 
