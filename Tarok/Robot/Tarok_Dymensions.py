@@ -1,6 +1,6 @@
 # In this File the dimensions of TAROK is found 
 
-class Tarok_Dimensions_Class:
+class Tarok_Dymensions_Class:
     def __init__(self):
         """ Lengths of the different parts of the robot in meters"""
         self.Torso_Lenght = 0.479   # m - Torso Lenght
@@ -44,10 +44,11 @@ class Tarok_Dimensions_Class:
     def Shoulder_Positions(self):
         """ Gives the Shoulder Positions for the Torso
         """
-        FL = [self.Torso_Lenght/2   , -self.Torso_Width/2 , 0]
-        FR = [self.Torso_Lenght/2   , self.Torso_Width/2  , 0] 
-        HL = [-self.Torso_Lenght/2  , -self.Torso_Width/2 , 0] 
-        HR = [-self.Torso_Lenght/2  , self.Torso_Width/2  , 0]
+        Front_Left  = [self.Torso_Lenght/2   , -self.Torso_Width/2 , 0]
+        Front_Right = [self.Torso_Lenght/2   , self.Torso_Width/2  , 0] 
+        Hind_Left   = [-self.Torso_Lenght/2  , -self.Torso_Width/2 , 0] 
+        Hind_Right  = [-self.Torso_Lenght/2  , self.Torso_Width/2  , 0]
+        return [Front_Left, Front_Right, Hind_Left, Hind_Right]
         
         
 

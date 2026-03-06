@@ -1,11 +1,11 @@
 # This will be the main file when oberating with TAROK
-import can
+#import can
 from time import sleep,time
-import numpy as np
+#import numpy as np
 from Robot import*
 
 
-Tarok = Tarok_Dimensions_Class()
+Tarok = Tarok_Dymensions_Class
 
 print("Starting the Robot")
 
@@ -19,7 +19,7 @@ bus1 = can.interface.Bus(bustype='socketcan', channel='can1', bitrate=1000000)
 bus2 = can.interface.Bus(bustype='socketcan', channel='can2', bitrate=1000000)
 
 # Flux the channels
-bus0.flush_tx_buffer()
+bus0.flush_tx_buffer() 
 bus1.flush_tx_buffer()
 bus2.flush_tx_buffer()
 

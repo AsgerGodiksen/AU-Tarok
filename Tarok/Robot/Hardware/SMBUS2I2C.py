@@ -22,7 +22,7 @@ class SMBus2I2C:
             dtparam=i2c_arm_baudrate=400000
         - smbus2 must be installed: pip install smbus2
 
-    Usage:
+    Usage:>
         i2c = SMBus2I2C(1, 0x4A)
         bno = BNO08X_I2C(i2c, address=0x4A)
     """
