@@ -56,7 +56,7 @@ def plot_torso():
     ax1.set_ylabel('Y (m)')
     ax1.axhline(0, color='gray', linewidth=0.5, linestyle='--')
     ax1.axvline(0, color='gray', linewidth=0.5, linestyle='--')
-    ax1.legend(loc='upper left', fontsize=8)
+    ax1.legend(lo='upper left', fontsize=8)
     ax1.grid(True, linestyle='--', alpha=0.4)
 
     # ── 3D View ───────────────────────────────────────────────────────────────
