@@ -1,0 +1,28 @@
+# Local pip dependencies for AU-Tarok (non-ROS runtime).
+# Install with: python -m pip install -r requirements-local.txt
+# Note: ROS 2 packages listed in requirements.txt (for example action-msgs/rclpy)
+# are not available on PyPI and must be installed via a ROS distribution.
+
+# Pip-installable entries from requirements.txt (exact pinned versions).
+contourpy==1.3.3
+cycler==0.12.1
+fonttools==4.61.1
+kiwisolver==1.4.9
+matplotlib==3.10.8
+numpy==2.4.2
+packaging==26.0
+pandas==3.0.1
+pillow==12.1.1
+pyparsing==3.3.2
+python-dateutil==2.9.0.post0
+PyYAML==6.0.3
+scipy==1.17.1
+setuptools==82.0.0
+six==1.17.0
+xacro==2.1.1
+
+# Additional pip packages imported by this repo but not listed in requirements.txt.
+adafruit-circuitpython-bno08x
+gpiozero
+python-can
+smbus2
