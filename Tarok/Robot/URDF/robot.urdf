@@ -1,0 +1,941 @@
+<?xml version="1.0" ?>
+<!-- Generated using onshape-to-robot -->
+<!-- Onshape document_id: ab44006cac3eb36d2c1b99f7 -->
+<robot name="Tarok">
+  <!-- Link torso_ros_assemply -->
+  <link name="torso_ros_assemply">
+    <inertial>
+      <origin xyz="0.0128 0.000220033 5.78737e-05" rpy="0 0 0"/>
+      <mass value="4.18259"/>
+      <inertia ixx="0.0527443" ixy="0.000214402" ixz="-5.90229e-05" iyy="0.213573" iyz="1.61981e-05" izz="0.257028"/>
+    </inertial>
+    <!-- Part myactuator_case -->
+    <visual>
+      <origin xyz="0.279 0.110016 2.05367e-06" rpy="3.14159 0 1.5708"/>
+      <geometry>
+        <mesh filename="package://assets/myactuator_case.stl"/>
+      </geometry>
+      <material name="myactuator_case_material">
+        <color rgba="0.4 0.4 0.4 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.279 0.110016 2.05367e-06" rpy="3.14159 0 1.5708"/>
+      <geometry>
+        <mesh filename="package://assets/myactuator_case.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part myactuator_case_2 -->
+    <visual>
+      <origin xyz="0.279 -0.109984 0.000420725" rpy="0 -0 -1.5708"/>
+      <geometry>
+        <mesh filename="package://assets/myactuator_case.stl"/>
+      </geometry>
+      <material name="myactuator_case_2_material">
+        <color rgba="0.4 0.4 0.4 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.279 -0.109984 0.000420725" rpy="0 -0 -1.5708"/>
+      <geometry>
+        <mesh filename="package://assets/myactuator_case.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part myactuator_case_3 -->
+    <visual>
+      <origin xyz="-0.2534 -0.108318 2.05367e-06" rpy="-1.5708 1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/myactuator_case.stl"/>
+      </geometry>
+      <material name="myactuator_case_3_material">
+        <color rgba="0.4 0.4 0.4 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.2534 -0.108318 2.05367e-06" rpy="-1.5708 1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/myactuator_case.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part myactuator_case_4 -->
+    <visual>
+      <origin xyz="-0.2534 0.110016 2.05367e-06" rpy="-1.5708 1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/myactuator_case.stl"/>
+      </geometry>
+      <material name="myactuator_case_4_material">
+        <color rgba="0.4 0.4 0.4 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.2534 0.110016 2.05367e-06" rpy="-1.5708 1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/myactuator_case.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part profile -->
+    <visual>
+      <origin xyz="-0.2122 0.107016 0.0460021" rpy="3.14159 0 -1.5708"/>
+      <geometry>
+        <mesh filename="package://assets/profile.stl"/>
+      </geometry>
+      <material name="profile_material">
+        <color rgba="0.917647 0.917647 0.917647 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.2122 0.107016 0.0460021" rpy="3.14159 0 -1.5708"/>
+      <geometry>
+        <mesh filename="package://assets/profile.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part profile_2 -->
+    <visual>
+      <origin xyz="0.2378 0.107016 -0.0459979" rpy="1.5708 1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/profile.stl"/>
+      </geometry>
+      <material name="profile_2_material">
+        <color rgba="0.917647 0.917647 0.917647 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.2378 0.107016 -0.0459979" rpy="1.5708 1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/profile.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part motor_mount -->
+    <visual>
+      <origin xyz="-0.2267 1.64896e-05 2.05367e-06" rpy="0 -0 1.5708"/>
+      <geometry>
+        <mesh filename="package://assets/motor_mount.stl"/>
+      </geometry>
+      <material name="motor_mount_material">
+        <color rgba="0.301961 0.301961 0.301961 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.2267 1.64896e-05 2.05367e-06" rpy="0 -0 1.5708"/>
+      <geometry>
+        <mesh filename="package://assets/motor_mount.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part motor_mount_2 -->
+    <visual>
+      <origin xyz="0.2523 1.64896e-05 2.05367e-06" rpy="0 -0 -1.5708"/>
+      <geometry>
+        <mesh filename="package://assets/motor_mount.stl"/>
+      </geometry>
+      <material name="motor_mount_2_material">
+        <color rgba="0.301961 0.301961 0.301961 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.2523 1.64896e-05 2.05367e-06" rpy="0 -0 -1.5708"/>
+      <geometry>
+        <mesh filename="package://assets/motor_mount.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part profile_3 -->
+    <visual>
+      <origin xyz="-0.2122 -0.106984 0.0460021" rpy="-1.5708 1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/profile.stl"/>
+      </geometry>
+      <material name="profile_3_material">
+        <color rgba="0.917647 0.917647 0.917647 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.2122 -0.106984 0.0460021" rpy="-1.5708 1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/profile.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part profile_4 -->
+    <visual>
+      <origin xyz="-0.2122 -0.106984 -0.0459979" rpy="-1.5708 1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/profile.stl"/>
+      </geometry>
+      <material name="profile_4_material">
+        <color rgba="0.917647 0.917647 0.917647 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.2122 -0.106984 -0.0459979" rpy="-1.5708 1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/profile.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <!-- Link myacuator_axel -->
+  <link name="myacuator_axel">
+    <inertial>
+      <origin xyz="-0.000447317 -0.003327 -0.0691995" rpy="0 0 0"/>
+      <mass value="0.565004"/>
+      <inertia ixx="0.000375524" ixy="3.46913e-06" ixz="-1.16e-10" iyy="0.000635787" iyz="-8.54e-10" izz="0.000374271"/>
+    </inertial>
+    <!-- Part hip_mount -->
+    <visual>
+      <origin xyz="-0 0 -0.0105" rpy="-3.14159 -0 1.55462"/>
+      <geometry>
+        <mesh filename="package://assets/hip_mount.stl"/>
+      </geometry>
+      <material name="hip_mount_material">
+        <color rgba="0.615686 0.811765 0.929412 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0 0 -0.0105" rpy="-3.14159 -0 1.55462"/>
+      <geometry>
+        <mesh filename="package://assets/hip_mount.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part myacuator_axel -->
+    <visual>
+      <origin xyz="-0 0 0" rpy="1.5708 0 -0.0161785"/>
+      <geometry>
+        <mesh filename="package://assets/myacuator_axel.stl"/>
+      </geometry>
+      <material name="myacuator_axel_material">
+        <color rgba="0.811765 0.858824 0.898039 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0 0 0" rpy="1.5708 0 -0.0161785"/>
+      <geometry>
+        <mesh filename="package://assets/myacuator_axel.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part myactuator_case_5 -->
+    <visual>
+      <origin xyz="-9.80195e-05 0.0133533 -0.0692" rpy="0.0161785 1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/myactuator_case.stl"/>
+      </geometry>
+      <material name="myactuator_case_5_material">
+        <color rgba="0.4 0.4 0.4 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-9.80195e-05 0.0133533 -0.0692" rpy="0.0161785 1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/myactuator_case.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <!-- Link myacuator_axel_2 -->
+  <link name="myacuator_axel_2">
+    <inertial>
+      <origin xyz="-2.5224e-05 -7.52901e-05 -0.0458159" rpy="0 0 0"/>
+      <mass value="0.565004"/>
+      <inertia ixx="0.000374398" ixy="3.5918e-07" ixz="2.35898e-07" iyy="0.00037535" iyz="7.04122e-07" izz="0.000635815"/>
+    </inertial>
+    <!-- Part upper_leg -->
+    <visual>
+      <origin xyz="0 -0 -0.07275" rpy="-1.5708 -0 1.24753"/>
+      <geometry>
+        <mesh filename="package://assets/upper_leg.stl"/>
+      </geometry>
+      <material name="upper_leg_material">
+        <color rgba="0.513725 0.737255 0.407843 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 -0 -0.07275" rpy="-1.5708 -0 1.24753"/>
+      <geometry>
+        <mesh filename="package://assets/upper_leg.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part myacuator_axel_2 -->
+    <visual>
+      <origin xyz="0 -0 -0" rpy="1.5708 -0 1.24753"/>
+      <geometry>
+        <mesh filename="package://assets/myacuator_axel.stl"/>
+      </geometry>
+      <material name="myacuator_axel_2_material">
+        <color rgba="0.811765 0.858824 0.898039 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 -0 -0" rpy="1.5708 -0 1.24753"/>
+      <geometry>
+        <mesh filename="package://assets/myacuator_axel.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hip_knee_connector -->
+    <visual>
+      <origin xyz="0 -0 -0.0205" rpy="2.81832 -1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/hip_knee_connector.stl"/>
+      </geometry>
+      <material name="hip_knee_connector_material">
+        <color rgba="0.615686 0.811765 0.929412 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 -0 -0.0205" rpy="2.81832 -1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/hip_knee_connector.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part myactuator_case_6 -->
+    <visual>
+      <origin xyz="0 -0 -0.0625" rpy="-1.5708 -0 -0.323271"/>
+      <geometry>
+        <mesh filename="package://assets/myactuator_case.stl"/>
+      </geometry>
+      <material name="myactuator_case_6_material">
+        <color rgba="0.4 0.4 0.4 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 -0 -0.0625" rpy="-1.5708 -0 -0.323271"/>
+      <geometry>
+        <mesh filename="package://assets/myactuator_case.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <!-- Link lower_leg -->
+  <link name="lower_leg">
+    <inertial>
+      <origin xyz="-0.0277651 -0.118713 -4.97107e-07" rpy="0 0 0"/>
+      <mass value="0.000243674"/>
+      <inertia ixx="2.28704e-06" ixy="-8.51812e-07" ixz="5e-12" iyy="3.96213e-07" iyz="1.5e-11" izz="2.6525e-06"/>
+    </inertial>
+    <!-- Part foot -->
+    <visual>
+      <origin xyz="-0.0780477 -0.275456 0.00015" rpy="3.14159 -0 -1.8469"/>
+      <geometry>
+        <mesh filename="package://assets/foot.stl"/>
+      </geometry>
+      <material name="foot_material">
+        <color rgba="0.615686 0.811765 0.929412 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.0780477 -0.275456 0.00015" rpy="3.14159 -0 -1.8469"/>
+      <geometry>
+        <mesh filename="package://assets/foot.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part lower_leg -->
+    <visual>
+      <origin xyz="-0 0 0" rpy="1.5708 -0 -1.8469"/>
+      <geometry>
+        <mesh filename="package://assets/lower_leg.stl"/>
+      </geometry>
+      <material name="lower_leg_material">
+        <color rgba="0.615686 0.811765 0.929412 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0 0 0" rpy="1.5708 -0 -1.8469"/>
+      <geometry>
+        <mesh filename="package://assets/lower_leg.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <!-- Joint from myacuator_axel_2 to lower_leg -->
+  <joint name="FR_3" type="revolute">
+    <origin xyz="0.0635339 0.18964 -0.07275" rpy="-0 -0 1.24753"/>
+    <parent link="myacuator_axel_2"/>
+    <child link="lower_leg"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10" velocity="10" lower="-3.141592653589793" upper="3.141592653589793"/>
+  </joint>
+  <!-- Joint from myacuator_axel to myacuator_axel_2 -->
+  <joint name="FR_2" type="revolute">
+    <origin xyz="-0.000227442 0.00535438 -0.0692" rpy="1.5708 0 -0.0161785"/>
+    <parent link="myacuator_axel"/>
+    <child link="myacuator_axel_2"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10" velocity="10" lower="-3.141592653589793" upper="3.141592653589793"/>
+  </joint>
+  <!-- Joint from torso_ros_assemply to myacuator_axel -->
+  <joint name="FR_1" type="revolute">
+    <origin xyz="0.271 -0.109984 0.000420725" rpy="3.14159 1.5708 0"/>
+    <parent link="torso_ros_assemply"/>
+    <child link="myacuator_axel"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10" velocity="10" lower="-3.141592653589793" upper="3.141592653589793"/>
+  </joint>
+  <!-- Link myacuator_axel_3 -->
+  <link name="myacuator_axel_3">
+    <inertial>
+      <origin xyz="8.73198e-05 0.00333266 -0.0691201" rpy="0 0 0"/>
+      <mass value="0.565004"/>
+      <inertia ixx="0.000374467" ixy="6.84807e-06" ixz="-1.9429e-08" iyy="0.000635652" iyz="-7.4149e-07" izz="0.000375464"/>
+    </inertial>
+    <!-- Part myacuator_axel_3 -->
+    <visual>
+      <origin xyz="-0 0 0" rpy="1.5708 0 3.1154"/>
+      <geometry>
+        <mesh filename="package://assets/myacuator_axel.stl"/>
+      </geometry>
+      <material name="myacuator_axel_3_material">
+        <color rgba="0.811765 0.858824 0.898039 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0 0 0" rpy="1.5708 0 3.1154"/>
+      <geometry>
+        <mesh filename="package://assets/myacuator_axel.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part myactuator_case_7 -->
+    <visual>
+      <origin xyz="-0.000349667 -0.0133454 -0.0692" rpy="3.14159 0 -0.0261952"/>
+      <geometry>
+        <mesh filename="package://assets/myactuator_case.stl"/>
+      </geometry>
+      <material name="myactuator_case_7_material">
+        <color rgba="0.4 0.4 0.4 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.000349667 -0.0133454 -0.0692" rpy="3.14159 0 -0.0261952"/>
+      <geometry>
+        <mesh filename="package://assets/myactuator_case.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hip_mount_2 -->
+    <visual>
+      <origin xyz="-0 0 -0.0105" rpy="3.14159 -0 -1.59699"/>
+      <geometry>
+        <mesh filename="package://assets/hip_mount.stl"/>
+      </geometry>
+      <material name="hip_mount_2_material">
+        <color rgba="0.615686 0.811765 0.929412 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0 0 -0.0105" rpy="3.14159 -0 -1.59699"/>
+      <geometry>
+        <mesh filename="package://assets/hip_mount.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <!-- Link myacuator_axel_4 -->
+  <link name="myacuator_axel_4">
+    <inertial>
+      <origin xyz="-6.17239e-05 4.99502e-05 0.0458159" rpy="0 0 0"/>
+      <mass value="0.565004"/>
+      <inertia ixx="0.000374998" ixy="-5.83109e-07" ixz="-5.77249e-07" iyy="0.000374749" iyz="4.6714e-07" izz="0.000635815"/>
+    </inertial>
+    <!-- Part hip_knee_connector_2 -->
+    <visual>
+      <origin xyz="0 -0 0.0205" rpy="-2.46123 1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/hip_knee_connector.stl"/>
+      </geometry>
+      <material name="hip_knee_connector_2_material">
+        <color rgba="0.615686 0.811765 0.929412 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 -0 0.0205" rpy="-2.46123 1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/hip_knee_connector.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part myacuator_axel_4 -->
+    <visual>
+      <origin xyz="0 0 0" rpy="-1.5708 -0 0.890438"/>
+      <geometry>
+        <mesh filename="package://assets/myacuator_axel.stl"/>
+      </geometry>
+      <material name="myacuator_axel_4_material">
+        <color rgba="0.811765 0.858824 0.898039 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="-1.5708 -0 0.890438"/>
+      <geometry>
+        <mesh filename="package://assets/myacuator_axel.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part upper_leg_2 -->
+    <visual>
+      <origin xyz="-0 -0 0.07275" rpy="-1.5708 -0 0.890438"/>
+      <geometry>
+        <mesh filename="package://assets/upper_leg.stl"/>
+      </geometry>
+      <material name="upper_leg_2_material">
+        <color rgba="0.513725 0.737255 0.407843 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0 -0 0.07275" rpy="-1.5708 -0 0.890438"/>
+      <geometry>
+        <mesh filename="package://assets/upper_leg.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part myactuator_case_8 -->
+    <visual>
+      <origin xyz="0 -0 0.0625" rpy="1.5708 -0 0.890438"/>
+      <geometry>
+        <mesh filename="package://assets/myactuator_case.stl"/>
+      </geometry>
+      <material name="myactuator_case_8_material">
+        <color rgba="0.4 0.4 0.4 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 -0 0.0625" rpy="1.5708 -0 0.890438"/>
+      <geometry>
+        <mesh filename="package://assets/myactuator_case.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <!-- Link lower_leg_2 -->
+  <link name="lower_leg_2">
+    <inertial>
+      <origin xyz="0.0775194 0.0940984 4.97107e-07" rpy="0 0 0"/>
+      <mass value="0.000243674"/>
+      <inertia ixx="1.91394e-06" ixy="-1.1366e-06" ixz="9e-12" iyy="7.69319e-07" iyz="1.3e-11" izz="2.6525e-06"/>
+    </inertial>
+    <!-- Part lower_leg_2 -->
+    <visual>
+      <origin xyz="-0 0 0" rpy="-1.5708 0 0.928052"/>
+      <geometry>
+        <mesh filename="package://assets/lower_leg.stl"/>
+      </geometry>
+      <material name="lower_leg_2_material">
+        <color rgba="0.615686 0.811765 0.929412 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0 0 0" rpy="-1.5708 0 0.928052"/>
+      <geometry>
+        <mesh filename="package://assets/lower_leg.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part foot_2 -->
+    <visual>
+      <origin xyz="0.171607 0.22917 0.00015" rpy="3.14159 0 0.928052"/>
+      <geometry>
+        <mesh filename="package://assets/foot.stl"/>
+      </geometry>
+      <material name="foot_2_material">
+        <color rgba="0.615686 0.811765 0.929412 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.171607 0.22917 0.00015" rpy="3.14159 0 0.928052"/>
+      <geometry>
+        <mesh filename="package://assets/foot.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <!-- Joint from myacuator_axel_4 to lower_leg_2 -->
+  <joint name="FL_3" type="revolute">
+    <origin xyz="0.125814 0.155469 0.07275" rpy="-3.14159 -0 0.890438"/>
+    <parent link="myacuator_axel_4"/>
+    <child link="lower_leg_2"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10" velocity="10" lower="-3.141592653589793" upper="3.141592653589793"/>
+  </joint>
+  <!-- Joint from myacuator_axel_3 to myacuator_axel_4 -->
+  <joint name="FL_2" type="revolute">
+    <origin xyz="-0.000140129 -0.00534816 -0.0692" rpy="1.5708 0 -0.0261952"/>
+    <parent link="myacuator_axel_3"/>
+    <child link="myacuator_axel_4"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10" velocity="10" lower="-3.141592653589793" upper="3.141592653589793"/>
+  </joint>
+  <!-- Joint from torso_ros_assemply to myacuator_axel_3 -->
+  <joint name="FL_1" type="revolute">
+    <origin xyz="0.271 0.110016 2.05367e-06" rpy="-3.14159 1.5708 0"/>
+    <parent link="torso_ros_assemply"/>
+    <child link="myacuator_axel_3"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10" velocity="10" lower="-3.141592653589793" upper="3.141592653589793"/>
+  </joint>
+  <!-- Link myacuator_axel_5 -->
+  <link name="myacuator_axel_5">
+    <inertial>
+      <origin xyz="-0.000393435 -0.00333381 0.0691995" rpy="0 0 0"/>
+      <mass value="0.565004"/>
+      <inertia ixx="0.00037548" ixy="-7.42606e-07" ixz="1e-10" iyy="0.000635831" iyz="8.58e-10" izz="0.000374271"/>
+    </inertial>
+    <!-- Part hip_mount_3 -->
+    <visual>
+      <origin xyz="-0 0 0.0105" rpy="-0 0 -1.5708"/>
+      <geometry>
+        <mesh filename="package://assets/hip_mount.stl"/>
+      </geometry>
+      <material name="hip_mount_3_material">
+        <color rgba="0.615686 0.811765 0.929412 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0 0 0.0105" rpy="-0 0 -1.5708"/>
+      <geometry>
+        <mesh filename="package://assets/hip_mount.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part myactuator_case_9 -->
+    <visual>
+      <origin xyz="-0.000314034 0.01335 0.0692" rpy="-0 1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/myactuator_case.stl"/>
+      </geometry>
+      <material name="myactuator_case_9_material">
+        <color rgba="0.4 0.4 0.4 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.000314034 0.01335 0.0692" rpy="-0 1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/myactuator_case.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part myacuator_axel_5 -->
+    <visual>
+      <origin xyz="0 0 -0" rpy="-1.5708 0 0"/>
+      <geometry>
+        <mesh filename="package://assets/myacuator_axel.stl"/>
+      </geometry>
+      <material name="myacuator_axel_5_material">
+        <color rgba="0.811765 0.858824 0.898039 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 -0" rpy="-1.5708 0 0"/>
+      <geometry>
+        <mesh filename="package://assets/myacuator_axel.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <!-- Link myacuator_axel_6 -->
+  <link name="myacuator_axel_6">
+    <inertial>
+      <origin xyz="-4.61395e-05 6.4622e-05 -0.0458159" rpy="0 0 0"/>
+      <mass value="0.565004"/>
+      <inertia ixx="0.00037468" ixy="-5.63914e-07" ixz="4.31502e-07" iyy="0.000375067" iyz="-6.04352e-07" izz="0.000635815"/>
+    </inertial>
+    <!-- Part upper_leg_3 -->
+    <visual>
+      <origin xyz="-0 0 -0.07275" rpy="1.5708 0 -0.950741"/>
+      <geometry>
+        <mesh filename="package://assets/upper_leg.stl"/>
+      </geometry>
+      <material name="upper_leg_3_material">
+        <color rgba="0.513725 0.737255 0.407843 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0 0 -0.07275" rpy="1.5708 0 -0.950741"/>
+      <geometry>
+        <mesh filename="package://assets/upper_leg.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part myactuator_case_10 -->
+    <visual>
+      <origin xyz="-0 0 -0.0625" rpy="-1.5708 -0 -2.52154"/>
+      <geometry>
+        <mesh filename="package://assets/myactuator_case.stl"/>
+      </geometry>
+      <material name="myactuator_case_10_material">
+        <color rgba="0.4 0.4 0.4 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0 0 -0.0625" rpy="-1.5708 -0 -2.52154"/>
+      <geometry>
+        <mesh filename="package://assets/myactuator_case.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hip_knee_connector_3 -->
+    <visual>
+      <origin xyz="-0 0 -0.0205" rpy="-0.950741 -1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/hip_knee_connector.stl"/>
+      </geometry>
+      <material name="hip_knee_connector_3_material">
+        <color rgba="0.615686 0.811765 0.929412 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0 0 -0.0205" rpy="-0.950741 -1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/hip_knee_connector.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part myacuator_axel_6 -->
+    <visual>
+      <origin xyz="-0 0 -0" rpy="1.5708 0 -2.52154"/>
+      <geometry>
+        <mesh filename="package://assets/myacuator_axel.stl"/>
+      </geometry>
+      <material name="myacuator_axel_6_material">
+        <color rgba="0.811765 0.858824 0.898039 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0 0 -0" rpy="1.5708 0 -2.52154"/>
+      <geometry>
+        <mesh filename="package://assets/myacuator_axel.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <!-- Link foot -->
+  <link name="foot">
+    <inertial>
+      <origin xyz="0.00564869 0.121786 4.97107e-07" rpy="0 0 0"/>
+      <mass value="0.000243674"/>
+      <inertia ixx="2.59336e-06" ixy="2.29274e-07" ixz="-1e-12" iyy="8.9898e-08" iyz="1.5e-11" izz="2.6525e-06"/>
+    </inertial>
+    <!-- Part lower_leg_3 -->
+    <visual>
+      <origin xyz="-0 -0 0" rpy="-1.5708 -0 1.5708"/>
+      <geometry>
+        <mesh filename="package://assets/lower_leg.stl"/>
+      </geometry>
+      <material name="lower_leg_3_material">
+        <color rgba="0.615686 0.811765 0.929412 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0 -0 0" rpy="-1.5708 -0 1.5708"/>
+      <geometry>
+        <mesh filename="package://assets/lower_leg.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part foot_3 -->
+    <visual>
+      <origin xyz="0 0.2863 -0.00015" rpy="-3.14159 0 1.5708"/>
+      <geometry>
+        <mesh filename="package://assets/foot.stl"/>
+      </geometry>
+      <material name="foot_3_material">
+        <color rgba="0.615686 0.811765 0.929412 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0.2863 -0.00015" rpy="-3.14159 0 1.5708"/>
+      <geometry>
+        <mesh filename="package://assets/foot.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <!-- Joint from myacuator_axel_6 to foot -->
+  <joint name="HR_3" type="revolute">
+    <origin xyz="0.116216 -0.162769 -0.07275" rpy="0 0 -0.950741"/>
+    <parent link="myacuator_axel_6"/>
+    <child link="foot"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10" velocity="10" lower="-3.141592653589793" upper="3.141592653589793"/>
+  </joint>
+  <!-- Joint from myacuator_axel_5 to myacuator_axel_6 -->
+  <joint name="HR_2" type="revolute">
+    <origin xyz="-0.000314034 0.00535 0.0692" rpy="1.5708 0 0"/>
+    <parent link="myacuator_axel_5"/>
+    <child link="myacuator_axel_6"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10" velocity="10" lower="-3.141592653589793" upper="3.141592653589793"/>
+  </joint>
+  <!-- Joint from torso_ros_assemply to myacuator_axel_5 -->
+  <joint name="HR_1" type="revolute">
+    <origin xyz="-0.2454 -0.108318 2.05367e-06" rpy="3.14159 1.5708 0"/>
+    <parent link="torso_ros_assemply"/>
+    <child link="myacuator_axel_5"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10" velocity="10" lower="-3.141592653589793" upper="3.141592653589793"/>
+  </joint>
+  <!-- Link myacuator_axel_7 -->
+  <link name="myacuator_axel_7">
+    <inertial>
+      <origin xyz="-2.17076e-06 0.00333475 0.0691995" rpy="0 0 0"/>
+      <mass value="0.565004"/>
+      <inertia ixx="0.000375654" ixy="6.76994e-06" ixz="2e-12" iyy="0.000635657" iyz="-8.56e-10" izz="0.000374271"/>
+    </inertial>
+    <!-- Part myactuator_case_11 -->
+    <visual>
+      <origin xyz="-0.000309187 -0.0133464 0.0692" rpy="3.11843 -1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/myactuator_case.stl"/>
+      </geometry>
+      <material name="myactuator_case_11_material">
+        <color rgba="0.4 0.4 0.4 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.000309187 -0.0133464 0.0692" rpy="3.11843 -1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/myactuator_case.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hip_mount_4 -->
+    <visual>
+      <origin xyz="0 0 0.0105" rpy="-0 -0 -1.59396"/>
+      <geometry>
+        <mesh filename="package://assets/hip_mount.stl"/>
+      </geometry>
+      <material name="hip_mount_4_material">
+        <color rgba="0.615686 0.811765 0.929412 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.0105" rpy="-0 -0 -1.59396"/>
+      <geometry>
+        <mesh filename="package://assets/hip_mount.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part myacuator_axel_7 -->
+    <visual>
+      <origin xyz="-0 0 -0" rpy="-1.5708 0 -0.0231621"/>
+      <geometry>
+        <mesh filename="package://assets/myacuator_axel.stl"/>
+      </geometry>
+      <material name="myacuator_axel_7_material">
+        <color rgba="0.811765 0.858824 0.898039 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0 0 -0" rpy="-1.5708 0 -0.0231621"/>
+      <geometry>
+        <mesh filename="package://assets/myacuator_axel.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <!-- Link myacuator_axel_8 -->
+  <link name="myacuator_axel_8">
+    <inertial>
+      <origin xyz="7.11689e-05 3.52115e-05 0.0458159" rpy="0 0 0"/>
+      <mass value="0.565004"/>
+      <inertia ixx="0.000375235" ixy="4.73951e-07" ixz="6.6558e-07" iyy="0.000374512" iyz="3.29302e-07" izz="0.000635815"/>
+    </inertial>
+    <!-- Part myactuator_case_12 -->
+    <visual>
+      <origin xyz="-0 0 0.0625" rpy="1.5708 -0 -1.11135"/>
+      <geometry>
+        <mesh filename="package://assets/myactuator_case.stl"/>
+      </geometry>
+      <material name="myactuator_case_12_material">
+        <color rgba="0.4 0.4 0.4 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0 0 0.0625" rpy="1.5708 -0 -1.11135"/>
+      <geometry>
+        <mesh filename="package://assets/myactuator_case.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hip_knee_connector_4 -->
+    <visual>
+      <origin xyz="-0 0 0.0205" rpy="-0.459445 1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/hip_knee_connector.stl"/>
+      </geometry>
+      <material name="hip_knee_connector_4_material">
+        <color rgba="0.615686 0.811765 0.929412 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0 0 0.0205" rpy="-0.459445 1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/hip_knee_connector.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part upper_leg_4 -->
+    <visual>
+      <origin xyz="-0 0 0.07275" rpy="1.5708 -0 -1.11135"/>
+      <geometry>
+        <mesh filename="package://assets/upper_leg.stl"/>
+      </geometry>
+      <material name="upper_leg_4_material">
+        <color rgba="0.513725 0.737255 0.407843 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0 0 0.07275" rpy="1.5708 -0 -1.11135"/>
+      <geometry>
+        <mesh filename="package://assets/upper_leg.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part myacuator_axel_8 -->
+    <visual>
+      <origin xyz="-0 0 0" rpy="-1.5708 -0 -1.11135"/>
+      <geometry>
+        <mesh filename="package://assets/myacuator_axel.stl"/>
+      </geometry>
+      <material name="myacuator_axel_8_material">
+        <color rgba="0.811765 0.858824 0.898039 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0 0 0" rpy="-1.5708 -0 -1.11135"/>
+      <geometry>
+        <mesh filename="package://assets/myacuator_axel.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <!-- Link foot_2 -->
+  <link name="foot_2">
+    <inertial>
+      <origin xyz="0.121786 -0.00564869 4.97107e-07" rpy="0 0 0"/>
+      <mass value="0.000243674"/>
+      <inertia ixx="8.9898e-08" ixy="-2.29274e-07" ixz="1.5e-11" iyy="2.59336e-06" iyz="1e-12" izz="2.6525e-06"/>
+    </inertial>
+    <!-- Part lower_leg_4 -->
+    <visual>
+      <origin xyz="-0 0 0" rpy="-1.5708 0 -0"/>
+      <geometry>
+        <mesh filename="package://assets/lower_leg.stl"/>
+      </geometry>
+      <material name="lower_leg_4_material">
+        <color rgba="0.615686 0.811765 0.929412 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0 0 0" rpy="-1.5708 0 -0"/>
+      <geometry>
+        <mesh filename="package://assets/lower_leg.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part foot_4 -->
+    <visual>
+      <origin xyz="0.2863 -0 -0.00015" rpy="3.14159 -0 -0"/>
+      <geometry>
+        <mesh filename="package://assets/foot.stl"/>
+      </geometry>
+      <material name="foot_4_material">
+        <color rgba="0.615686 0.811765 0.929412 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.2863 -0 -0.00015" rpy="3.14159 -0 -0"/>
+      <geometry>
+        <mesh filename="package://assets/foot.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <!-- Joint from myacuator_axel_8 to foot_2 -->
+  <joint name="HL_3" type="revolute">
+    <origin xyz="0.0886902 -0.17926 0.07225" rpy="-0 -0 0.505624"/>
+    <parent link="myacuator_axel_8"/>
+    <child link="foot_2"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10" velocity="10" lower="-3.141592653589793" upper="3.141592653589793"/>
+  </joint>
+  <!-- Joint from myacuator_axel_7 to myacuator_axel_8 -->
+  <joint name="HL_2" type="revolute">
+    <origin xyz="-0.000123906 -0.00534856 0.0692" rpy="1.5708 0 -0.0231621"/>
+    <parent link="myacuator_axel_7"/>
+    <child link="myacuator_axel_8"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10" velocity="10" lower="-3.141592653589793" upper="3.141592653589793"/>
+  </joint>
+  <!-- Joint from torso_ros_assemply to myacuator_axel_7 -->
+  <joint name="HL_1" type="revolute">
+    <origin xyz="-0.2454 0.110016 2.05367e-06" rpy="3.14159 1.5708 0"/>
+    <parent link="torso_ros_assemply"/>
+    <child link="myacuator_axel_7"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10" velocity="10" lower="-3.141592653589793" upper="3.141592653589793"/>
+  </joint>
+</robot>

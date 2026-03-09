@@ -1,0 +1,14 @@
+{
+    "configuration": "default",
+    "documentId": "d99c8b6a5eb36cdcde05d69d",
+    "documentMicroversion": "fdcefdcc2328eeb8d41ddfcf",
+    "documentVersion": "224b1f6e23ec6c5107851d1c",
+    "elementId": "558d6bca8161e6ad6d1ef10e",
+    "fullConfiguration": "default",
+    "id": "MYsSMu2aIcFm/erlG",
+    "isStandardContent": false,
+    "name": "motor_mount <1>",
+    "partId": "JID",
+    "suppressed": false,
+    "type": "Part"
+}
