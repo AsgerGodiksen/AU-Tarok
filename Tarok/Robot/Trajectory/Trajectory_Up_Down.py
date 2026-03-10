@@ -34,14 +34,14 @@ ID_HIP   = 0x141
 ID_THIGH = 0x142
 ID_KNEE  = 0x143
 
-dt         = 0.005        # 200 Hz pre-computed trajectory
+dt         = 0.005        
 total_time = 10.0
 num_steps  = int(total_time / dt) + 1
 t_arr      = np.linspace(0, total_time, num_steps)
 
 # recv timeout per motor per step — 3 motors × 0.01 s = ~30 ms per loop iteration
 # giving an effective command rate of ~33 Hz, well within CAN bus limits
-RECV_TIMEOUT = 0.01   # seconds
+RECV_TIMEOUT = 0.001   # seconds
 
 # ─────────────────────────────────────────────
 # SINUSOIDAL TRAJECTORY

@@ -1,0 +1,86 @@
+.
+├── Hardware
+│   ├── __pycache__
+│   │   ├── Battery_Status.cpython-312.pyc
+│   │   ├── __init__.cpython-312.pyc
+│   │   ├── Light.cpython-312.pyc
+│   │   ├── Motor_Control.cpython-312.pyc
+│   │   ├── Motor_Controls.cpython-312.pyc
+│   │   └── Motor_Readings.cpython-312.pyc
+│   ├── Battery_Status.py
+│   ├── IMU_BNO085.py
+│   ├── __init__.py
+│   ├── Leg_Reading.py
+│   ├── Light.py
+│   ├── Motor_Controls.py
+│   ├── Motor_ID.py
+│   ├── Motor_Readings.py
+│   ├── SMBUS2I2C.py
+│   └── TESTER.py
+├── Kinematics
+│   ├── __pycache__
+│   │   ├── FL_Forward_Kinematics.cpython-312.pyc
+│   │   ├── FR_Forward_Kinematics.cpython-312.pyc
+│   │   ├── __init__.cpython-312.pyc
+│   │   ├── Inverse_Kinematics.cpython-312.pyc
+│   │   ├── Jacobians.cpython-312.pyc
+│   │   └── Pitch_And_Roll.cpython-312.pyc
+│   ├── TESTER
+│   │   ├── __pycache__
+│   │   ├── ASGER_METHODS.py
+│   │   ├── FL_Jacobian.py
+│   │   ├── Test_for_Position_data_Print.py
+│   │   └── Torque_Data_Investigation.py
+│   ├── FL_Forward_Kinematics.py
+│   ├── FR_Forward_Kinematics.py
+│   ├── __init__.py
+│   ├── Inverse_Kinematics.py
+│   ├── Jacobians.py
+│   ├── Pitch_And_Roll.py
+│   └── Transformation_Matrixes.py
+├── __pycache__
+│   ├── __init__.cpython-312.pyc
+│   └── Tarok_Dymensions.cpython-312.pyc
+├── Simulations
+│   ├── Simulation_Pitch.py
+│   ├── Simulation_Up_Down.py
+│   ├── Tarok_Visualizer.py
+│   └── Torso.py
+├── Test_Data
+│   └── Torque_Test_DATA_NO_LOAD.ods
+├── Trajectory
+│   ├── Initial_Pose.py
+│   ├── __init__.py
+│   └── Trajectory_Up_Down.py
+├── URDF
+│   ├── assets
+│   │   ├── foot.part
+│   │   ├── foot.stl
+│   │   ├── hip_knee_connector.part
+│   │   ├── hip_knee_connector.stl
+│   │   ├── hip_mount.part
+│   │   ├── hip_mount.stl
+│   │   ├── lower_leg.part
+│   │   ├── lower_leg.stl
+│   │   ├── motor_mount.part
+│   │   ├── motor_mount.stl
+│   │   ├── myactuator_case.part
+│   │   ├── myactuator_case.stl
+│   │   ├── myacuator_axel.part
+│   │   ├── myacuator_axel.stl
+│   │   ├── profile.part
+│   │   ├── profile.stl
+│   │   ├── upper_leg.part
+│   │   └── upper_leg.stl
+│   ├── config.json
+│   ├── keys
+│   ├── robot.urdf
+│   └── Tarok_Veiwer.py
+├── Directory_Structure.txt
+├── __init__.py
+├── structure.pdf
+├── structure.ps
+├── structure.txt
+└── Tarok_Dymensions.py
+
+13 directories, 71 files
