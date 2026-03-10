@@ -2,6 +2,7 @@
 # Install with: python -m pip install -r requirements-local.txt
 # Note: ROS 2 packages listed in requirements.txt (for example action-msgs/rclpy)
 # are not available on PyPI and must be installed via a ROS distribution.
+# So for windows this file will work
 
 # Pip-installable entries from requirements.txt (exact pinned versions).
 contourpy==1.3.3

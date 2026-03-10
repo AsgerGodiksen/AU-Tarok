@@ -1,5 +1,5 @@
 # This will be the main file when oberating with TAROK
-#import can
+import can
 from time import sleep,time
 #import numpy as np
 from Robot import*
@@ -19,20 +19,31 @@ bus1 = can.interface.Bus(bustype='socketcan', channel='can1', bitrate=1000000)
 bus2 = can.interface.Bus(bustype='socketcan', channel='can2', bitrate=1000000)
 
 # Flux the channels
-bus0.flush_tx_buffer() 
-bus1.flush_tx_buffer()
-bus2.flush_tx_buffer()
+# bus0.flush_tx_buffer() 
+# bus1.flush_tx_buffer()
+# bus2.flush_tx_buffer()
 
 print("Initialization complete")
-Position_Control(bus2,ID_1,360,100)
-Position_Control(bus2,ID_2,360,100)
-Position_Control(bus2,ID_3,360,100)
+Position_Control(bus0,ID_1,0,100)
+Position_Control(bus0,ID_2,0,100)
+Position_Control(bus0,ID_3,0,100)
+
+Position_Control(bus1,ID_1,0,100)
+Position_Control(bus1,ID_2,0,100)
+Position_Control(bus1,ID_3,0,100)
+
+Position_Control(bus2,ID_1,0,100)
+Position_Control(bus2,ID_2,0,100)
+Position_Control(bus2,ID_3,0,100)
+
+
+
 
 
 try:
     while True:
         # Read motor data
-
+        
         # Sleep for a short time before the next read
         sleep(0.5)
 
