@@ -1,55 +1,87 @@
 import time
+import numpy as np
 import smbus2
 from adafruit_bno08x.i2c import BNO08X_I2C
 from adafruit_bno08x import BNO_REPORT_ROTATION_VECTOR
+from numpy.typing import NDArray
+from SMBUS2I2C import SMBus2I2C
 
-class SMBus2I2C:
-    def __init__(self, bus_num, address):
-        self._bus = smbus2.SMBus(bus_num)
-        self._address = address
 
-    def readfrom_into(self, addr, buf, start=0, end=None):
-        if end is None:
-            end = len(buf)
-        length = end - start
-        # Use raw I2C read instead of SMBus block read
-        msg = smbus2.i2c_msg.read(addr, length)
-        self._bus.i2c_rdwr(msg)
-        for i, b in enumerate(msg):
-            buf[start + i] = b
+def skew(v: NDArray) -> NDArray:
+    v = v.flatten()
+    return np.array([[0, -v[2], v[1]],
+                     [v[2], 0, -v[0]],
+                     [-v[1], v[0], 0]])
 
-    def writeto(self, addr, buf, start=0, end=None):
-        if end is None:
-            end = len(buf)
-        # Use raw I2C write instead of SMBus block write
-        msg = smbus2.i2c_msg.write(addr, list(buf[start:end]))
-        self._bus.i2c_rdwr(msg)
 
-    def writeto_then_readfrom(self, addr, out_buf, in_buf, out_start=0, out_end=None, in_start=0, in_end=None):
-        if out_end is None:
-            out_end = len(out_buf)
-        if in_end is None:
-            in_end = len(in_buf)
-        write = smbus2.i2c_msg.write(addr, list(out_buf[out_start:out_end]))
-        read = smbus2.i2c_msg.read(addr, in_end - in_start)
-        self._bus.i2c_rdwr(write, read)
-        for i, b in enumerate(read):
-            in_buf[in_start + i] = b
+def quat_to_rot_matrix(quaternion: NDArray) -> NDArray:
+    q = quaternion[:3]   # [i, j, k] - vector part
+    q0 = quaternion[3]   # real/w - scalar part
 
-    def try_lock(self): return True
-    def unlock(self): pass
-    def deinit(self): self._bus.close()
+    q_tilt = skew(q)
+    rot = np.eye(3) + 2 * (q0 * np.eye(3) + q_tilt) @ q_tilt
+    return rot
 
-i2c = SMBus2I2C(1, 0x4A)
-time.sleep(1.0)
 
-bno = BNO08X_I2C(i2c, address=0x4A)
-time.sleep(1.0)
+def IMU_Initialization():
+    i2c = SMBus2I2C(1, 0x4A)
+    time.sleep(2.0)
 
-bno.enable_feature(BNO_REPORT_ROTATION_VECTOR)
-print("Feature enabled!")
+    bno = BNO08X_I2C(i2c, address=0x4A)
+    time.sleep(2.0)
 
-while True:
+    for attempt in range(5):
+        try:
+            bno.enable_feature(BNO_REPORT_ROTATION_VECTOR)
+            print("Feature enabled!")
+            return bno, i2c
+        except RuntimeError as e:
+            print(f"Attempt {attempt + 1} failed: {e}")
+            time.sleep(1.0)
+
+    raise RuntimeError("Could not enable BNO085 feature after 5 attempts")
+
+
+def Get_Quaternion(bno) -> NDArray:
     quat_i, quat_j, quat_k, quat_real = bno.quaternion
-    print(f"I: {quat_i:.6f}  J: {quat_j:.6f}  K: {quat_k:.6f}  Real: {quat_real:.6f}")
-    time.sleep(0.1)
+
+    # Pack into numpy array [i, j, k, real] = [x, y, z, w]
+    quaternion = np.array([quat_i, quat_j, quat_k, quat_real])
+    return quaternion
+
+def Quaternion_To_Euler(quaternion: NDArray) -> NDArray:
+    i, j, k, w = quaternion
+
+    # Roll (x-axis rotation)
+    roll = np.arctan2(2*(w*i + j*k), 1 - 2*(i**2 + j**2))
+
+    # Pitch (y-axis rotation)
+    pitch = np.arcsin(2*(w*j - k*i))
+
+    # Yaw (z-axis rotation)
+    yaw = np.arctan2(2*(w*k + i*j), 1 - 2*(j**2 + k**2))
+
+    # Convert to degrees
+    return np.degrees(np.array([roll, pitch, yaw]))
+
+if __name__ == "__main__":
+    bno, i2c = IMU_Initialization()
+
+    try:
+        while True:
+            quaternion = Get_Quaternion(bno)
+
+            # Option 1 - from quaternion directly
+            angles = Quaternion_To_Euler(quaternion)
+
+            print(f"Roll:  {angles[0]:.2f}°")
+            print(f"Pitch: {angles[1]:.2f}°")
+            print(f"Yaw:   {angles[2]:.2f}°")
+            print("---")
+
+            time.sleep(1)
+
+    except KeyboardInterrupt:
+        print("Stopping...")
+        i2c.deinit()
+        print("I2C connection closed.")

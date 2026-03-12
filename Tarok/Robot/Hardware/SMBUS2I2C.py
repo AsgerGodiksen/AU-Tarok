@@ -164,7 +164,7 @@ time.sleep(1.0)
 bno.enable_feature(BNO_REPORT_ACCELEROMETER)
 print("Feature enabled!")
 
-while True:
-    accel_x, accel_y, accel_z = bno.acceleration
-    print(f"X: {accel_x:.4f}  Y: {accel_y:.4f}  Z: {accel_z:.4f}")
-    time.sleep(0.1)
+#while True:
+#    accel_x, accel_y, accel_z = bno.acceleration
+#    print(f"X: {accel_x:.4f}  Y: {accel_y:.4f}  Z: {accel_z:.4f}")
+#    time.sleep(0.1)
