@@ -28,6 +28,7 @@ def Get_Quaternion(bno):
 
 
 if __name__ == "__main__":
+    pass
 try:
     while True:
         quat_i, quat_j, quat_k, quat_real = bno.quaternion
