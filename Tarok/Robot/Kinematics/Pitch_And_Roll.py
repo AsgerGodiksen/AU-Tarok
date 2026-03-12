@@ -151,7 +151,7 @@ if __name__ == "__main__":
     foot_positions = [FR_Position, FL_Position, HR_Position, HL_Position]
 
     # Test Inverse_Pitch with 10 degrees pitch
-    test_pitch = 0 * pi / 180
+    test_pitch =0 * pi / 180
     new_positions, shoulder_heights = Inverse_Pitch(test_pitch, foot_positions)
     print("=== Inverse Pitch Test (10 deg) ===")
     for i, pos in enumerate(new_positions):
