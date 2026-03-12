@@ -2,7 +2,7 @@ import can
 from time import sleep, time
 #from Motor_Readings import*
 #from Motor_Controls import*
-from Robot.Hardware.Motor_Readings import*
+from Motor_Readings import*
 
 # This code will be used to find the input voltage to the actuators
 #class BatteryProcentageCalculator:

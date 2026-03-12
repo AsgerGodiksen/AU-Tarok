@@ -9,19 +9,19 @@
 #   motor's acknowledgement. This naturally throttles the send rate to
 #   what the CAN bus can handle, preventing TX buffer overflow and the
 #   resulting jumpy motion.
-
+'''
 import sys
 import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
-
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../Hardware')))
 import can
 import numpy as np
 from time import sleep
 import time
 
 from Robot.Hardware.Motor_Controls import Position_Control, Motor_Stop
-from Robot.Kinematics.Inverse_Kinematics import FL_Inverse_Kinematics
-from Robot.Kinematics.Jacobians import FL_Jacobian
+from Robot.Kinematics.Inverse_Kinematics import Inverse_Kinematics
+from Robot.Kinematics.Jacobian import Jacobian
 
 # ─────────────────────────────────────────────
 # CONFIGURATION
@@ -70,7 +70,7 @@ theta3 = np.zeros_like(t_arr)
 print("Pre-computing inverse kinematics...")
 for i in range(num_steps):
     P = np.array([[x_arr[i]], [y_arr[i]], [z_arr[i]]])
-    theta1[i], theta2[i], theta3[i] = FL_Inverse_Kinematics(L1, L2, L3, P)
+    theta1[i], theta2[i], theta3[i] = Inverse_Kinematics(L1, L2, L3, P)
 
 theta1_deg = np.rad2deg(theta1)
 theta2_deg = np.rad2deg(theta2)
@@ -207,3 +207,5 @@ finally:
         print("Done.")
     except Exception as e:
         print(f"Warning during shutdown: {e}")
+
+        '''

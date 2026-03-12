@@ -5,6 +5,8 @@ from time import sleep,time
 from Robot import*
 
 
+
+
 Tarok = Tarok_Dymensions_Class
 
 print("Starting the Robot")
