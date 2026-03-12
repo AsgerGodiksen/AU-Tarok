@@ -1,4 +1,7 @@
+import time
 import smbus2
+from adafruit_bno08x.i2c import BNO08X_I2C
+from adafruit_bno08x import BNO_REPORT_ACCELEROMETER
 
 
 class SMBus2I2C:
@@ -22,7 +25,7 @@ class SMBus2I2C:
             dtparam=i2c_arm_baudrate=400000
         - smbus2 must be installed: pip install smbus2
 
-    Usage:>
+    Usage:
         i2c = SMBus2I2C(1, 0x4A)
         bno = BNO08X_I2C(i2c, address=0x4A)
     """
@@ -146,3 +149,22 @@ class SMBus2I2C:
         Call this when finished using the sensor to free system resources.
         """
         self._bus.close()
+
+
+# --- Initialisation ---
+
+# Give the sensor time to power up before attempting communication
+i2c = SMBus2I2C(1, 0x4A)
+time.sleep(1.0)
+
+# Give the sensor time to complete its internal boot sequence
+bno = BNO08X_I2C(i2c, address=0x4A)
+time.sleep(1.0)
+
+bno.enable_feature(BNO_REPORT_ACCELEROMETER)
+print("Feature enabled!")
+
+while True:
+    accel_x, accel_y, accel_z = bno.acceleration
+    print(f"X: {accel_x:.4f}  Y: {accel_y:.4f}  Z: {accel_z:.4f}")
+    time.sleep(0.1)
