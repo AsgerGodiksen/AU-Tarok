@@ -33,8 +33,13 @@ def Inverse_Kinematics(P_org, Leg):
     if distance_first_eq < lower_first_eq or distance_second_eq < lower_second_eq or distance_second_eq > upper_second_eq:
         raise ValueError("The desired position is outside the reachable workspace of the specified leg.")
 
-    # Check cartesian space limits
-    ########## DERIVE AND IMPLEMENT #############
+    # Check cartesian space limits (Only checking end-effector for obstruction with bounding box of body (including addition of physical foot size))
+    if config == 1: # FL and HR legs
+        if x > -0.101171 and x < 0.101171 and y > -0.309 and y < 0.089 and z > -0.6594 and z < -0.0454:
+            raise ValueError("The desired position is inside the bounding box of the body.")
+    elif config == -1: # FR and HL legs
+        if x > -0.101171 and x < 0.101171 and y > -0.089 and y < 0.309 and z > -0.6594 and z < -0.0454:
+            raise ValueError("The desired position is inside the bounding box of the body.")
 
     # Determine horizontal reach in plane of the leg
     H = np.sqrt(x**2 + y**2 - 0.078**2)

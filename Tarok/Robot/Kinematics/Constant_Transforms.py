@@ -1,5 +1,6 @@
 # Constant Transforms from body frame to leg base frames
 import numpy as np
+from scipy.spatial.transform import Rotation
 
 # Constant parameters used:
     # l_k = 0.7048 m (length of body in kinematic model)
@@ -117,3 +118,65 @@ def R0_B(V_B, Leg):
     # Rotate velocity from body frame to leg base frame
     V_0 = R_inv @ V_B
     return V_0
+
+# Define rotation from IMU frame to body frame using scipy Rotation class and constant rotation matrix
+qB_IMU = Rotation.from_matrix(np.array([[ 0, 0, -1], 
+                                        [-1, 0,  0], 
+                                        [ 0, 1,  0]]))
+
+# Define rotation from body frame to IMU frame using scipy Rotation class and constant rotation matrix
+qIMU_B = Rotation.from_matrix(np.array([[ 0, 0, -1],
+                                        [-1, 0,  0],
+                                        [ 0, 1,  0]]).T)
+
+# Function to rotate orientations from IMU frame to body frame using quaternions
+def RB_IMU(q_IMU):
+    # Input:
+        # q_IMU: Quaternion in the IMU frame
+    # Output:
+        # q_B: Quaternion in the body frame of the robot
+
+    # Define rotation from input quaternion using scipy Rotation class
+    q_IMU = Rotation.from_quat(q_IMU) # Quaternion in (x, y, z, w) format
+
+    # Rotate orientation from IMU frame to body frame
+    q_B = qB_IMU * q_IMU
+    return q_B
+
+# Function to rotate orientations from body frame to IMU frame using quaternions
+def RIMU_B(q_B):
+    # Input:
+        # q_B: Quaternion in the body frame of the robot
+    # Output:
+        # q_IMU: Quaternion in the IMU frame
+
+    # Define rotation from input quaternion using scipy Rotation class
+    q_B = Rotation.from_quat(q_B) # Quaternion in (x, y, z, w) format
+
+    # Rotate orientation from body frame to IMU frame
+    q_IMU = qIMU_B * q_B
+    return q_IMU
+
+
+
+
+
+
+
+# Example usage of the functions to verify they work as intended
+if __name__ == "__main__":
+    # Test orientation transformation from IMU frame to body frame and back
+    q_IMU = np.array([0.5, -0.5, 0.5, 0.5]) # Quaternion in IMU frame (x, y, z, w)
+    q_B = RB_IMU(q_IMU) # Rotate to body frame
+    q_IMU_check = RIMU_B(q_B.as_quat()) # Rotate back to IMU frame
+
+    print("\nOriginal quaternion in IMU frame (q_IMU):")
+    print(q_IMU)
+    print("\nRotated quaternion in body frame (q_B):")
+    print(q_B.as_quat()) # Print as (x, y, z, w) format
+    print("\nRotated back quaternion in IMU frame (q_IMU_check):")
+    print(q_IMU_check.as_quat()) # Print as (x, y, z, w) format
+
+    check_variable = (q_IMU_check.as_quat() / q_IMU)
+    print("\nCheck variable (should be close to [1, 1, 1, 1]):")
+    print(check_variable)
