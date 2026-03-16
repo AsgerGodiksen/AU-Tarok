@@ -3,8 +3,8 @@
 
 from math import pi, cos, sin, atan
 
-L_Body = 0.3277 * 2
-W_Body = 0.0729 * 2
+L_Body = 0.7048  # [m] Lenght Between Actuator 2 rotation axis in front and hind legs 
+W_Body = 0.220   # [m] Width  Between Actuator 1 rotation axis in left and right legs
 
 def Inverse_Pitch(Theta_Pitch=None, Current_Foot_Positions=None):  
     """
@@ -45,11 +45,12 @@ def Inverse_Pitch(Theta_Pitch=None, Current_Foot_Positions=None):
             pitch_signed = Theta_Pitch
         
         x_dist  = L_Body * cos(pitch_signed)     # Calculate the x distance
-        dz      = L_Body * sin(pitch_signed)     # Calcualte the Change in z
-        dx      = L_Body - x_dist               # Calculate the change in x
-        
-        
+        dz      = L_Body * sin(pitch_signed) / 2 # Calcualte the Change in z
+        dx      = (L_Body - x_dist)/2            # Calculate the change in x
+
+        #print(f"dx = {dx:.5f}")
         Shoulder_Height = z + dz
+        #print(Shoulder_Height)
         Shoulder_Heights[i] = Shoulder_Height
 
         if i == 0 or i == 1:   # Front legs: dx is negative
@@ -58,12 +59,13 @@ def Inverse_Pitch(Theta_Pitch=None, Current_Foot_Positions=None):
             dx_signed = dx
             
         Shoulder_Angle = atan(dx_signed / Shoulder_Height)    
-        
+        #print(Shoulder_Angle)
+
         if i == 0 or i == 1:
             Shoulder_Angle_signed = -Shoulder_Angle
         else:
             Shoulder_Angle_signed = Shoulder_Angle     
-        
+
          # Leg length and new angles
         Leg_Length      = Shoulder_Height / cos(Shoulder_Angle_signed)
         Shoulder_Angle_2 = pitch_signed + Shoulder_Angle_signed
@@ -151,16 +153,20 @@ if __name__ == "__main__":
     foot_positions = [FR_Position, FL_Position, HR_Position, HL_Position]
 
     # Test Inverse_Pitch with 10 degrees pitch
-    test_pitch =0 * pi / 180
+    test_pitch =10 * pi / 180
     new_positions, shoulder_heights = Inverse_Pitch(test_pitch, foot_positions)
-    print("=== Inverse Pitch Test (10 deg) ===")
+    print("=== Inverse Pitch Test ( xxdeg) ===")
     for i, pos in enumerate(new_positions):
-        print(f"  Leg {i}: {[round(v, 4) for v in pos]}")
-    print(f"  Shoulder Heights: {[round(h, 4) for h in shoulder_heights]}")
+        #print(f"  Leg {i}: {[round(v, 4) for v in pos]}")
+        pass
+    #print(f"  Shoulder Heights: {[round(h, 4) for h in shoulder_heights]}")
 
+'''
     # Test Inverse_Roll with 10 degrees roll
-    test_roll = 0 * pi / 180
+    test_roll = 25 * pi / 180
     new_positions_roll = Inverse_Roll(test_roll, new_positions, shoulder_heights)
-    print("\n=== Inverse Roll Test (10 deg) ===")
+    print("\n=== Inverse Roll Test (xx deg) ===")
     for i, pos in enumerate(new_positions_roll):
         print(f"  Leg {i}: {[round(v, 4) for v in pos]}")
+
+        '''
