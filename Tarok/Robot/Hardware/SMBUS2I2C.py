@@ -154,17 +154,10 @@ class SMBus2I2C:
 # --- Initialisation ---
 
 # Give the sensor time to power up before attempting communication
-i2c = SMBus2I2C(1, 0x4A)
-time.sleep(1.0)
+#i2c = SMBus2I2C(1, 0x4A)
+#time.sleep(0.01)
 
 # Give the sensor time to complete its internal boot sequence
-bno = BNO08X_I2C(i2c, address=0x4A)
-time.sleep(1.0)
+#bno = BNO08X_I2C(i2c, address=0x4A)
+#time.sleep(0.01)
 
-bno.enable_feature(BNO_REPORT_ACCELEROMETER)
-print("Feature enabled!")
-
-#while True:
-#    accel_x, accel_y, accel_z = bno.acceleration
-#    print(f"X: {accel_x:.4f}  Y: {accel_y:.4f}  Z: {accel_z:.4f}")
-#    time.sleep(0.1)
