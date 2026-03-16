@@ -27,7 +27,7 @@ def Inverse_Kinematics(P_org, Leg):
     # Check workspace
     lower_first_eq = 0.078**2
     distance_first_eq = x**2 + y**2
-    lower_second_eq = abs(0.3 - 0.3)
+    lower_second_eq = abs(0.2 - 0.3)
     upper_second_eq = 0.2 + 0.3
     distance_second_eq = np.sqrt(x**2 + y**2 + z**2 - 0.078**2)
     if distance_first_eq < lower_first_eq or distance_second_eq < lower_second_eq or distance_second_eq > upper_second_eq:
