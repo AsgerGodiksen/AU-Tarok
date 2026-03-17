@@ -9,7 +9,7 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 
 # Imports
-from Hardware.Motor_Controls import Position_Control
+from Hardware.Motor_Controls import Position_Control, Motor_Stop
 from Kinematics.Inverse_Kinematics import Inverse_Kinematics
 from Kinematics.Constant_Transforms import T0_B
 import time
@@ -43,11 +43,139 @@ P_HL_base = T0_B(P_HL_body.reshape((3,1)), 'HL')
 P_HR_base = T0_B(P_HR_body.reshape((3,1)), 'HR')
 
 # Determine joint angles for all 4 legs using inverse kinematics
-# forsæt linje 61 test_visualization.py
+Theta_FL = Inverse_Kinematics(P_FL_base, 'FL')
+Theta_FR = Inverse_Kinematics(P_FR_base, 'FR')
+Theta_HL = Inverse_Kinematics(P_HL_base, 'HL')
+Theta_HR = Inverse_Kinematics(P_HR_base, 'HR')
+
+# Convert angles from radians to degrees for motor control
+Theta_FL = np.degrees(Theta_FL)
+Theta_FR = np.degrees(Theta_FR)
+Theta_HL = np.degrees(Theta_HL)
+Theta_HR = np.degrees(Theta_HR)
+
+# Convert angles to python scalar integers for motor control
+#Theta_FL = Theta_FL.astype(int)
+#Theta_FR = Theta_FR.astype(int)
+#Theta_HL = Theta_HL.astype(int)
+#Theta_HR = Theta_HR.astype(int)
+################################ TRY WITHOUT CONVERSION TO INT FIRST ################
+########################################################3
+###############################################
 
 
-# Convert to motor control - tjek lmkring 114 og frem
+######### Send commands to motors ############
+print("Initializing CAN busses")
+# Define motor IDs (might be specific to chosen physical leg)
+ID_1 = 0x141  # Motor for theta1
+ID_2 = 0x142  # Motor for theta2
+ID_3 = 0x143  # Motor for theta3
+
+# Connect to CAN bus
+bus0 = can.interface.Bus(bustype='socketcan', channel='can0', bitrate=1000000)
+bus1 = can.interface.Bus(bustype='socketcan', channel='can1', bitrate=1000000)
+bus2 = can.interface.Bus(bustype='socketcan', channel='can2', bitrate=1000000)
+#bus3 = can.interface.Bus(bustype='socketcan', channel='can3', bitrate=1000000)
+
+bus0.flush_tx_buffer()		# Clean any CAN signals on the line
+bus1.flush_tx_buffer()		# Clean any CAN signals on the line
+bus2.flush_tx_buffer()		# Clean any CAN signals on the line
+#bus3.flush_tx_buffer()		# Clean any CAN signals on the line
+#### REMEMBER BUS 3 when having all 4 legs
+for bus in [bus0, bus1, bus2]: #bus3
+    for i in range(100):		# Now Listens for any signals 100 times with 0.01 s in between. Prints if any.
+        msg = bus.recv(0.01)
+        if msg:
+            print(msg)
 
 
+print("Initialization compltete, moving to zero position")
 
-# Send command to motors linje 138 og frem
+# Move to zero position 
+Position_Control(bus0,ID_1,0,200)
+Position_Control(bus0,ID_2,0,200)
+Position_Control(bus0,ID_3,0,200)
+Position_Control(bus1,ID_1,0,200)
+Position_Control(bus1,ID_2,0,200)
+Position_Control(bus1,ID_3,0,200)
+Position_Control(bus2,ID_1,0,200)
+Position_Control(bus2,ID_2,0,200)
+Position_Control(bus2,ID_3,0,200)
+#Position_Control(bus3,ID_1,0,200)
+#Position_Control(bus3,ID_2,0,200)
+#Position_Control(bus3,ID_3,0,200)
+
+time.sleep(8)
+
+print("Moved to zero position, moving to initial trajectory position")
+
+# Move to initial position
+Position_Control(bus0,ID_1,Theta_FL[0],200)
+Position_Control(bus0,ID_2,Theta_FL[1],200)
+Position_Control(bus0,ID_3,Theta_FL[2],200)
+Position_Control(bus1,ID_1,Theta_FR[0],200)
+Position_Control(bus1,ID_2,Theta_FR[1],200)
+Position_Control(bus1,ID_3,Theta_FR[2],200)
+Position_Control(bus2,ID_1,Theta_HL[0],200)
+Position_Control(bus2,ID_2,Theta_HL[1],200)
+Position_Control(bus2,ID_3,Theta_HL[2],200)
+#Position_Control(bus3,ID_1,Theta_HR[0],200)
+#Position_Control(bus3,ID_2,Theta_HR[1],200)
+#Position_Control(bus3,ID_3,Theta_HR[2],200)
+
+time.sleep(6)
+
+print("Moved to initial trajectory position, starting trajectory execution")
+print("Loop started - Press ctrl+c for shutdown")
+
+# Note start time
+
+try:
+    while True:       
+        # Send commands to motors
+        Position_Control(bus0,ID_1,Theta_FL[0],200)
+        Position_Control(bus0,ID_2,Theta_FL[1],200)
+        Position_Control(bus0,ID_3,Theta_FL[2],200)
+        Position_Control(bus1,ID_1,Theta_FR[0],200)
+        Position_Control(bus1,ID_2,Theta_FR[1],200)
+        Position_Control(bus1,ID_3,Theta_FR[2],200)
+        Position_Control(bus2,ID_1,Theta_HL[0],200)
+        Position_Control(bus2,ID_2,Theta_HL[1],200)
+        Position_Control(bus2,ID_3,Theta_HL[2],200)
+        #Position_Control(bus3,ID_1,Theta_HR[0],200)
+        #Position_Control(bus3,ID_2,Theta_HR[1],200)
+        #Position_Control(bus3,ID_3,Theta_HR[2],200)
+
+
+# Stop loop with Ctrl+C
+except KeyboardInterrupt:
+    print("KeyboardInterrupt received, shutting down...")
+
+    print("Stopping motors...")
+    bus0.flush_tx_buffer()
+    bus1.flush_tx_buffer()
+    bus2.flush_tx_buffer()
+    #bus3.flush_tx_buffer()
+
+    Motor_Stop(bus0,ID_1)
+    Motor_Stop(bus0,ID_2)
+    Motor_Stop(bus0,ID_3)
+    Motor_Stop(bus1,ID_1)
+    Motor_Stop(bus1,ID_2)
+    Motor_Stop(bus1,ID_3)
+    Motor_Stop(bus2,ID_1)
+    Motor_Stop(bus2,ID_2)
+    Motor_Stop(bus2,ID_3)
+    #Motor_Stop(bus3,ID_1)
+    #Motor_Stop(bus3,ID_2)
+    #Motor_Stop(bus3,ID_3)
+    print("Motors stopped")
+
+    print("Shutting down CAN busses...")
+    bus0.shutdown()
+    bus1.shutdown()
+    bus2.shutdown()
+    #bus3.shutdown()
+    print("CAN busses shut down")
+
+    print("Shutdown complete.")
