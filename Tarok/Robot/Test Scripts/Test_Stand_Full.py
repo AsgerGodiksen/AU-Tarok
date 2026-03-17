@@ -6,12 +6,16 @@ import sys
 import os
 
 # Add Robot/ to path so Kinematics and Hardware can be imported directly
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
+#sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
+#sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../Hardware')))
+
 
 # Imports
-from Hardware.Motor_Controls import Position_Control, Motor_Stop
-from Kinematics.Inverse_Kinematics import Inverse_Kinematics
-from Kinematics.Constant_Transforms import T0_B
+from Robot.Hardware.Motor_Controls import Position_Control, Motor_Stop
+from Robot.Kinematics.Inverse_Kinematics import Inverse_Kinematics
+from Robot.Kinematics.Constant_Transforms import T0_B
 import time
 import can
 import numpy as np
