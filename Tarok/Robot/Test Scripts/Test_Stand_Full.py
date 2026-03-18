@@ -69,7 +69,7 @@ Theta_HR = np.degrees(Theta_HR)
 
 
 ######### Send commands to motors ############
-print("Initializing CAN buses")
+print("Initializing CAN buses...")
 # Define motor IDs (might be specific to chosen physical leg)
 ID_1 = 0x141  # Motor for theta1
 ID_2 = 0x142  # Motor for theta2
@@ -79,7 +79,7 @@ ID_3 = 0x143  # Motor for theta3
 bus0 = can.interface.Bus(interface='socketcan', channel='can0', bitrate=1000000)
 bus1 = can.interface.Bus(interface='socketcan', channel='can1', bitrate=1000000)
 bus2 = can.interface.Bus(interface='socketcan', channel='can2', bitrate=1000000)
-#bus3 = can.interface.Bus(bustype='socketcan', channel='can3', bitrate=1000000)
+#bus3 = can.interface.Bus(interface='socketcan', channel='can3', bitrate=1000000)
 
 #### REMEMBER BUS 3 when having all 4 legs
 # Drain any stale messages from the buses
@@ -89,7 +89,7 @@ for bus in [bus0, bus1, bus2]: #bus3
         if msg:
             print(msg)
 
-print("Initialization compltete, moving to zero position")
+print("Initialization complete, moving to zero position...")
 
 # Move to zero position 
 Position_Control(bus0,ID_1,0,20)
@@ -107,7 +107,7 @@ Position_Control(bus2,ID_3,0,20)
 
 time.sleep(8)
 
-print("Moved to zero position, moving to initial trajectory position")
+print("Moved to zero position, moving to initial trajectory position...")
 
 # Move to initial position
 Position_Control(bus0,ID_1,Theta_FL[0],20)
@@ -125,7 +125,7 @@ Position_Control(bus2,ID_3,Theta_HL[2],20)
 
 time.sleep(6)
 
-print("Moved to initial trajectory position, starting trajectory execution")
+print("Moved to initial trajectory position, starting trajectory execution...")
 print("Loop started - Press ctrl+c in terminal for shutdown")
 
 # Note start time
