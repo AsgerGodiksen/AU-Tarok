@@ -71,12 +71,12 @@ try:
             print(f"Joint positions for Front Right: theta1 = {FR_theta1}, theta2 = {FR_theta2}, theta3 = {FR_theta3}")
             print(f"Joint positions for Hind Left: theta1 = {HL_theta1}, theta2 = {HL_theta2}, theta3 = {HL_theta3}")
             #print(f"Joint positions for Hind Right: theta1 = {HR_theta1}, theta2 = {HR_theta2}, theta3 = {HR_theta3}")
-            print("========== ======== ",{i})
+            print("========== 1 ======== ")
             print("Loop running - Move legs to desired zero position - Press ctrl+c in terminal for shutdown")
             
-            Position_Control(bus2,ID_1,10,10)
+            Position_Control(bus1,ID_2,30,5)
             
-            sleep(2)
+            sleep(5)
 
             # Read current positions for all 4 legs
             FL_theta1 = Read_Angle(bus0,ID_1)
@@ -98,12 +98,12 @@ try:
             print(f"Joint positions for Front Right: theta1 = {FR_theta1}, theta2 = {FR_theta2}, theta3 = {FR_theta3}")
             print(f"Joint positions for Hind Left: theta1 = {HL_theta1}, theta2 = {HL_theta2}, theta3 = {HL_theta3}")
             #print(f"Joint positions for Hind Right: theta1 = {HR_theta1}, theta2 = {HR_theta2}, theta3 = {HR_theta3}")
-            print("========== ======== ",{i})
+            print("========== 2 ======== ")
             print("Loop running - Move legs to desired zero position - Press ctrl+c in terminal for shutdown")
             
-            Position_Control(bus2,ID_1,0,10)
+            Position_Control(bus1,ID_2,0,5)
             
-            sleep(2)
+            sleep(5)
 
 
 
