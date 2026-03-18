@@ -3,4 +3,4 @@ How to make a "Structure.txt" file with the Derictory
 Depending on how far out in the directory you want. Use this in the terminal
 You can do it in the AU-Tarok Folder to get everything
 
-tree -I __pycache__ -n -o Structure.txt
+tree -I "__pycache__|Tarok_Enviroment" -n -o Structure.txt
