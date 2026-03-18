@@ -40,6 +40,7 @@ def Position_Control(bus,id,New_Position,Max_Rotation_Speed):
     # With 360000 representing 360 degrees
     # Can go both in positive and negative values
 
+    '''
     # Rotation direction is determined by the target and current Position.
     Max_Rotation_Speed = Max_Rotation_Speed*10  # To get the desired number of degrees pr second, we need to multiply the input by 10, because the motor protocol uses a resolution of 0.1 degree pr second.
     # The Max Rotation Speed 
@@ -54,6 +55,13 @@ def Position_Control(bus,id,New_Position,Max_Rotation_Speed):
         else:
             data[2] = int('0x' + Max_Speed_In_Hex[4:6], 16)
             data[3] = int('0x' + Max_Speed_In_Hex[2:4], 16)
+    '''
+
+    speed_raw = int(Max_Rotation_Speed * 10)  # Convert to the motor's expected format
+    speed_bytes = struct.pack('<h', speed_raw)  # Convert to little-endian signed short
+    data[2] = speed_bytes[0]  # Low byte
+    data[3] = speed_bytes[1]  # High byte
+
     
     # Now Looking at the New_Position
     # The New_Position is a int32_t type. And given in degress 
