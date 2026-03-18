@@ -31,6 +31,7 @@ for bus in [bus0, bus1, bus2]: #bus3
         if msg:
             print(msg)
 
+'''
 print("Initialization complete")
 Position_Control(bus0,ID_1,0,100)
 Position_Control(bus0,ID_2,0,100)
@@ -43,17 +44,68 @@ Position_Control(bus1,ID_3,0,100)
 Position_Control(bus2,ID_1,0,100)
 Position_Control(bus2,ID_2,0,100)
 Position_Control(bus2,ID_3,0,100)
-
+'''
 
 
 
 print("Loop started - Press ctrl+c in terminal for shutdown")
 try:
     while True:
-        # Read motor data
-        
-        # Sleep for a short time before the next read
-        sleep(0.5)
+            # Read current positions for all 4 legs
+            FL_theta1 = Read_Angle(bus0,ID_1)
+            FL_theta2 = Read_Angle(bus0,ID_2)
+            FL_theta3 = Read_Angle(bus0,ID_3)
+            FR_theta1 = Read_Angle(bus1,ID_1)
+            FR_theta2 = Read_Angle(bus1,ID_2)
+            FR_theta3 = Read_Angle(bus1,ID_3)
+            HL_theta1 = Read_Angle(bus2,ID_1)
+            HL_theta2 = Read_Angle(bus2,ID_2)
+            HL_theta3 = Read_Angle(bus2,ID_3)
+            #HR_theta1 = Read_Angle(bus3,ID_1)
+            #HR_theta2 = Read_Angle(bus3,ID_2)
+            #HR_theta3 = Read_Angle(bus3,ID_3)
+
+            # Print the current positions of all 4 legs
+            print("  ")
+            print(f"Joint positions for Front Left: theta1 = {FL_theta1}, theta2 = {FL_theta2}, theta3 = {FL_theta3}")
+            print(f"Joint positions for Front Right: theta1 = {FR_theta1}, theta2 = {FR_theta2}, theta3 = {FR_theta3}")
+            print(f"Joint positions for Hind Left: theta1 = {HL_theta1}, theta2 = {HL_theta2}, theta3 = {HL_theta3}")
+            #print(f"Joint positions for Hind Right: theta1 = {HR_theta1}, theta2 = {HR_theta2}, theta3 = {HR_theta3}")
+            print("========== ======== ",{i})
+            print("Loop running - Move legs to desired zero position - Press ctrl+c in terminal for shutdown")
+            
+            Position_Control(bus2,ID_1,10,10)
+            
+            sleep(2)
+
+            # Read current positions for all 4 legs
+            FL_theta1 = Read_Angle(bus0,ID_1)
+            FL_theta2 = Read_Angle(bus0,ID_2)
+            FL_theta3 = Read_Angle(bus0,ID_3)
+            FR_theta1 = Read_Angle(bus1,ID_1)
+            FR_theta2 = Read_Angle(bus1,ID_2)
+            FR_theta3 = Read_Angle(bus1,ID_3)
+            HL_theta1 = Read_Angle(bus2,ID_1)
+            HL_theta2 = Read_Angle(bus2,ID_2)
+            HL_theta3 = Read_Angle(bus2,ID_3)
+            #HR_theta1 = Read_Angle(bus3,ID_1)
+            #HR_theta2 = Read_Angle(bus3,ID_2)
+            #HR_theta3 = Read_Angle(bus3,ID_3)
+
+            # Print the current positions of all 4 legs
+            print("  ")
+            print(f"Joint positions for Front Left: theta1 = {FL_theta1}, theta2 = {FL_theta2}, theta3 = {FL_theta3}")
+            print(f"Joint positions for Front Right: theta1 = {FR_theta1}, theta2 = {FR_theta2}, theta3 = {FR_theta3}")
+            print(f"Joint positions for Hind Left: theta1 = {HL_theta1}, theta2 = {HL_theta2}, theta3 = {HL_theta3}")
+            #print(f"Joint positions for Hind Right: theta1 = {HR_theta1}, theta2 = {HR_theta2}, theta3 = {HR_theta3}")
+            print("========== ======== ",{i})
+            print("Loop running - Move legs to desired zero position - Press ctrl+c in terminal for shutdown")
+            
+            Position_Control(bus2,ID_1,0,10)
+            
+            sleep(2)
+
+
 
 
 

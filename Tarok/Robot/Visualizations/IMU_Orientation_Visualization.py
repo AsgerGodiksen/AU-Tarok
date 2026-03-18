@@ -61,18 +61,17 @@ t_start = time.time()
 def update(_frame):
     try:
         quat  = Get_Quaternion(bno)
-        print("Get Quterion")
-        quat_ = RB_IMU(quat)
+        
         print("Rotated")
-        euler = Quaternion_To_Euler(quat_)
+        euler = Quaternion_To_Euler(quat)
 
     except Exception:
         return []
 
     now = time.time() - t_start
     t_buf.append(now)
-    pitch_buf.append(euler[1])
-    roll_buf.append(euler[0])
+    pitch_buf.append(euler[0])
+    roll_buf.append(euler[1])
 
     t_arr = np.array(t_buf)
     t_min = t_arr[-1] - WINDOW_S

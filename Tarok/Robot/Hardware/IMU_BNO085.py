@@ -74,8 +74,15 @@ def Quaternion_To_Euler(quaternion: NDArray) -> NDArray:
     # Yaw (z-axis rotation)
     Yaw = np.arctan2(2*(w*k + i*j), 1 - 2*(j**2 + k**2))
 
+    Pitch, Roll, Yaw = np.degrees(np.array([Pitch, Roll, Yaw]))
+
+    # Rotating according to how we implement the physical Robot
+    Pitch_Body = -Roll + 90
+    Roll_Body = Pitch
+    # We forget about Yaw, since we dont have on using it for now
+
     # Convert to degrees
-    return np.degrees(np.array([Pitch, Roll, Yaw]))
+    return Pitch_Body, Roll_Body, Yaw
 
 if __name__ == "__main__":
     bno, i2c = IMU_Initialization()
@@ -87,8 +94,8 @@ if __name__ == "__main__":
             # Option 1 - from quaternion directly
             angles = Quaternion_To_Euler(quaternion)
 
-            print(f"Roll:  {angles[0]:.2f}°")
-            print(f"Pitch: {angles[1]:.2f}°")
+            print(f"Pitch: {angles[0]:.2f}°")
+            print(f"Roll:  {angles[1]:.2f}°")
             print(f"Yaw:   {angles[2]:.2f}°")
             print("---")
 

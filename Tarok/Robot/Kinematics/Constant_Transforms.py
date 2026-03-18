@@ -139,15 +139,13 @@ def RB_IMU(q_IMU):
     Returns:
         q_B: Rotated Orientating from IMU frame to Body Frame
     """
-    print(q_IMU)
-    print(q_IMU.shape)
+    #print("Now Being Rotated")
     # Define rotation from input quaternion using scipy Rotation class
     q_IMU = Rotation.from_quat(q_IMU) # Quaternion in (x, y, z, w) format
-    print(q_IMU)
-    print(q_IMU.shape)
     # Rotate orientation from IMU frame to body frame
     q_B = qB_IMU * q_IMU
-    return q_B
+    #print(q_B.as_quat())
+    return q_B.as_quat()
 
 # Function to rotate orientations from body frame to IMU frame using quaternions
 def RIMU_B(q_B):
@@ -161,7 +159,7 @@ def RIMU_B(q_B):
 
     # Rotate orientation from body frame to IMU frame
     q_IMU = qIMU_B * q_B
-    return q_IMU
+    return q_IMU.as_quat()
 
 
 

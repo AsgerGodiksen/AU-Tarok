@@ -50,18 +50,18 @@ if __name__ == "__main__":
             i = i+1
             
             # Weak torque control command to make movement of legs easy
-            Torque_Control(bus0,ID_1,1)
-            Torque_Control(bus0,ID_2,1)
-            Torque_Control(bus0,ID_3,1)
-            Torque_Control(bus1,ID_1,1)
-            Torque_Control(bus1,ID_2,1)
-            Torque_Control(bus1,ID_3,1)
-            Torque_Control(bus2,ID_1,1)
-            Torque_Control(bus2,ID_2,1)
-            Torque_Control(bus2,ID_3,1)
-            #Torque_Control(bus3,ID_1,1)
-            #Torque_Control(bus3,ID_2,1)
-            #Torque_Control(bus3,ID_3,1)
+            Torque_Control(bus0,ID_1,0.01)
+            Torque_Control(bus0,ID_2,0.01)
+            Torque_Control(bus0,ID_3,0.01)
+            Torque_Control(bus1,ID_1,0.01)
+            Torque_Control(bus1,ID_2,0.01)
+            Torque_Control(bus1,ID_3,0.01)
+            Torque_Control(bus2,ID_1,0.01)
+            Torque_Control(bus2,ID_2,0.01)
+            Torque_Control(bus2,ID_3,0.01)
+            #Torque_Control(bus3,ID_1,0.01)
+            #Torque_Control(bus3,ID_2,0.01)
+            #Torque_Control(bus3,ID_3,0.01)
 
             time.sleep(0.5)
             
