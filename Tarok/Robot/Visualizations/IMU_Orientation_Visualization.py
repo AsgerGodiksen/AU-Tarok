@@ -12,6 +12,7 @@ import matplotlib.animation as animation
 from collections import deque
 
 from Robot.Hardware.IMU_BNO085 import IMU_Initialization, Get_Quaternion, Quaternion_To_Euler
+from Robot.Kinematics.Constant_Transforms import*
 
 
 ################## PARAMETERS ######################
@@ -60,7 +61,11 @@ t_start = time.time()
 def update(_frame):
     try:
         quat  = Get_Quaternion(bno)
-        euler = Quaternion_To_Euler(quat)
+        print("Get Quterion")
+        quat_ = RB_IMU(quat)
+        print("Rotated")
+        euler = Quaternion_To_Euler(quat_)
+
     except Exception:
         return []
 

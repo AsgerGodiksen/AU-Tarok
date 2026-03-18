@@ -1,5 +1,5 @@
-from Kalman_Filter import KalmanFilter
-from Pitch_And_Roll import Inverse_Pitch, Inverse_Roll
+from Robot.Kinematics.Kalman_Filter import KalmanFilter
+from Robot.Kinematics.Pitch_And_Roll import Inverse_Pitch, Inverse_Roll
 
 
 # --- Filter instances (one per axis) ---

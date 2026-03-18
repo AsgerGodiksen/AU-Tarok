@@ -1,0 +1,66 @@
+.
+├── Hardware
+│   ├── Battery_Status.py
+│   ├── IMU_BNO085.py
+│   ├── __init__.py
+│   ├── Leg_Reading.py
+│   ├── Light.py
+│   ├── Motor_Controls.py
+│   ├── Motor_ID.py
+│   ├── Motor_Readings.py
+│   └── SMBUS2I2C.py
+├── __init__.py
+├── Kinematics
+│   ├── Balance_Control.py
+│   ├── Constant_Transforms.py
+│   ├── Forward_Kinematics.py
+│   ├── __init__.py
+│   ├── Inverse_Kinematics.py
+│   ├── Jacobian.py
+│   ├── Kalman_Filter.py
+│   └── Pitch_And_Roll.py
+├── Structure.txt
+├── Tarok_Dymensions.py
+├── Test_Data
+│   └── Torque_Test_DATA_NO_LOAD.ods
+├── Test Scripts
+│   ├── Test_Balance_Control.py
+│   └── Test_Stand_Full.py
+├── Trajectory
+│   ├── Initial_Pose.py
+│   ├── __init__.py
+│   └── Trajectory_Up_Down.py
+├── URDF
+│   ├── assets
+│   │   ├── foot.part
+│   │   ├── foot.stl
+│   │   ├── hip_knee_connector.part
+│   │   ├── hip_knee_connector.stl
+│   │   ├── hip_mount.part
+│   │   ├── hip_mount.stl
+│   │   ├── lower_leg.part
+│   │   ├── lower_leg.stl
+│   │   ├── motor_mount.part
+│   │   ├── motor_mount.stl
+│   │   ├── myactuator_case.part
+│   │   ├── myactuator_case.stl
+│   │   ├── myacuator_axel.part
+│   │   ├── myacuator_axel.stl
+│   │   ├── profile.part
+│   │   ├── profile.stl
+│   │   ├── upper_leg.part
+│   │   └── upper_leg.stl
+│   ├── config.json
+│   ├── keys
+│   ├── robot.urdf
+│   └── Tarok_Veiwer.py
+└── Visualizations
+    ├── IMU_Orientation_Visualization.py
+    ├── Initial_Position_Visualization.py
+    ├── Pitch_And_Roll_Visualization_With_IMU.py
+    ├── Pitch_Visualization.py
+    ├── Pitch_Visualization_With_IMU.py
+    ├── Roll_Visualizations.py
+    └── Up_Down_Visualization.py
+
+9 directories, 55 files

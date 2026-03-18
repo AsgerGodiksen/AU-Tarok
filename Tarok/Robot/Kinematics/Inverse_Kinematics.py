@@ -7,12 +7,16 @@ import numpy as np
     # L3 = 0.30 m (length of the third leg segment)
 
 def Inverse_Kinematics(P_org, Leg):
-    # Input:
-        # P_org: Position of the end effector (foot) in the base frame
-        # Leg: 'FL', 'FR', 'HL' or 'HR' to specify considered leg
-    # Output:
-        # theta1, theta2, theta3: joint angles in radians
+    """
+    Docstring for Inverse_Kinematics
+    
+    Args:
+        P_org: Position of the end effector (foot) in the base frame
+        Leg: 'FL', 'FR', 'HL' or 'HR' to specify considered leg
 
+    Returns:
+        Joints Angles: theta1, theta2, theta3: joint angles in radians
+    """
     # Compute joint angles using inverse kinematics
     x = P_org[0, 0]  # Extract scalar value from numpy array
     y = P_org[1, 0]  # Extract scalar value from numpy array

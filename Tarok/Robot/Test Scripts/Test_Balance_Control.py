@@ -10,12 +10,13 @@ import time
 import numpy as np
 import sys, os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../Hardware')))
 
-from Kinematics.Balance_Control import*
-from Kinematics.Constant_Transforms import TB_0
-from Kinematics.Inverse_Kinematics import*
-from Hardware.IMU_BNO085 import*
-#from Hardware.Motor_Control import send_joint_angles
+from Robot.Kinematics import Inverse_Kinematics,Balance_Control
+#from Robot.Kinematics.Constant_Transforms import TB_0
+#from Robot.Kinematics.Inverse_Kinematics import*
+from Robot.Hardware.IMU_BNO085 import*
+#from Robot.Hardware.Motor_Controls import send_joint_angles
 
 # -------------------------------------------------------------------
 # Robot geometry
