@@ -58,16 +58,6 @@ Theta_FR = np.degrees(Theta_FR)
 Theta_HL = np.degrees(Theta_HL)
 Theta_HR = np.degrees(Theta_HR)
 
-# Convert angles to python scalar integers for motor control
-#Theta_FL = Theta_FL.astype(int)
-#Theta_FR = Theta_FR.astype(int)
-#Theta_HL = Theta_HL.astype(int)
-#Theta_HR = Theta_HR.astype(int)
-################################ TRY WITHOUT CONVERSION TO INT FIRST ################
-########################################################3
-###############################################
-
-
 ######### Send commands to motors ############
 print("Initializing CAN buses...")
 # Define motor IDs (might be specific to chosen physical leg)
