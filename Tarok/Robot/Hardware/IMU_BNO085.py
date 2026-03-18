@@ -25,10 +25,10 @@ def quat_to_rot_matrix(quaternion: NDArray) -> NDArray:
 
 def IMU_Initialization():
     i2c = SMBus2I2C(1, 0x4A)
-    time.sleep(2.0)
+    time.sleep(1.0)
 
     bno = BNO08X_I2C(i2c, address=0x4A)
-    time.sleep(2.0)
+    time.sleep(0.5)
 
     for attempt in range(5):
         try:
@@ -50,19 +50,32 @@ def Get_Quaternion(bno) -> NDArray:
     return quaternion
 
 def Quaternion_To_Euler(quaternion: NDArray) -> NDArray:
+    """
+    Docstring for Quaternion_To_Euler
+
+    Args:
+        quaternion (NDArray): A Measured Quaternion from the IMU Sensor
+
+    Returns:
+        Pitch:  Calculated Pitch for the Torso
+        
+        Roll:   Calculated Roll for the Torso
+        
+        Yaw:    Calculated Yaw for the Torso
+    """
     i, j, k, w = quaternion
 
     # Roll (x-axis rotation)
-    roll = np.arctan2(2*(w*i + j*k), 1 - 2*(i**2 + j**2))
+    Roll = np.arctan2(2*(w*i + j*k), 1 - 2*(i**2 + j**2))
 
     # Pitch (y-axis rotation)
-    pitch = np.arcsin(2*(w*j - k*i))
+    Pitch = np.arcsin(2*(w*j - k*i))
 
     # Yaw (z-axis rotation)
-    yaw = np.arctan2(2*(w*k + i*j), 1 - 2*(j**2 + k**2))
+    Yaw = np.arctan2(2*(w*k + i*j), 1 - 2*(j**2 + k**2))
 
     # Convert to degrees
-    return np.degrees(np.array([roll, pitch, yaw]))
+    return np.degrees(np.array([Pitch, Roll, Yaw]))
 
 if __name__ == "__main__":
     bno, i2c = IMU_Initialization()

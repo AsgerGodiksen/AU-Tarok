@@ -131,11 +131,14 @@ qIMU_B = Rotation.from_matrix(np.array([[ 0, 0, -1],
 
 # Function to rotate orientations from IMU frame to body frame using quaternions
 def RB_IMU(q_IMU):
-    # Input:
-        # q_IMU: Quaternion in the IMU frame
-    # Output:
-        # q_B: Quaternion in the body frame of the robot
+    """Function that Rotates Orientation From IMU Frame to BOdy Frame using Quaternions
 
+    Args:
+        q_IMU (_type_): IMU Quaternion
+
+    Returns:
+        q_B: Rotated Orientating from IMU frame to Body Frame
+    """
     # Define rotation from input quaternion using scipy Rotation class
     q_IMU = Rotation.from_quat(q_IMU) # Quaternion in (x, y, z, w) format
 

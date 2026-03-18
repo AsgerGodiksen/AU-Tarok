@@ -1,27 +1,50 @@
+from Kalman_Filter import KalmanFilter
+from Pitch_And_Roll import Inverse_Pitch, Inverse_Roll
 
-def Balance_Control(Euler_Angle,Pitch_Desired,Roll_Desired,Foot_Positions):
+
+# --- Filter instances (one per axis) ---
+_pitch_filter = KalmanFilter(Kalman_Gain=0.8)
+_roll_filter  = KalmanFilter(Kalman_Gain=0.8)
+
+# --- PD controller state ---
+_pitch_prev_error = 0.0
+_roll_prev_error  = 0.0
+
+# --- PD gains ---
+PITCH_P, PITCH_D = 2.5, 0.3
+ROLL_P,  ROLL_D  = 2.0, 0.0
+
+FREQ = 20  # Hz - How Often the Balance_Control runs each second.
+
+
+
+def Balance_Control(Euler_Angle, Pitch_Desired, Roll_Desired, Foot_Positions):
     """
-    Docstring for Balance_Control
-    
-    :param Euler_Angle: Euler angle from the IMU sensor
-    :param Pitch_Desired: Description
-    :param Roll_Desired: Description
-    :param Foot_Positions: Description
+    :param Euler_Angle:    [Pitch, Roll, Yaw] from the IMU sensor, in radians.
+    :param Pitch_Desired:  Desired pitch of the torso, in radians.
+    :param Roll_Desired:   Desired roll of the torso, in radians.
+    :param Foot_Positions: Current foot positions before balance adjustment.
+    :returns: Adjusted foot positions after pitch and roll compensation.
     """
+    global _pitch_prev_error, _roll_prev_error
 
-    return
+    # Filter raw measurements
+    pitch_measured = _pitch_filter.update(Euler_Angle[0])
+    roll_measured  = _roll_filter.update(Euler_Angle[1])
 
-def Kalman_Filter(Angle,Previous_Angle_Filter):
-    """
-    Funtion that uses a Kalman_Filter
-    
-    :param Angle: Takes the Measured value from the IMU Sensor
-    :param Previous_Angle_Filter: Previus Calculated Angle using the filter
-    """
-    Kalman_Gain = 0.8
-    Angle_Filter = Angle * Kalman_Gain + (1 - Kalman_Gain) * Previous_Angle_Filter
-    return Angle_Filter
+    # PD control
+    dt = 1 / FREQ
+    pitch_error = Pitch_Desired - pitch_measured
+    roll_error  = Roll_Desired  - roll_measured
 
+    pitch_pd = pitch_error * PITCH_P + (pitch_error - _pitch_prev_error) * PITCH_D / dt
+    roll_pd  = roll_error  * ROLL_P  + (roll_error  - _roll_prev_error)  * ROLL_D  / dt
 
+    _pitch_prev_error = pitch_error
+    _roll_prev_error  = roll_error
 
-Kal
+    # Inverse kinematics
+    New_foot_positions_From_Pitch, shoulder_heights = Inverse_Pitch(pitch_pd, Foot_Positions)
+    New_foot_positions = Inverse_Roll(roll_pd, New_foot_positions_From_Pitch, shoulder_heights)
+
+    return New_foot_positions
