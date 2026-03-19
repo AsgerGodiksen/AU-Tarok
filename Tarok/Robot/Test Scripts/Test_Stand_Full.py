@@ -69,11 +69,10 @@ ID_3 = 0x143  # Motor for theta3
 bus0 = can.interface.Bus(interface='socketcan', channel='can0', bitrate=1000000)
 bus1 = can.interface.Bus(interface='socketcan', channel='can1', bitrate=1000000)
 bus2 = can.interface.Bus(interface='socketcan', channel='can2', bitrate=1000000)
-#bus3 = can.interface.Bus(interface='socketcan', channel='can3', bitrate=1000000)
+bus3 = can.interface.Bus(interface='socketcan', channel='can3', bitrate=1000000)
 
-#### REMEMBER BUS 3 when having all 4 legs
 # Drain any stale messages from the buses
-for bus in [bus0, bus1, bus2]: #bus3
+for bus in [bus0, bus1, bus2, bus3]:
     for i in range(100):		# Now Listens for any signals 100 times with 0.01 s in between. Prints if any.
         msg = bus.recv(0.01)
         if msg:
@@ -91,9 +90,9 @@ Position_Control(bus1,ID_3,0,20)
 Position_Control(bus2,ID_1,0,20)
 Position_Control(bus2,ID_2,0,20)
 Position_Control(bus2,ID_3,0,20)
-#Position_Control(bus3,ID_1,0,20)
-#Position_Control(bus3,ID_2,0,20)
-#Position_Control(bus3,ID_3,0,20)
+Position_Control(bus3,ID_1,0,20)
+Position_Control(bus3,ID_2,0,20)
+Position_Control(bus3,ID_3,0,20)
 
 time.sleep(8)
 
@@ -109,9 +108,9 @@ Position_Control(bus1,ID_3,Theta_FR[2],20)
 Position_Control(bus2,ID_1,Theta_HL[0],20)
 Position_Control(bus2,ID_2,Theta_HL[1],20)
 Position_Control(bus2,ID_3,Theta_HL[2],20)
-#Position_Control(bus3,ID_1,Theta_HR[0],20)
-#Position_Control(bus3,ID_2,Theta_HR[1],20)
-#Position_Control(bus3,ID_3,Theta_HR[2],20)
+Position_Control(bus3,ID_1,Theta_HR[0],20)
+Position_Control(bus3,ID_2,Theta_HR[1],20)
+Position_Control(bus3,ID_3,Theta_HR[2],20)
 
 time.sleep(6)
 
@@ -132,9 +131,9 @@ try:
         Position_Control(bus2,ID_1,Theta_HL[0],20)
         Position_Control(bus2,ID_2,Theta_HL[1],20)
         Position_Control(bus2,ID_3,Theta_HL[2],20)
-        #Position_Control(bus3,ID_1,Theta_HR[0],20)
-        #Position_Control(bus3,ID_2,Theta_HR[1],20)
-        #Position_Control(bus3,ID_3,Theta_HR[2],20)
+        Position_Control(bus3,ID_1,Theta_HR[0],20)
+        Position_Control(bus3,ID_2,Theta_HR[1],20)
+        Position_Control(bus3,ID_3,Theta_HR[2],20)
         time.sleep(0.05)
 
 
@@ -152,16 +151,16 @@ except KeyboardInterrupt:
     Motor_Stop(bus2,ID_1)
     Motor_Stop(bus2,ID_2)
     Motor_Stop(bus2,ID_3)
-    #Motor_Stop(bus3,ID_1)
-    #Motor_Stop(bus3,ID_2)
-    #Motor_Stop(bus3,ID_3)
+    Motor_Stop(bus3,ID_1)
+    Motor_Stop(bus3,ID_2)
+    Motor_Stop(bus3,ID_3)
     print("Motors stopped")
 
     print("Shutting down CAN buses...")
     bus0.shutdown()
     bus1.shutdown()
     bus2.shutdown()
-    #bus3.shutdown()
+    bus3.shutdown()
     print("CAN buses shut down")
 
     print("Shutdown complete.")

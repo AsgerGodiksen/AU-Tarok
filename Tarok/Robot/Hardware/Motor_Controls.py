@@ -7,17 +7,25 @@ import re
 import binascii
 import struct
 
-
-
 def Torque_Control(bus,id,Current_Amps):
     """ 
     This method takes the wanted current in Amps and converts it
-    to the corresponding torque current value that the motor can understand.
-    from -33A to 33A
+    to the corresponding iq control as int16_t type.
+    The input can range from -32 A to 32 A, and corresponds to iq control values from -2000 to 2000.
+    Input: 
+        - bus: The CAN bus object to send the message on.
+        - id: The ID of the motor to send the command to.
+        - Current_Amps (float): Desired current in Amps, should be between -32 and 32.
+    Output: None. The function sends a CAN message to the specified motor to control its torque.
     """ 
+
+    # To avoid sending full torque (value = 0)
+    if Current_Amps < 0.02:
+        Current_Amps = 0.02 # Resulting in iq_control being 1, which is the minimum non-zero value and practically just free movement of the output.
+
     data = [0xA1,0x00,0x00,0x00,0x00,0x00,0x00,0x00]
 
-    iq_control = int(Current_Amps / 0.01)
+    iq_control = int(Current_Amps * 62.5)
 
     iq_bytes = struct.pack('<h', iq_control)  # Convert to little-endian signed short
 
@@ -33,31 +41,20 @@ def Torque_Control(bus,id,Current_Amps):
 
 
 def Position_Control(bus,id,New_Position,Max_Rotation_Speed):
-    # This method takes the bus, ID, wanted position and speed as input and sends the corresponding command to the motor.
+    """
+    This method takes the bus, ID, wanted position and speed as input and sends the corresponding command to the motor.
+    Input:
+    - bus: The CAN bus object to send the message on.
+    - id: The ID of the motor to send the command to.
+    - New_Position: Desired position in degrees, where 360 degrees corresponds to 360000 in the motor's encoder units. Can be positive or negative.
+    - Max_Rotation_Speed: Desired maximum rotation speed in degrees per second.
+    Output: None. The function sends a CAN message to the specified motor to control its position and speed.
+    """
+
     data = [0xA4,0x00,0x00,0x00,0x00,0x00,0x00,0x00]
 
-    # The New_Position is a int32_t type. And given in degress 
-    # With 360000 representing 360 degrees
-    # Can go both in positive and negative values
-
-    '''
-    # Rotation direction is determined by the target and current Position.
-    Max_Rotation_Speed = Max_Rotation_Speed*10  # To get the desired number of degrees pr second, we need to multiply the input by 10, because the motor protocol uses a resolution of 0.1 degree pr second.
-    # The Max Rotation Speed 
-    Max_Speed_In_Hex = hex(Max_Rotation_Speed) 
-    if Max_Rotation_Speed <= 255:
-        data[2] = Max_Rotation_Speed
-        Max_Speed_In_Hex = Max_Speed_In_Hex[2:6]
-    else:
-        if len(Max_Speed_In_Hex) == 5:
-            data[2] = int('0x' + Max_Speed_In_Hex[3:5], 16)
-            data[3] = int('0x' + Max_Speed_In_Hex[2], 16)
-        else:
-            data[2] = int('0x' + Max_Speed_In_Hex[4:6], 16)
-            data[3] = int('0x' + Max_Speed_In_Hex[2:4], 16)
-    '''
-
-    speed_raw = int(Max_Rotation_Speed * 10)  # Convert to the motor's expected format
+    # The speed is converted as 1dps/LSB to uint16_t 
+    speed_raw = int(Max_Rotation_Speed)  # Convert to the motor's expected format
     speed_bytes = struct.pack('<h', speed_raw)  # Convert to little-endian signed short
     data[2] = speed_bytes[0]  # Low byte
     data[3] = speed_bytes[1]  # High byte
@@ -89,6 +86,7 @@ def Position_Control(bus,id,New_Position,Max_Rotation_Speed):
     bus.send(send_msg)
 
 def Speed_Control(bus,id,speed):
+    ##### NOTE: NOT SURE IF CORRECT UNIT IS USED FOR SPEED, CHECK COMMAND PROTOCOL #####
     # This method takes the bus, ID and a arbitrary speed value
     # The speed is given as Degrees pr second.
     speed = speed * 10  # To get the desired number of degrees pr second, we need to multiply the input by 10, because the motor protocol uses a resolution of 0.1 degree pr second.
