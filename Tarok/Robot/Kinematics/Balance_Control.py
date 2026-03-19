@@ -1,5 +1,5 @@
-from Robot.Kinematics.Kalman_Filter import KalmanFilter
-from Robot.Kinematics.Pitch_And_Roll import Inverse_Pitch, Inverse_Roll
+from Kalman_Filter import KalmanFilter
+from Pitch_And_Roll import Inverse_Pitch, Inverse_Roll
 
 
 # --- Filter instances (one per axis) ---
@@ -37,8 +37,17 @@ def Balance_Control(Euler_Angle, Pitch_Desired, Roll_Desired, Foot_Positions):
     pitch_error = Pitch_Desired - pitch_measured
     roll_error  = Roll_Desired  - roll_measured
 
-    pitch_pd = pitch_error * PITCH_P + (pitch_error - _pitch_prev_error) * PITCH_D / dt
-    roll_pd  = roll_error  * ROLL_P  + (roll_error  - _roll_prev_error)  * ROLL_D  / dt
+
+        # Maybe a sign error in the parenteses
+    # Implementing the Contributions from both the p and d terms
+    Pitch_d = (pitch_error - _pitch_prev_error) * PITCH_D / dt
+    Roll_d  = (roll_error  - _roll_prev_error)  * ROLL_D  / dt
+    Pitch_p = pitch_error * PITCH_P
+    Roll_p  = roll_error  * ROLL_P
+    
+    # Combineing the terms
+    pitch_pd = Pitch_p + Pitch_d
+    roll_pd  = Roll_p + Roll_d
 
     _pitch_prev_error = pitch_error
     _roll_prev_error  = roll_error
@@ -47,4 +56,4 @@ def Balance_Control(Euler_Angle, Pitch_Desired, Roll_Desired, Foot_Positions):
     New_foot_positions_From_Pitch, shoulder_heights = Inverse_Pitch(pitch_pd, Foot_Positions)
     New_foot_positions = Inverse_Roll(roll_pd, New_foot_positions_From_Pitch, shoulder_heights)
 
-    return New_foot_positions
+    return New_foot_positions , pitch_pd, roll_pd
