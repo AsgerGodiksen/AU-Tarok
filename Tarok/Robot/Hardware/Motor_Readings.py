@@ -1,5 +1,6 @@
 from time import sleep, time
 import can
+import struct
 
 
 
@@ -100,6 +101,7 @@ def Read_Encoder_Postion(bus,id):
 
     return encoder_position
 
+# OLD VERSION READ_ANGLE (Old and new works identical as far as we know)
 def Read_Angle(bus,id):
 
     data = [0x92,0x00,0x00,0x00,0x00,0x00,0x00,0x00]
@@ -111,7 +113,7 @@ def Read_Angle(bus,id):
     
     bus.send(send_msg)
     sleep(0.0001)
-    msg = bus.recv(5)    
+    msg = bus.recv(4)    
     if msg is None:
         # print("No response received.")    # only print for debug - slows prcoess down
         return None
@@ -141,7 +143,39 @@ def Read_Angle(bus,id):
     # print(f"Encoder value: {angle_float}")
     return angle_float
 
-
+'''
+# NEW VERSION READ_ANGLE (Old and new works identical as far as we know)
+def Read_Angle(bus,id):
+ 
+    data = [0x92,0x00,0x00,0x00,0x00,0x00,0x00,0x00]
+    
+    send_msg = can.Message(
+                        arbitration_id=id, 
+                        data=data, 
+                        is_extended_id=False)
+    
+    bus.send(send_msg)
+    sleep(0.0001)
+    msg = bus.recv(4)    
+    if msg is None:
+        # print("No response received.")    # only print for debug - slows process down
+        return None
+    
+    can_data = msg.data  # bytes object: [cmd, b1, b2, b3, b4, b5, b6, b7]
+ 
+    # The motor returns a signed 56-bit little-endian angle in bytes[1:8].
+    # Pad to 8 bytes and unpack as signed int64 (little-endian).
+    raw_bytes = bytes(can_data[1:8]) + b'\x00'  # 7 bytes + 1 zero pad = 8 bytes
+    encoder_dec = struct.unpack('<q', raw_bytes)[0]
+ 
+    # Sign-extend from 56-bit: if bit 55 (MSB of byte[7]) is set, value is negative.
+    if can_data[7] & 0x80:
+        encoder_dec -= (1 << 56)
+ 
+    angle_float = float(encoder_dec) / 900.0
+ 
+    return angle_float
+'''
 
 def Read_Motor_Temperature(bus,id):
     # This method is used to find out the temperature of the motor
