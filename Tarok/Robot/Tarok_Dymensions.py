@@ -1,5 +1,7 @@
 # In this File the dimensions of TAROK is found 
 
+import numpy as np
+
 class Tarok_Dymensions_Class:
     def __init__(self):
         """ Lengths of the different parts of the robot in meters"""
@@ -10,10 +12,12 @@ class Tarok_Dymensions_Class:
         self.Lower_Leg = 0.3        # m - Lower leg length
         self.L1 = 0.078             # m - Lenght of First segment in meters
         self.Foot_Radius = 0.02625  # [m] Radius of the Foot 
+        
 
         """ Kinematics Lengths"""
         self.K_L = 0.7048  # [m] Lenght Between Actuator 2 rotation axis in front and hind legs 
-        self.K_W = 0.220   # [m] Width  Between Actuator 1 rotation axis in left and right legs
+        self.K_W = 0.220   # [m] Width  Between Actuator 1 rotation axis in left and right legs[ L_BODY/2,  W_BODY/2 + L1,  STAND_Z]
+        self.Standing_Heights = 0.41
 
         
         """ Weights of the different parts of the robot in kg"""
@@ -48,10 +52,21 @@ class Tarok_Dymensions_Class:
         Front_Right = [self.Torso_Lenght/2   , self.Torso_Width/2  , 0] 
         Hind_Left   = [-self.Torso_Lenght/2  , -self.Torso_Width/2 , 0] 
         Hind_Right  = [-self.Torso_Lenght/2  , self.Torso_Width/2  , 0]
-        return [Front_Left, Front_Right, Hind_Left, Hind_Right]
+        Shoulder_Positions = [Front_Left, Front_Right, Hind_Left, Hind_Right]
+        return Shoulder_Positions
         
+    def Initial_Foot_Positions(self):
+        """ 
+        Function From Tarok_Dymensions
+              
+            The Initial Foot Positions - The End effector 
+        Returns:
+            Returns the initial foot positions as (3,1) numpy arrays
+            [Front_Left_Foot, Front_Right_Foot, Hind_Left_Foot, Hind_Right_Foot]
+        """
+        Front_Left_Foot  = np.array([[ self.K_L/2], [ self.K_W/2 + self.L1], [-self.Standing_Heights]])
+        Front_Right_Foot = np.array([[ self.K_L/2], [-self.K_W/2 - self.L1], [-self.Standing_Heights]])
+        Hind_Left_Foot   = np.array([[-self.K_L/2], [ self.K_W/2 + self.L1], [-self.Standing_Heights]])
+        Hind_Right_Foot  = np.array([[-self.K_L/2], [-self.K_W/2 - self.L1], [-self.Standing_Heights]])
         
-
-        
-
-        
+        return [Front_Left_Foot, Front_Right_Foot, Hind_Left_Foot, Hind_Right_Foot]

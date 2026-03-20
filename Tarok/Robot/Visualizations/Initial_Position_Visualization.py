@@ -45,40 +45,46 @@ Theta_FR = Inverse_Kinematics(P_FR_Base,'FR')
 Theta_HL = Inverse_Kinematics(P_HL_Base,'HL')
 Theta_HR = Inverse_Kinematics(P_HR_Base,'HR')
 
-# Get current joint angles
-th1_FL, th2_FL, th3_FL = Theta_FL
-th1_FR, th2_FR, th3_FR = Theta_FR
-th1_HL, th2_HL, th3_HL = Theta_HL
-th1_HR, th2_HR, th3_HR = Theta_HR
 
-# Compute forward kinematics in leg base frames
-P0_1_FL = P0_1_FR = P0_1_HL = P0_1_HR = np.array([[0], [0], [0]])  # Placeholder for P0_1
-P0_2_FL = P0_2(th1_FL, th2_FL, th3_FL, 'FL')
-P0_2_FR = P0_2(th1_FR, th2_FR, th3_FR, 'FR')
-P0_2_HL = P0_2(th1_HL, th2_HL, th3_HL, 'HL')
-P0_2_HR = P0_2(th1_HR, th2_HR, th3_HR, 'HR') 
-P0_3_FL = P0_3(th1_FL, th2_FL, th3_FL, 'FL')
-P0_3_FR = P0_3(th1_FR, th2_FR, th3_FR, 'FR')
-P0_3_HL = P0_3(th1_HL, th2_HL, th3_HL, 'HL')
-P0_3_HR = P0_3(th1_HR, th2_HR, th3_HR, 'HR') 
-P0_end_FL = P0_end(th1_FL, th2_FL, th3_FL, 'FL')
-P0_end_FR = P0_end(th1_FR, th2_FR, th3_FR, 'FR')
-P0_end_HL = P0_end(th1_HL, th2_HL, th3_HL, 'HL')
-P0_end_HR = P0_end(th1_HR, th2_HR, th3_HR, 'HR')
+###### Compute forward kinematics in leg base frames ####
+P0_1_FL = np.array([[0], [0], [0]])  # Placeholder for P0_1
+P0_1_FR = np.array([[0], [0], [0]])  # Placeholder for P0_1
+P0_1_HL = np.array([[0], [0], [0]])  # Placeholder for P0_1
+P0_1_HR = np.array([[0], [0], [0]])  # Placeholder for P0_1
 
-# Transform end-effector positions to body frame
+# Frist The Position of the second Joint
+P0_2_FL = P0_2(Theta_FL[0], Theta_FL[1], Theta_FL[2], 'FL')
+P0_2_FR = P0_2(Theta_FR[0], Theta_FR[1], Theta_FR[2], 'FR')
+P0_2_HL = P0_2(Theta_HL[0], Theta_HL[1], Theta_HL[2], 'HL')
+P0_2_HR = P0_2(Theta_HR[0], Theta_HR[1], Theta_HR[2], 'HR') 
+# The Thrid Joint
+P0_3_FL = P0_3(Theta_FL[0], Theta_FL[1], Theta_FL[2], 'FL')
+P0_3_FR = P0_3(Theta_FR[0], Theta_FR[1], Theta_FR[2], 'FR')
+P0_3_HL = P0_3(Theta_HL[0], Theta_HL[1], Theta_HL[2], 'HL')
+P0_3_HR = P0_3(Theta_HR[0], Theta_HR[1], Theta_HR[2], 'HR') 
+# The End Effector
+P0_end_FL = P0_end(Theta_FL[0], Theta_FL[1], Theta_FL[2], 'FL')
+P0_end_FR = P0_end(Theta_FR[0], Theta_FR[1], Theta_FR[2], 'FR')
+P0_end_HL = P0_end(Theta_HL[0], Theta_HL[1], Theta_HL[2], 'HL')
+P0_end_HR = P0_end(Theta_HR[0], Theta_HR[1], Theta_HR[2], 'HR')
+
+###### Transformning Positions from Leg Base Frames to Body Frame
+# For the frist Joints
 P0_1_FL = TB_0(P0_1_FL, 'FL')
 P0_1_FR = TB_0(P0_1_FR, 'FR')
 P0_1_HL = TB_0(P0_1_HL, 'HL')
 P0_1_HR = TB_0(P0_1_HR, 'HR')
+# For the Second Joint
 P0_2_FL = TB_0(P0_2_FL, 'FL')
 P0_2_FR = TB_0(P0_2_FR, 'FR')
 P0_2_HL = TB_0(P0_2_HL, 'HL')
 P0_2_HR = TB_0(P0_2_HR, 'HR')
+# For the Thrid Joint
 P0_3_FL = TB_0(P0_3_FL, 'FL')
 P0_3_FR = TB_0(P0_3_FR, 'FR')
 P0_3_HL = TB_0(P0_3_HL, 'HL')
 P0_3_HR = TB_0(P0_3_HR, 'HR')
+# For End Effector
 P0_end_FL = TB_0(P0_end_FL, 'FL')
 P0_end_FR = TB_0(P0_end_FR, 'FR')
 P0_end_HL = TB_0(P0_end_HL, 'HL')

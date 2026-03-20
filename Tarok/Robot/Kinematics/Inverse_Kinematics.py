@@ -15,7 +15,7 @@ def Inverse_Kinematics(P_org, Leg):
         Leg: 'FL', 'FR', 'HL' or 'HR' to specify considered leg
 
     Returns:
-        Joints Angles: theta1, theta2, theta3: joint angles in radians
+        Angles: theta1, theta2, theta3 in radians
     """
     # Compute joint angles using inverse kinematics
     x = P_org[0, 0]  # Extract scalar value from numpy array

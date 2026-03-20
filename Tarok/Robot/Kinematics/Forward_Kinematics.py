@@ -101,12 +101,18 @@ def T0_3(theta1, theta2, theta3, Leg):
     return R, P_org
 
 def P0_end(theta1, theta2, theta3, Leg):
-    # Input:
-        # theta1, theta2, theta3: joint angles in radians
-        # Leg: 'FL', 'FR', 'HL' or 'HR' to specify considered leg
-    # Output:
-        # P_org: Position of the end effector (foot) in the base frame of the specified leg
+    """ 
+    Position of the End Effector
 
+    Args:
+        theta1: joint angle in radians
+        theta2: joint angle in radians
+        theta3: joint angle in radians
+        Leg: 'FL', 'FR', 'HL' or 'HR' to specify considered leg
+
+    Returns:
+        P_org: Position of the end effector (foot) in the base frame of the specified leg
+    """
     # Specify config variable based on leg
     if Leg == 'FL' or Leg == 'HR':
         config = 1
@@ -120,6 +126,18 @@ def P0_end(theta1, theta2, theta3, Leg):
     return P_org
 
 def P0_2(theta1, theta2, theta3, Leg):
+    """
+    Postion for second Joint
+
+    Args:
+        theta1: joint angle in radians
+        theta2: joint angle in radians
+        theta3: joint angle in radians
+        Leg: 'FL', 'FR', 'HL' or 'HR' to specify considered leg
+
+    Returns:
+        P_org: Position of the second joint in the base frame of the specified leg
+    """
     # Input:
         # theta1, theta2, theta3: joint angles in radians
         # Leg: 'FL', 'FR', 'HL' or 'HR' to specify considered leg
@@ -139,12 +157,18 @@ def P0_2(theta1, theta2, theta3, Leg):
     return P_org
 
 def P0_3(theta1, theta2, theta3, Leg):
-    # Input:
-        # theta1, theta2, theta3: joint angles in radians
-        # Leg: 'FL', 'FR', 'HL' or 'HR' to specify considered leg
-    # Output:
-        # P_org: Position of the third joint in the base frame of the specified leg
+    """
+    Postion for Thrid Joint
 
+    Args:
+        theta1: joint angle in radians
+        theta2: joint angle in radians
+        theta3: joint angle in radians
+        Leg: 'FL', 'FR', 'HL' or 'HR' to specify considered leg
+
+    Returns:
+        P_org: Position of the third joint in the base frame of the specified leg
+    """
     # Specify config variable based on leg
     if Leg == 'FL' or Leg == 'HR':
         config = 1

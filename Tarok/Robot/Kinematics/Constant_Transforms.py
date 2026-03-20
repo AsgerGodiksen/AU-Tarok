@@ -7,14 +7,20 @@ from scipy.spatial.transform import Rotation
     # w_k = 0.220 m (width of body in kinematic model)
 # Note, often l_k/2 and w_k/2 are used in the transforms.
 
-# Function to transform positions from leg base frames to body frame
-def TB_0(P_0, Leg):
-    # Input:
-        # P_0: Position in the base frame of the specific leg
-        # Leg: 'FL', 'FR', 'HL' or 'HR' to specify considered leg
-    # Output:
-        # P_B: Position in the body frame of the robot
 
+def TB_0(P_0, Leg):
+    """ 
+    From Constand_Transform.py
+    
+    Function to transform positions from leg base frames to body frame
+    
+    Args:
+        P_0 (_type_): Position in the base frame of the specific leg 
+        Leg (_type_): 'FL', 'FR', 'HL' or 'HR' to specify considered leg
+
+    Returns:
+        P_B: Position in the body frame of the robot
+    """
     # Specify config varaible based on leg
     if   Leg == 'FL':
         configA = 1
@@ -42,11 +48,18 @@ def TB_0(P_0, Leg):
 
 # Function to transform positions from body frame to leg base frames
 def T0_B(P_B, Leg):
-    # Input:
-        # P_B: Position in the body frame of the robot
-        # Leg: 'FL', 'FR', 'HL' or 'HR' to specify considered leg
-    # Output:
-        # P_0: Position in the base frame of the specific leg
+    """
+    From Constant_Transform.py
+    
+    Function to transform positions from body frame to leg base frames
+
+    Args:
+        P_B (_type_): Position in the body frame of the robot
+        Leg (_type_): 'FL', 'FR', 'HL' or 'HR' to specify considered leg
+
+    Returns:
+        P_0: Position in the base frame of the specific leg
+    """
 
     # Specify config varaible based on leg
     if   Leg == 'FL':
