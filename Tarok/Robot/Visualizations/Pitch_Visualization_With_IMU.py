@@ -15,8 +15,7 @@
 #   then run:  python Simulation_Pitch_IMU.py
 
 import sys, os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../Hardware')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 import threading
 import numpy as np

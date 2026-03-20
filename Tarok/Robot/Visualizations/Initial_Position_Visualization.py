@@ -4,8 +4,7 @@
 import sys
 import os
 # Add Robot/ to path so Kinematics and Hardware can be imported directly
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../Hardware')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 
 from Robot.Kinematics.Inverse_Kinematics import*
