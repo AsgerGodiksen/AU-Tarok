@@ -45,15 +45,8 @@ try:
     while True:
             # Loop count
             count = count + 1
-            '''
-            # Drain stale messages
-            for bus in [bus0, bus1, bus2, bus3]:
-                for i in range(100):		# Now Listens for any signals 100 times with 0.01 s in between. Prints if any.
-                    msg = bus.recv(0.01)
-                    if msg:
-                        print(msg)
-            '''
-            '''
+
+            
             # Weak torque control to make movement of legs easy
             Torque_Control(bus0, ID_1, 0.02)
             Torque_Control(bus0, ID_2, 0.02)
@@ -68,7 +61,7 @@ try:
             Torque_Control(bus3, ID_2, 0.02)
             Torque_Control(bus3, ID_3, 0.02)
             sleep(0.5)
-            '''
+            
 
             # Read current positions for all 4 legs
             FL_theta1 = Read_Angle(bus0,ID_1)
