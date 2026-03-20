@@ -38,7 +38,8 @@ def Torque_Control(bus,id,Current_Amps):
                     data=data, 
                     is_extended_id=False)
     bus.send(send_msg)
-
+    # Flush reply
+    bus.recv(0.1) # Flush reply, dont care about the content, just want to make sure we dont have any stale replies in the buffer for later commands
 
 def Position_Control(bus,id,New_Position,Max_Rotation_Speed):
     """
@@ -84,6 +85,8 @@ def Position_Control(bus,id,New_Position,Max_Rotation_Speed):
                     data=data, 
                     is_extended_id=False)
     bus.send(send_msg)
+    # Flush reply
+    bus.recv(0.1) # Flush reply, dont care about the content, just want to make sure we dont have any stale replies in the buffer for later commands
 
 def Speed_Control(bus,id,speed):
     ##### NOTE: NOT SURE IF CORRECT UNIT IS USED FOR SPEED, CHECK COMMAND PROTOCOL #####
@@ -109,6 +112,8 @@ def Speed_Control(bus,id,speed):
         is_extended_id=False
     )
     bus.send(msg)
+    # Flush reply
+    bus.recv(0.1) # Flush reply, dont care about the content, just want to make sure we dont have any stale replies in the buffer for later commands
         
 def Motor_Stop(bus,id):
     # This command will stop the motor from running, but not remove the earlier command.  
@@ -121,11 +126,17 @@ def Motor_Stop(bus,id):
     
     bus.send(send_msg)
 
+    # stricter pattern for flush compared to other motor control commands - we want to be on the safe side with motor stop
+    while True:
+        msg = bus.recv(0.5)
+        if msg is None:
+            raise RuntimeError(f"Motor {id} did not confirm stop command.")
+        if msg.arbitration_id == id and msg.data[0] == 0x81:
+            break
+
 def Map_Value(value, from_low, from_high, to_low, to_high):
     # Scale the value from the input range to the output range
     return (value - from_low) * (to_high - to_low) / (from_high - from_low) + to_low
-
-
 
 def PID_RAM_Control(bus, id,
                     Position_Kp=None, Position_Ki=None,

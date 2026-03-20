@@ -17,14 +17,18 @@ def Read_Voltage(bus,id):
                         is_extended_id=False)
     
     bus.send(send_msg)
-    
     sleep(0.0001)
+
+    # Filter for our own reply - discard any stale  replies from other commands
     while True:
         msg = bus.recv(1)
-        if msg is not None:
-            if msg.arbitration_id == id and msg.data[0] == 0x9A:
-                break
+        if msg is None:
+            # Print("No response received.")    # only print for debug - slows process down
+            return None
+        if msg.arbitration_id == id and msg.data[0] == 0x9A:
+            break
 
+    # Now we have the correct message, we can process it
     can_data = msg.data
      # Based on the Motor Protocol the voltage is sent as two bytes
     # can_data[3] is the low byte
@@ -54,11 +58,17 @@ def Read_Torque_Current(bus, id):
                         is_extended_id=False)
     bus.send(send_msg)
     sleep(0.0001)
+    
+    # Filter for our own reply - discard any stale  replies from other commands
     while True:
         msg = bus.recv(1)
-        if msg is not None:
-            if msg.arbitration_id == id and msg.data[0] == 0x9C:
-                break
+        if msg is None:
+            # Print("No response received.")    # only print for debug - slows process down
+            return None
+        if msg.arbitration_id == id and msg.data[0] == 0x9C:
+            break
+    
+    # Now we have the correct message, we can process it
     can_data = msg.data
     # Based on the Motor Protocol the Torque Current is sent as two bytes
     # can_data[2] is the low byte
@@ -89,7 +99,17 @@ def Read_Encoder_Postion(bus,id):
                         is_extended_id=False)
     bus.send(send_msg)
     sleep(0.0001)
-    msg = bus.recv(4)
+
+    # Filter for our own reply - discard any stale  replies from other commands
+    while True:
+        msg = bus.recv(1)
+        if msg is None:
+            # Print("No response received.")    # only print for debug - slows process down
+            return None
+        if msg.arbitration_id == id and msg.data[0] == 0x9C:
+            break
+    
+    # Now we have the correct message, we can process it
     can_data = msg.data
 
     encoder_position_low = can_data[6]
@@ -102,6 +122,7 @@ def Read_Encoder_Postion(bus,id):
     return encoder_position
 
 # OLD VERSION READ_ANGLE (Old and new works identical as far as we know)
+'''
 def Read_Angle(bus,id):
 
     data = [0x92,0x00,0x00,0x00,0x00,0x00,0x00,0x00]
@@ -142,8 +163,8 @@ def Read_Angle(bus,id):
 
     # print(f"Encoder value: {angle_float}")
     return angle_float
-
 '''
+
 # NEW VERSION READ_ANGLE (Old and new works identical as far as we know)
 def Read_Angle(bus,id):
  
@@ -156,11 +177,17 @@ def Read_Angle(bus,id):
     
     bus.send(send_msg)
     sleep(0.0001)
-    msg = bus.recv(4)    
-    if msg is None:
-        # print("No response received.")    # only print for debug - slows process down
-        return None
+
+    # Filter for our own reply - discard any stale  replies from other commands
+    while True:
+        msg = bus.recv(1)
+        if msg is None:
+            # Print("No response received.")    # only print for debug - slows process down
+            return None
+        if msg.arbitration_id == id and msg.data[0] == 0x92:
+            break
     
+    # Now we have the correct message, we can process it
     can_data = msg.data  # bytes object: [cmd, b1, b2, b3, b4, b5, b6, b7]
  
     # The motor returns a signed 56-bit little-endian angle in bytes[1:8].
@@ -175,7 +202,6 @@ def Read_Angle(bus,id):
     angle_float = float(encoder_dec) / 900.0
  
     return angle_float
-'''
 
 def Read_Motor_Temperature(bus,id):
     # This method is used to find out the temperature of the motor
@@ -187,14 +213,23 @@ def Read_Motor_Temperature(bus,id):
                         is_extended_id=False)
     bus.send(send_msg)
     sleep(0.0001)
-    msg = bus.recv(4)
+
+    # Filter for our own reply - discard any stale  replies from other commands
+    while True:
+        msg = bus.recv(1)
+        if msg is None:
+            # Print("No response received.")    # only print for debug - slows process down
+            return None
+        if msg.arbitration_id == id and msg.data[0] == 0x9A:
+            break
+    
+    # Now we have the correct message, we can process it
     can_data = msg.data
 
     motor_temperature = can_data[1] / 10
     print(f"Motor Temperature: {motor_temperature}°C")
 
     return motor_temperature
-
 
 def Read_Speed(bus,id):
     # This method is used to find out the speed of the motor
@@ -205,11 +240,18 @@ def Read_Speed(bus,id):
                         data=data, 
                         is_extended_id=False)
     bus.send(send_msg)
+    sleep(0.0001)
+
+    # Filter for our own reply - discard any stale  replies from other commands
     while True:
-            msg = bus.recv(1)
-            if msg is not None:
-                if msg.arbitration_id == id and msg.data[0] == 0x9C:
-                    break
+        msg = bus.recv(1)
+        if msg is None:
+            # Print("No response received.")    # only print for debug - slows process down
+            return None
+        if msg.arbitration_id == id and msg.data[0] == 0x9C:
+            break
+    
+    # Now we have the correct message, we can process it
     can_data = msg.data
 
     # Inserting the Values on the bytes
@@ -226,7 +268,6 @@ def Read_Speed(bus,id):
 
     return speed
 
-
 def Read_PID(bus,id):
     # This method is used to read the PID values of the motor
     data = [0x30,0x00,0x00,0x00,0x00,0x00,0x00,0x00]
@@ -236,7 +277,16 @@ def Read_PID(bus,id):
                         is_extended_id=False)
     bus.send(send_msg)
     sleep(0.0001)
-    msg = bus.recv(4)
+    # Filter for our own reply - discard any stale  replies from other commands
+    while True:
+        msg = bus.recv(1)
+        if msg is None:
+            # Print("No response received.")    # only print for debug - slows process down
+            return None
+        if msg.arbitration_id == id and msg.data[0] == 0x30:
+            break
+    
+    # Now we have the correct message, we can process it
     can_data = msg.data
 
     # We extract the differnt PID values from the CAN data, based on the Motor Protocol
