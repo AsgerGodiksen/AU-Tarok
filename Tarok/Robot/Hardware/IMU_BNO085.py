@@ -24,6 +24,12 @@ def quat_to_rot_matrix(quaternion: NDArray) -> NDArray:
 
 
 def IMU_Initialization():
+    """
+    Initialization of the IMU
+
+    Returns:
+        Ensures the initialization of the IMU
+    """
     i2c = SMBus2I2C(1, 0x4A)
     time.sleep(1.0)
 
@@ -43,6 +49,15 @@ def IMU_Initialization():
 
 
 def Get_Quaternion(bno) -> NDArray:
+    """    
+    Getting the Quaternion for the IMU in it's own frame
+
+    Args:
+        bno (_type_): Given the Sensor as input
+
+    Returns:
+        Quaternion: Gives The Quaternion in the IMU frame
+    """
     quat_i, quat_j, quat_k, quat_real = bno.quaternion
 
     # Pack into numpy array [i, j, k, real] = [x, y, z, w]
@@ -51,17 +66,17 @@ def Get_Quaternion(bno) -> NDArray:
 
 def Quaternion_To_Euler(quaternion: NDArray) -> NDArray:
     """
-    Docstring for Quaternion_To_Euler
+    Quaternion_To_Euler takes the IMU data. Convert into Euler repesented in Body Frame
 
     Args:
-        quaternion (NDArray): A Measured Quaternion from the IMU Sensor
+        Quaternion (NDArray): A Measured Quaternion from the IMU Sensor
 
     Returns:
-        Pitch:  Calculated Pitch for the Torso
+        Pitch: In Body Frame
         
-        Roll:   Calculated Roll for the Torso
+        Roll: In Body Frame
         
-        Yaw:    Calculated Yaw for the Torso
+        Yaw: In Body Frame
     """
     i, j, k, w = quaternion
 
