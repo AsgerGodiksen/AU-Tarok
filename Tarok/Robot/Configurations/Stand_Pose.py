@@ -16,8 +16,8 @@ from Robot.Kinematics import T0_B
 from Robot.Hardware import Position_Control
 from Robot.Hardware import Motor_Stop
 
-from Robot.Hardware.IMU_BNO085 import IMU_Initialization, Get_Quaternion, Quaternion_To_Euler
-
+from Robot.Hardware import IMU_Initialization, Get_Quaternion, Quaternion_To_Euler
+from Robot.Hardware import SMBus2I2C
 
 Tarok_Class = Tarok_Dymensions_Class()  # instantiate first
 
@@ -112,6 +112,7 @@ time.sleep(0.5)
 
 
 log_filename = f"TEST_DATA/Standing_TEST_IMU_Log_{time.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
+os.makedirs("TEST_DATA", exist_ok=True)
 with open(log_filename, 'w', newline='') as csvfile:
     writer = csv.writer(csvfile)
     writer.writerow(["Timestamp (s)", "Pitch_deg", "Roll_deg", "Yaw_deg"])  # Header
@@ -136,6 +137,7 @@ try:
             data_count += 1
         
             time.sleep(0.05)
+            print(data_count)
 
 # Stop loop with Ctrl+C
 except KeyboardInterrupt:
@@ -170,9 +172,10 @@ except KeyboardInterrupt:
     
     print("Storing logged data to file")
     # Store logged data in file
-    with open(log_filename,"a") as file:
+    with open(log_filename, "a", newline='') as file:
+        writer = csv.writer(file)
         for i in range(data_count):
-            row = data[i,:]
-            file.write([f"{data[0]:.4f}", f"{data[1]:.4f}", f"{data[2]:.4f}", f"{data[3]:.4f}"])
+            row = data[i, :]
+            writer.writerow([f"{row[0]:.4f}", f"{row[1]:.4f}", f"{row[2]:.4f}", f"{row[3]:.4f}"])
     print("Logged data stored")
     print("Shutdown complete.")
