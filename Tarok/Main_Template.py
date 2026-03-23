@@ -13,9 +13,6 @@ from Robot import*
 # Old: CAN initialization in terminal: "sudo ip link set dev canX up type can bitrate 1000000" - with "X" being 0, 1, 2 and 3 for each bus
 # New: CAN initialization in terminal: "for i in 0 1 2 3; do sudo ip link set dev can$i up type can bitrate 1000000 && sudo ip link set can$i txqueuelen 1000; done"
 
-# Tarok dimensions if needed
-Tarok = Tarok_Dymensions_Class
-
 ### SCRIPT START ###
 ## PRECOMPUTATIONS ##
 print("Performing pre-computations...")
