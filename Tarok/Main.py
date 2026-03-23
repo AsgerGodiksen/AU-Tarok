@@ -10,9 +10,6 @@ from Robot import*
 # or:
 # for i in 0 1 2 3; do sudo ip link set dev can$i up type can bitrate 1000000 && sudo ip link set can$i txqueuelen 1000; done
 
-# Tarok dimensions if needed
-Tarok = Tarok_Dymensions_Class
-
 ### SCRIPT START ###
 print("Starting the Robot")
 print("Initializing CAN buses...")
@@ -55,24 +52,17 @@ try:
 
 
 
-            '''
+            
             Position_Control(bus0, ID_1, 0, 90)
 
             sleep(2)
 
-            Position_Control(bus0, ID_1, 180, 45)
+            Position_Control(bus0, ID_1, -180, 90)
 
             sleep(4)
 
-            Position_Control(bus0, ID_1, 270, 90)
 
-            sleep(1)
-
-            Position_Control(bus0, ID_1, 0, 90)
-
-            sleep(6)
-
-
+            '''
             # Weak torque control to make movement of legs easy
             Torque_Control(bus0, ID_1, 0.15)
             Torque_Control(bus0, ID_2, 0.02)

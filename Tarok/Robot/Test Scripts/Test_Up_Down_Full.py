@@ -93,6 +93,12 @@ for i in range(len(t)):
     Theta_dot_HL[:, i] = np.linalg.solve(term_HL, JT_HL @ V_HL_base[i].flatten())
     Theta_dot_HR[:, i] = np.linalg.solve(term_HR, JT_HR @ V_HR_base[i].flatten())
 
+# Convert velocities to absolute value and degree/s
+Theta_dot_FL = np.abs(np.rad2deg(Theta_dot_FL))
+Theta_dot_FR = np.abs(np.rad2deg(Theta_dot_FR))
+Theta_dot_HL = np.abs(np.rad2deg(Theta_dot_HL))
+Theta_dot_HR = np.abs(np.rad2deg(Theta_dot_HR))
+
 print("Pre-computations complete.")
 
 ## INITIALIZATION ##
@@ -141,18 +147,18 @@ time.sleep(6)
 
 # Move to initial position
 print("Moved to zero position, moving to initial trajectory position...")
-Position_Control(bus0,ID_1,Theta_FL[0],30)
-Position_Control(bus0,ID_2,Theta_FL[1],30)
-Position_Control(bus0,ID_3,Theta_FL[2],30)
-Position_Control(bus1,ID_1,Theta_FR[0],30)
-Position_Control(bus1,ID_2,Theta_FR[1],30)
-Position_Control(bus1,ID_3,Theta_FR[2],30)
-Position_Control(bus2,ID_1,Theta_HL[0],30)
-Position_Control(bus2,ID_2,Theta_HL[1],30)
-Position_Control(bus2,ID_3,Theta_HL[2],30)
-Position_Control(bus3,ID_1,Theta_HR[0],30)
-Position_Control(bus3,ID_2,Theta_HR[1],30)
-Position_Control(bus3,ID_3,Theta_HR[2],30)
+Position_Control(bus0,ID_1,Theta_FL[0, 0],30)
+Position_Control(bus0,ID_2,Theta_FL[0, 1],30)
+Position_Control(bus0,ID_3,Theta_FL[0, 2],30)
+Position_Control(bus1,ID_1,Theta_FR[0, 0],30)
+Position_Control(bus1,ID_2,Theta_FR[0, 1],30)
+Position_Control(bus1,ID_3,Theta_FR[0, 2],30)
+Position_Control(bus2,ID_1,Theta_HL[0, 0],30)
+Position_Control(bus2,ID_2,Theta_HL[0, 1],30)
+Position_Control(bus2,ID_3,Theta_HL[0, 2],30)
+Position_Control(bus3,ID_1,Theta_HR[0, 0],30)
+Position_Control(bus3,ID_2,Theta_HR[0, 1],30)
+Position_Control(bus3,ID_3,Theta_HR[0, 2],30)
 
 time.sleep(6)
 
