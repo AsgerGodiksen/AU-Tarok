@@ -35,6 +35,7 @@ P_FR_Base = T0_B(Front_Right_Foot, 'FR')
 P_HL_Base = T0_B(Hind_Left_Foot, 'HL')
 P_HR_Base = T0_B(Hind_Right_Foot, 'HR')
 
+
 # Determine joint angles using inverse kinematics
 Theta_FL = IK(P_FL_Base, 'FL')
 Theta_FR = IK(P_FR_Base, 'FR')
@@ -82,7 +83,7 @@ Position_Control(bus0, ID_3, 0, 20)
 #Position_Control(bus3, ID_2, 0, 20)
 #Position_Control(bus3, ID_3, 0, 20)
 
-time.sleep(4)
+time.sleep(2)
 
 print("Moved to zero position, moving to standing position...")
 
@@ -100,7 +101,7 @@ Position_Control(bus0, ID_3, Theta_FL[2], 20)
 #Position_Control(bus3, ID_2, Theta_HR[1], 20)
 #Position_Control(bus3, ID_3, Theta_HR[2], 20)
 
-time.sleep(6)
+time.sleep(2)
 
 print("Moved to standing position, starting balance control...")
 
@@ -111,8 +112,12 @@ print("IMU ready")
 time.sleep(0.5)
 
 ### Initiating Data Logging
-log_filename = f"TEST_DATA/Stand_Pose_Balance_TEST_IMU_Log_{time.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
-os.makedirs("TEST_DATA", exist_ok=True)
+## Initiating Data Logging — By Making a Unique file
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+log_dir = os.path.join(SCRIPT_DIR, "TEST_DATA")
+os.makedirs(log_dir, exist_ok=True)
+log_filename = os.path.join(log_dir, f"Stand_Pose_Balance_TEST_IMU_Log_{time.strftime('%Y-%m-%d_%H-%M-%S')}.csv")
+
 
 # Writing the header line
 with open(log_filename, 'w', newline='') as csvfile:
@@ -138,28 +143,38 @@ Foot_Positions = [
 # Initiating the Balance_Controller
 Balance_Controller = BalanceControl()
 
+
+i = 1
 try:
     while True:
+        print("Iteration",i )
         # Read IMU
         quat  = Get_Quaternion(bno)
-        euler = Quaternion_To_Euler(quat)
-        euler = IMU_To_Body_Frame(euler)
+        Euler = Quaternion_To_Euler(quat)
         
-        Pitch = euler[0]
-        Roll  = euler[1]
-        Yaw   = euler[2]
+        Pitch = Euler[0]
+        Roll  = Euler[1]
+        Yaw   = Euler[2]
+        #print(f"Measured Pitch is:",Pitch,"And Measured Roll is",Roll)
 
         # Convert to radians for Balance_Control
-        euler_rad = np.radians(euler)
+        euler_rad = np.radians(Euler)
 
         # Call Balance_Control to get corrected foot positions
         Corrected_Foot_Positions = Balance_Controller.update(euler_rad, 0.0, 0.0, Foot_Positions)
 
+        print(f"Pitch_rad: {euler_rad[0]:.5f}  Roll_rad: {euler_rad[1]:.5f}")
         # IK for each leg
         P_FL_Base = T0_B(np.array(Corrected_Foot_Positions[0]).reshape(3,1), 'FL')
         P_FR_Base = T0_B(np.array(Corrected_Foot_Positions[1]).reshape(3,1), 'FR')
         P_HL_Base = T0_B(np.array(Corrected_Foot_Positions[2]).reshape(3,1), 'HL')
         P_HR_Base = T0_B(np.array(Corrected_Foot_Positions[3]).reshape(3,1), 'HR')
+
+        #print("\n")
+        #print("P_FL_Base",P_FL_Base[0],P_FL_Base[1],P_FL_Base[2])
+        #print("P_FR_Base",P_FR_Base[0],P_FR_Base[1],P_FR_Base[2])
+        #print("P_HL_Base",P_HL_Base[0],P_HL_Base[1],P_HL_Base[2])
+        #print("P_HR_Base",P_HR_Base[0],P_HR_Base[1],P_HR_Base[2])
 
         Theta_FL_new = np.degrees(IK(P_FL_Base, 'FL'))
         Theta_FR_new = np.degrees(IK(P_FR_Base, 'FR'))
@@ -190,7 +205,9 @@ try:
         Foot_Positions = Corrected_Foot_Positions
 
         # 20 Hz
-        time.sleep(1/20)
+        time.sleep(0.1)
+        i = i +1
+
         
         
 except KeyboardInterrupt:

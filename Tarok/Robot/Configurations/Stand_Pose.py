@@ -17,7 +17,7 @@ from Robot.Kinematics import Inverse_Kinematics as IK
 from Robot.Kinematics import T0_B
 from Robot.Hardware import Position_Control
 from Robot.Hardware import Motor_Stop
-from Robot.Hardware import IMU_Initialization, Get_Quaternion, Quaternion_To_Euler
+from Robot.Hardware import IMU_Initialization, Get_Quaternion, Quaternion_To_Euler, IMU_To_Body_Frame
 from Robot.Hardware import SMBus2I2C
 
 
@@ -113,10 +113,12 @@ print("IMU ready")
 time.sleep(0.5)
 
 
+## Initiating Data Logging — By Making a Unique file
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+log_dir = os.path.join(SCRIPT_DIR, "TEST_DATA")
+os.makedirs(log_dir, exist_ok=True)
+log_filename = os.path.join(log_dir, f"Stand_Pose_TEST_IMU_Log_{time.strftime('%Y-%m-%d_%H-%M-%S')}.csv")
 
-### Initiating Data Logging   By Making a Unique file
-log_filename = f"TEST_DATA/Stand_Pose_TEST_IMU_Log_{time.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
-os.makedirs("TEST_DATA", exist_ok=True)
 
 # Writing the first line in the Data Logging file
 with open(log_filename, 'w', newline='') as csvfile:
@@ -128,19 +130,20 @@ data = np.zeros((1500000,4))  # Adjust size as needed (current run for max of 83
 data_count = 0
 start_time = time.monotonic()
 
+print("Loop running")
 
 try:
     while True:
             # Extrating the data and saving the data     
             quat  = Get_Quaternion(bno)
-            euler = Quaternion_To_Euler(quat)
+            Pitch, Roll, Yaw = Quaternion_To_Euler(quat)
             
             current_time = time.monotonic()
             timestamp = current_time - start_time
             
-            Pitch = euler[0]
-            Roll  = euler[1]
-            Yaw   = euler[2]
+            #Pitch = euler[0]
+            #Roll  = euler[1]
+            #Yaw   = euler[2]
             
             data[data_count, :] = [timestamp,Pitch,Roll,Yaw]
             data_count += 1

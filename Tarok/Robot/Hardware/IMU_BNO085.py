@@ -93,9 +93,13 @@ def Quaternion_To_Euler(quaternion: NDArray) -> NDArray:
 
     Pitch, Roll, Yaw = np.degrees(np.array([Pitch, Roll, Yaw]))
     
-    return Pitch, Roll, Yaw
+    # Rotating according to how we implement the physical Robot
+    Pitch_Body = -Roll + 90
+    Roll_Body = Pitch
 
-def IMU_To_Body_Frame(Pitch, Roll, Yaw): 
+    return Pitch_Body, Roll_Body, Yaw
+
+def IMU_To_Body_Frame(Euler): 
     """
     Rotate the IMU frame from Physical orientation into Body frame
 
@@ -108,13 +112,15 @@ def IMU_To_Body_Frame(Pitch, Roll, Yaw):
         Rotated euler angles into the Body Frame
         Yaw are not rotated, since we dont use it
     """
-       
+    Pitch = Euler[0] 
+    Roll  = Euler[1]   
+
     # Rotating according to how we implement the physical Robot
     Pitch = -Roll + 90
     Roll = Pitch
     
     # We forget about Yaw, since we dont have on using it for now
-    return Pitch, Roll,Yaw
+    return Pitch, Roll
     
     
     

@@ -82,6 +82,15 @@ def Inverse_Pitch(Theta_Pitch=None, Current_Foot_Positions=None):
         New_Foot_Positions[i][0] = x_new_signed + Current_Foot_Positions[i][0]
         New_Foot_Positions[i][1] = Current_Foot_Positions[i][1]
         New_Foot_Positions[i][2] = -z_new
+
+
+    #print("\n")
+    #print("After Inverse Pitch")
+    #print("New_Foot_Positions ",New_Foot_Positions[0][0],New_Foot_Positions[0][1],New_Foot_Positions[0][2])
+    #print("New_Foot_Positions ",New_Foot_Positions[1][0],New_Foot_Positions[1][1],New_Foot_Positions[1][2])
+    #print("New_Foot_Positions",New_Foot_Positions[2][0],New_Foot_Positions[2][1],New_Foot_Positions[2][2])
+    #print("New_Foot_Positions",New_Foot_Positions[3][0],New_Foot_Positions[3][1],New_Foot_Positions[3][2])
+
         
     return New_Foot_Positions, Shoulder_Heights
 
@@ -111,13 +120,13 @@ def Inverse_Roll(Phi_Roll=None,Current_Foot_Positions=None,Shoulder_Heights=None
     for i in range(4):
         y = abs(Current_Foot_Positions[i][1])
         
-        dz      = W_Body * sin(Phi_Roll)
+        dz      = W_Body * sin(Phi_Roll) / 2
         y_dist  = W_Body * cos(Phi_Roll)
-        dy = y - y_dist 
+        dy = (y - y_dist) / 2 
         
         if i == 0 or i == 2:    # These are for the left legs
             Hip_Height = Shoulder_Heights[i] + dz
-            dy = - dy
+            dy = -dy
 
         else:
             Hip_Height = Shoulder_Heights[i] - dz
@@ -131,15 +140,21 @@ def Inverse_Roll(Phi_Roll=None,Current_Foot_Positions=None,Shoulder_Heights=None
         y_new = Leg_Length * sin(Hip_Angle_2)
         
         if i == 0 or i == 2:
-            y_final = - W_Body + y_new
+            y_final = + W_Body + y_new
         else:
-            y_final = W_Body + y_new
+            y_final = - W_Body - y_new
             
         # Now Makring the new Foot Positions
         New_Foot_Positions[i][0] = Current_Foot_Positions[i][0]
         New_Foot_Positions[i][1] = y_final
         New_Foot_Positions[i][2] = - z_new  
             
+    #print("\n")
+    #print("After Inverse Roll")
+    #print("New_Foot_Positions",New_Foot_Positions[0][0],New_Foot_Positions[0][1],New_Foot_Positions[0][2])
+    #print("New_Foot_Positions",New_Foot_Positions[1][0],New_Foot_Positions[1][1],New_Foot_Positions[1][2])
+    #print("New_Foot_Positions",New_Foot_Positions[2][0],New_Foot_Positions[2][1],New_Foot_Positions[2][2])
+    #print("New_Foot_Positions",New_Foot_Positions[3][0],New_Foot_Positions[3][1],New_Foot_Positions[3][2])
     return New_Foot_Positions
     
     

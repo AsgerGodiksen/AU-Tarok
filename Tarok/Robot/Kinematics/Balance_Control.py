@@ -102,5 +102,16 @@ class BalanceControl:
         # Inverse kinematics
         New_Foot_Positions_From_Pitch, shoulder_heights = Inverse_Pitch(Pitch_Increment, Foot_Positions)
         New_Foot_Positions = Inverse_Roll(Roll_Increment, New_Foot_Positions_From_Pitch, shoulder_heights)
-
+        
+        
+        
+        #print("\n")
+        #print("After Inverse Pitch & Roll")
+        #print("Front Left foot ",New_Foot_Positions[0][0],New_Foot_Positions[0][1],New_Foot_Positions[0][2])
+        #print("Front Right foot",New_Foot_Positions[1][0],New_Foot_Positions[1][1],New_Foot_Positions[1][2])
+        #print("Hind Left foot  ",New_Foot_Positions[2][0],New_Foot_Positions[2][1],New_Foot_Positions[2][2])
+        #print("Hind Right foot ",New_Foot_Positions[3][0],New_Foot_Positions[3][1],New_Foot_Positions[3][2])
         return New_Foot_Positions
+
+if __name__ == "__main__":
+    print("HEllo")
