@@ -7,6 +7,19 @@ import re
 import binascii
 import struct
 
+def Drain_RX(bus):
+    """
+    Discard all messages currently sitting in the RX buffer of a CAN bus.
+    Call this before Read_Angle (or any other read) after fire-and-forget
+    commands (e.g. Torque_Control) to prevent stale replies from corrupting
+    subsequent reads. Uses a near-zero timeout so it returns immediately
+    once the buffer is empty — no blocking.
+    """
+    while True:
+        msg = bus.recv(timeout=0.0001)  # 0.1 ms — returns None if buffer empty
+        if msg is None:
+            break
+
 def Torque_Control(bus,id,Current_Amps):
     """ 
     This method takes the wanted current in Amps and converts it
@@ -38,9 +51,22 @@ def Torque_Control(bus,id,Current_Amps):
                     data=data, 
                     is_extended_id=False)
     bus.send(send_msg)
+    
+    '''
+    # Wait for and discard the matching reply to keep the RX buffer clean.
+    # Must filter by arbitration_id AND command byte — a bare recv(timeout) can
+    # miss the reply if it arrives late, leaving it in the buffer to corrupt later reads.
+    while True:
+        msg = bus.recv(1)
+        if msg is None:
+            break  # No reply within timeout — motor may be off, just continue
+        if msg.arbitration_id == id and msg.data[0] == 0xA1:
+            break  # Got our reply, discard it and move on
+
+    '''
     # Flush reply
     bus.recv(0.1) # Flush reply, dont care about the content, just want to make sure we dont have any stale replies in the buffer for later commands
-
+    
 def Position_Control(bus,id,New_Position,Max_Rotation_Speed):
     """
     This method takes the bus, ID, wanted position and speed as input and sends the corresponding command to the motor.
@@ -48,14 +74,14 @@ def Position_Control(bus,id,New_Position,Max_Rotation_Speed):
     - bus: The CAN bus object to send the message on.
     - id: The ID of the motor to send the command to.
     - New_Position: Desired position in degrees, where 360 degrees corresponds to 360000 in the motor's encoder units. Can be positive or negative.
-    - Max_Rotation_Speed: Desired maximum rotation speed in degrees per second.
+    - Max_Rotation_Speed: Desired maximum rotation speed of the output in degrees per second.
     Output: None. The function sends a CAN message to the specified motor to control its position and speed.
     """
 
     data = [0xA4,0x00,0x00,0x00,0x00,0x00,0x00,0x00]
 
     # The speed is converted as 1dps/LSB to uint16_t 
-    speed_raw = int(Max_Rotation_Speed)  # Convert to the motor's expected format
+    speed_raw = int(Max_Rotation_Speed*9)  # Convert to the motor's expected format - *9 for gearing
     speed_bytes = struct.pack('<h', speed_raw)  # Convert to little-endian signed short
     data[2] = speed_bytes[0]  # Low byte
     data[3] = speed_bytes[1]  # High byte
@@ -125,7 +151,7 @@ def Motor_Stop(bus,id):
                     is_extended_id=False)
     
     bus.send(send_msg)
-
+    
     # stricter pattern for flush compared to other motor control commands - we want to be on the safe side with motor stop
     while True:
         msg = bus.recv(0.5)
@@ -133,6 +159,7 @@ def Motor_Stop(bus,id):
             raise RuntimeError(f"Motor {id} did not confirm stop command.")
         if msg.arbitration_id == id and msg.data[0] == 0x81:
             break
+    
 
 def Map_Value(value, from_low, from_high, to_low, to_high):
     # Scale the value from the input range to the output range

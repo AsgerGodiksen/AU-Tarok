@@ -175,6 +175,15 @@ def Read_Angle(bus,id):
                         data=data, 
                         is_extended_id=False)
     
+    '''
+    # Drain any stale replies (e.g. from fire-and-forget Torque_Control commands)
+    # before sending our request, so we don't accidentally read the wrong message.
+    while True:
+        stale = bus.recv(timeout=0.0001)
+        if stale is None:
+            break
+    '''
+
     bus.send(send_msg)
     sleep(0.0001)
 

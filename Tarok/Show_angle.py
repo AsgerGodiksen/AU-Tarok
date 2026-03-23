@@ -40,7 +40,7 @@ count = 0
 
 print("Initialization complete, starting pre-loop sequence")
 
-# Insert optional pre-loop sequence here
+# Insert optional pre-oop sequence here
 
 print("Pre-loop sequence complete, starting loop")
 print("Loop started - Press ctrl+c in terminal for shutdown")
@@ -50,31 +50,9 @@ try:
             # Loop count
             count = count + 1
 
-
-
-
-
-
-            '''
-            Position_Control(bus0, ID_1, 0, 90)
-
-            sleep(2)
-
-            Position_Control(bus0, ID_1, 180, 45)
-
-            sleep(4)
-
-            Position_Control(bus0, ID_1, 270, 90)
-
-            sleep(1)
-
-            Position_Control(bus0, ID_1, 0, 90)
-
-            sleep(6)
-
-
+            
             # Weak torque control to make movement of legs easy
-            Torque_Control(bus0, ID_1, 0.15)
+            Torque_Control(bus0, ID_1, 0.02)
             Torque_Control(bus0, ID_2, 0.02)
             Torque_Control(bus0, ID_3, 0.02)
             Torque_Control(bus1, ID_1, 0.02)
@@ -82,13 +60,13 @@ try:
             Torque_Control(bus1, ID_3, 0.02)
             Torque_Control(bus2, ID_1, 0.02)
             Torque_Control(bus2, ID_2, 0.02)
-            Torque_Control(bus2, ID_3, 0.15)
+            Torque_Control(bus2, ID_3, 0.02)
             Torque_Control(bus3, ID_1, 0.02)
             Torque_Control(bus3, ID_2, 0.02)
             Torque_Control(bus3, ID_3, 0.02)
             sleep(0.5)
             
-            
+
             # Read current positions for all 4 legs
             FL_theta1 = Read_Angle(bus0,ID_1)
             FL_theta2 = Read_Angle(bus0,ID_2)
@@ -115,7 +93,6 @@ try:
 
             #Sleep
             sleep(3)
-            '''
 
 
 # Stop loop with Ctrl+C in terminal
