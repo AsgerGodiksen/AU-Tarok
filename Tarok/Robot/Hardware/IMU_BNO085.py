@@ -66,8 +66,10 @@ def Get_Quaternion(bno) -> NDArray:
 
 def Quaternion_To_Euler(quaternion: NDArray) -> NDArray:
     """
-    Quaternion_To_Euler takes the IMU data. Convert into Euler repesented in Body Frame
-
+    Quaternion_To_Euler takes the IMU data. 
+    
+    Convert quaterions into Euler
+    
     Args:
         Quaternion (NDArray): A Measured Quaternion from the IMU Sensor
 
@@ -90,14 +92,33 @@ def Quaternion_To_Euler(quaternion: NDArray) -> NDArray:
     Yaw = np.arctan2(2*(w*k + i*j), 1 - 2*(j**2 + k**2))
 
     Pitch, Roll, Yaw = np.degrees(np.array([Pitch, Roll, Yaw]))
+    
+    return Pitch, Roll, Yaw
 
+def IMU_To_Body_Frame(Pitch, Roll, Yaw): 
+    """
+    Rotate the IMU frame from Physical orientation into Body frame
+
+    Args:
+        Pitch (_type_): The Pitch in IMU Frame
+        Roll (_type_): The Roll in IMU Frame
+        Yaw (_type_): Yaw In IMU frmae
+        
+    Returns:
+        Rotated euler angles into the Body Frame
+        Yaw are not rotated, since we dont use it
+    """
+       
     # Rotating according to how we implement the physical Robot
-    Pitch_Body = -Roll + 90
-    Roll_Body = Pitch
+    Pitch = -Roll + 90
+    Roll = Pitch
+    
     # We forget about Yaw, since we dont have on using it for now
-
-    # Convert to degrees
-    return Pitch_Body, Roll_Body, Yaw
+    return Pitch, Roll,Yaw
+    
+    
+    
+    
 
 if __name__ == "__main__":
     bno, i2c = IMU_Initialization()

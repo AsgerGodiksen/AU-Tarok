@@ -10,7 +10,7 @@ import csv
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 ### Importing the nessesary functions from the Project Directory 
-from Robot.Tarok_Dymensions import Tarok_Dymensions_Class
+from Robot.Tarok_Dymensions import TarokDymensions
 from Robot.Kinematics import Inverse_Kinematics as IK
 
 ### Some of the imported Transformations are from "Constant_Transforms.py" and "Forward_Kinematics"
@@ -22,7 +22,7 @@ from Robot.Hardware import SMBus2I2C
 
 
 ## Importing the Tarok Dimension Class
-Tarok_Class = Tarok_Dymensions_Class()
+Tarok_Class = TarokDymensions()
 
 # Importing the Inital Foot Position
 Front_Left_Foot, Front_Right_Foot, Hind_Left_Foot, Hond_Right_Foot = Tarok_Class.Initial_Foot_Positions()

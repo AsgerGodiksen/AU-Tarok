@@ -2,7 +2,20 @@
 
 import numpy as np
 
-class Tarok_Dymensions_Class:
+class TarokDymensions:
+    """ Tarok Dynemsions
+    
+    Methods
+    -------
+    __init__():
+        Gives Dymensions over the Physical Robot
+
+    Shoulder_Positions():
+        Gives Positions of the Shoulders in the Body frame
+        
+    Initial_Foot_Positions():
+        Gives the inital Foot Positions that are just below the actuators
+    """
     def __init__(self):
         """ Lengths of the different parts of the robot in meters"""
         self.Torso_Lenght = 0.479   # m - Torso Lenght
