@@ -93,7 +93,11 @@ for i in range(len(t)):
     Theta_dot_HL[:, i] = np.linalg.solve(term_HL, JT_HL @ V_HL_base[i].flatten())
     Theta_dot_HR[:, i] = np.linalg.solve(term_HR, JT_HR @ V_HR_base[i].flatten())
 
-# Convert velocities to absolute value and degree/s
+# Convert joint angles and velocities to degrees and abs(degrees/s) for right units for motor control
+Theta_FL = np.rad2deg(Theta_FL)
+Theta_FR = np.rad2deg(Theta_FR)
+Theta_HL = np.rad2deg(Theta_HL)
+Theta_HR = np.rad2deg(Theta_HR)
 Theta_dot_FL = np.abs(np.rad2deg(Theta_dot_FL))
 Theta_dot_FR = np.abs(np.rad2deg(Theta_dot_FR))
 Theta_dot_HL = np.abs(np.rad2deg(Theta_dot_HL))
