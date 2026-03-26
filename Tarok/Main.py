@@ -1,16 +1,33 @@
-# This will be the main file when oberating with TAROK
+# This is the main fil for testing functionality when working with Tarok
+
+# Imports
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..'))) # Change level of path based on file location (the ../../)
 import can
-from time import sleep,time
-#import numpy as np
+import time
+import numpy as np
 from Robot import*
 
-# CAN initialization in terminal: sudo ip link set dev canX up type can bitrate 1000000
-# with "X" being 0, 1, 2 and 3 for each bus
-
-# or:
-# for i in 0 1 2 3; do sudo ip link set dev can$i up type can bitrate 1000000 && sudo ip link set can$i txqueuelen 1000; done
+# Old: CAN initialization in terminal: "sudo ip link set dev canX up type can bitrate 1000000" - with "X" being 0, 1, 2 and 3 for each bus
+# New: CAN initialization in terminal: "for i in 0 1 2 3; do sudo ip link set dev can$i up type can bitrate 1000000 && sudo ip link set can$i txqueuelen 1000; done"
 
 ### SCRIPT START ###
+## PRECOMPUTATIONS ##
+print("Performing pre-computations...")
+
+# Define time series
+dt = 0.005 # seconds (200 Hz) - adjust as needed for your application - not directly the control frequency, but the discretization used for precomputations
+total_time = 10  # Total time in seconds of a cycle of the trajectory, adjust as needed for your application
+num_time_steps = int(total_time / dt) + 1
+t = np.linspace(0, total_time, num_time_steps)
+
+# Insert optional pre-computations here, such as trajectory generation, inverse kinematics calculations, etc.
+
+print("Pre-computations complete.")
+
+## INITIALIZATION ##
+
 print("Starting the Robot")
 print("Initializing CAN buses...")
 
@@ -33,23 +50,39 @@ for bus in [bus0, bus1, bus2, bus3]:
         if msg:
             print(msg)
 
+# Loop count
 count = 0
 
-print("Initialization complete, starting pre-loop sequence")
+print("Initialization complete, starting pre-loop sequence...")
+
+## PRE-LOOP SEQUENCE ##
 
 # Insert optional pre-loop sequence here
 
-print("Pre-loop sequence complete, starting loop")
+print("Pre-loop sequence complete, starting loop...")
+
+## MAIN LOOP ##
 print("Loop started - Press ctrl+c in terminal for shutdown")
+
+# Note start time
+start_time = cycle_start = current_time = time.monotonic()
 
 try:
     while True:
-            # Loop count
+            # Loop count (if needed)
             count = count + 1
 
+            # Loop time managment (if needed)
+            current_time = time.monotonic()
+            elapsed_cycle = current_time - cycle_start # Elapsed time in current cycle
+            elapsed_total = current_time - start_time  # Elapsed time since start of program
+            # Check if current cycle is over -> start new cycle
+            if elapsed_cycle >= total_time:
+                cycle_start += total_time # Force next cycle start time to be exactly total trajectory time after previous cycle start time to avoid drift
+                continue
 
-
-
+            # Find closest value in t to elapsed in current cycle
+            index = min(int(elapsed_cycle / dt), len(t) - 1)
 
 
             
