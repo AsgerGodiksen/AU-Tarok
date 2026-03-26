@@ -1,6 +1,6 @@
 # This will be the main file when oberating with TAROK
 import can
-from time import sleep,time
+import time
 #import numpy as np
 from Robot import*
 
@@ -46,11 +46,11 @@ try:
     while True:
             # Loop count
             count = count + 1
+        
+            '''
+            Battery_Voltage(bus0,ID_1)
 
-
-
-
-
+            time.sleep(20)
 
             
             Position_Control(bus0, ID_1, 0, 90)
@@ -60,7 +60,7 @@ try:
             Position_Control(bus0, ID_1, -180, 90)
 
             sleep(4)
-
+            '''
 
             '''
             # Weak torque control to make movement of legs easy
