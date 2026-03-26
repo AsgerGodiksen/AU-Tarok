@@ -7,6 +7,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 import can
 import time
 import numpy as np
+#import numpy as np
 from Robot import*
 
 # Old: CAN initialization in terminal: "sudo ip link set dev canX up type can bitrate 1000000" - with "X" being 0, 1, 2 and 3 for each bus
@@ -71,6 +72,9 @@ try:
     while True:
             # Loop count (if needed)
             count = count + 1
+        
+            '''
+            Battery_Voltage(bus0,ID_1)
 
             # Loop time managment (if needed)
             current_time = time.monotonic()
@@ -84,6 +88,7 @@ try:
             # Find closest value in t to elapsed in current cycle
             index = min(int(elapsed_cycle / dt), len(t) - 1)
 
+            time.sleep(20)
 
             
             Position_Control(bus0, ID_1, 0, 90)
@@ -93,7 +98,7 @@ try:
             Position_Control(bus0, ID_1, -180, 90)
 
             sleep(4)
-
+            '''
 
             '''
             # Weak torque control to make movement of legs easy
