@@ -38,6 +38,8 @@ class BalanceControl:
         self.ROLL_P=2.0  
         self.ROLL_D=0.0
         
+        self.DEADBAND = 0.02  # rad — errors smaller than this are ignored
+        
         
         # Filter instances
         self.Pitch_Filter = KalmanFilter(Kalman_Gain=self.Kalman_Gain)
@@ -81,6 +83,12 @@ class BalanceControl:
         Pitch_Error = Pitch_Desired - Pitch_Measured
         Roll_Error  = Roll_Desired  - Roll_Measured
         
+        # Apply deadband
+        #if abs(Pitch_Error) < self.DEADBAND:
+        #    Pitch_Error = 0.0
+        #if abs(Roll_Error) < self.DEADBAND:
+        #    Roll_Error = 0.0
+
         # Implementing the Contributions from both the p and d terms
         Pitch_p = Pitch_Error * self.PITCH_P
         Roll_p  = Roll_Error  * self.ROLL_P

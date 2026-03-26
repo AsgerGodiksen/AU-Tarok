@@ -3,6 +3,9 @@
 import numpy as np
 
 class TarokDymensions:
+    L1 = 0.078  
+    L2 = 0.2
+    L3 = 0.3
     """ Tarok Dynemsions
     
     Methods

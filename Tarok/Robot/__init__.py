@@ -1,7 +1,5 @@
 # Robot Folder
-try:
-    from .Hardware import *
-except (ModuleNotFoundError, ImportError):
-    pass # Hardware module not avialable on windows
+from .Hardware import *
 from .Kinematics import *
 from .Tarok_Dymensions import TarokDymensions
+
