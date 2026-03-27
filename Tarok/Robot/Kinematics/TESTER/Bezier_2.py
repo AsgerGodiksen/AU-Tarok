@@ -152,7 +152,7 @@ def Assemble_Full_Cycle(swing_traj, swing_vel, stand_z, stand_x,
     N_sw = swing_traj.shape[0]
     N_st = stand_z.shape[0]
     N    = N_sw + N_st
-
+    
     x = np.concatenate((swing_traj[:, 1], stand_x   ))   # height  → x in leg frame
     z = np.concatenate((swing_traj[:, 0], stand_z   ))   # forward → z in leg frame
     y = np.full(N, y_offset)

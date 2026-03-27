@@ -315,6 +315,8 @@ def Read_PID(bus,id):
     print(f"Speed Loop Kp:    {Speed_Loop_Kp:5.0f}, and Ki: {Speed_Loop_Ki:5.0f}")
     print(f"Torque Loop Kp:   {Torque_Loop_Kp:5.0f}, and Ki: {Torque_Loop_Ki:5.0f}")
     print(" ")
+    
+    return Position_Loop_Kp, Position_Loop_Ki, Speed_Loop_Kp,Speed_Loop_Ki,Torque_Loop_Kp,Torque_Loop_Ki
 
 def Map_Value(value, from_low, from_high, to_low, to_high):
     # Scale the value from the input range to the output range

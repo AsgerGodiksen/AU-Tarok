@@ -7,6 +7,17 @@ import re
 import binascii
 import struct
 
+# Default values
+PID_DEFAULTS = {
+    'angle_kp':  100,
+    'angle_ki':  100,
+    'speed_kp':  50,
+    'speed_ki':  40,
+    'torque_kp': 50,
+    'torque_ki': 50,
+}
+
+
 def Drain_RX(bus):
     """
     Discard all messages currently sitting in the RX buffer of a CAN bus.
@@ -165,33 +176,94 @@ def Map_Value(value, from_low, from_high, to_low, to_high):
     # Scale the value from the input range to the output range
     return (value - from_low) * (to_high - to_low) / (from_high - from_low) + to_low
 
-def PID_RAM_Control(bus, id,
-                    Position_Kp=None, Position_Ki=None,
-                    Speed_Kp=None, Speed_Ki=None,
-                    Torque_Kp=None, Torque_Ki=None):
-    """
-    # default table
-    defaults = {
-        'Position_Kp': 10,
-        'Position_Ki': 0,
-        'Speed_Kp': 20,
-        'Speed_Ki': 0,
-        'Torque_Kp': 30,
-        'Torque_Ki': 0,
-    }
-    # This method is used to control the PID values of the motor. 
-    # It takes the bus, ID and the wanted PID values as input.
-    data = [0x31,0x00,0x00,0x00,0x00,0x00,0x00,0x00]
 
-    data[2] = Position_Kp
-    data[3] = Position_Ki
-    data[4] = Speed_Kp
-    data[5] = Speed_Ki
-    data[6] = Torque_Kp
-    data[7] = Torque_Ki
-
-    send_msg = can.Message(arbitration_id=id, data=data, is_extended_id=False)
-    bus.send(send_msg)
+def PID_RAM_Control(bus, id, pid_params={}):
     """
+    Writes PID parameters to RAM (DONT persists after power off).
+    Uses command 0x31. Avoid calling while motor is in motion.
+    Any parameter not provided will fall back to PID_DEFAULTS.
+
+    :param bus:        CAN bus instance
+    :param id:         Motor arbitration ID (e.g. 0x141)
+    :param pid_params: Dict with any of these keys:
+                         'angle_kp'  - Position loop Kp  (DATA[2])
+                         'angle_ki'  - Position loop Ki  (DATA[3])
+                         'speed_kp'  - Speed loop Kp     (DATA[4])
+                         'speed_ki'  - Speed loop Ki     (DATA[5])
+                         'torque    _kp' - Torque loop Kp    (DATA[6])
+                         'torque_ki' - Torque loop Ki    (DATA[7])
+                       All values are uint8_t (0-255).
+                       
+    #### EKSAMPEL #####
+        PID_RAM_Control(bus0, 0x141,{
+                                    'speed_kp': 80,
+                                    'angle_kp': 120,
+                                    })                   
+                       
+    """
+    params = {**PID_DEFAULTS, **pid_params}  # Merge: pid_params overrides defaults
+
+    data = [
+        0x31,
+        0x00,
+        params['angle_kp'],
+        params['angle_ki'],
+        params['speed_kp'],
+        params['speed_ki'],
+        params['torque_kp'],
+        params['torque_ki'],
+    ]
+
+    msg = can.Message(
+        arbitration_id=id,
+        data=data,
+        is_extended_id=False
+    )
+    bus.send(msg)
+
+
+def PID_ROM_Control(bus, id, pid_params={}):
+    """
+    Writes PID parameters to ROM (persists after power off).
+    Uses command 0x32. Avoid calling while motor is in motion.
+    Any parameter not provided will fall back to PID_DEFAULTS.
+
+    :param bus:        CAN bus instance
+    :param id:         Motor arbitration ID (e.g. 0x141)
+    :param pid_params: Dict with any of these keys:
+                         'angle_kp'  - Position loop Kp  (DATA[2])
+                         'angle_ki'  - Position loop Ki  (DATA[3])
+                         'speed_kp'  - Speed loop Kp     (DATA[4])
+                         'speed_ki'  - Speed loop Ki     (DATA[5])
+                         'torque_kp' - Torque loop Kp    (DATA[6])
+                         'torque_ki' - Torque loop Ki    (DATA[7])
+                       All values are uint8_t (0-255).
+                       
+    #### EKSAMPEL #####
+        PID_ROM_Control(bus0, 0x141,{
+                                    'speed_kp': 80,
+                                    'angle_kp': 120,
+                                    })    
+    """
+    params = {**PID_DEFAULTS, **pid_params}  # Merge: pid_params overrides defaults
+
+    data = [
+        0x32,
+        0x00,
+        params['angle_kp'],
+        params['angle_ki'],
+        params['speed_kp'],
+        params['speed_ki'],
+        params['torque_kp'],
+        params['torque_ki'],
+    ]
+
+    msg = can.Message(
+        arbitration_id=id,
+        data=data,
+        is_extended_id=False
+    )
+    bus.send(msg)
+    
 
 

@@ -3,10 +3,8 @@
 import numpy as np
 
 class TarokDymensions:
-    L1 = 0.078  
-    L2 = 0.2
-    L3 = 0.3
-    """ Tarok Dynemsions
+    """ 
+    Tarok Dynemsions
     
     Methods
     -------
@@ -19,6 +17,17 @@ class TarokDymensions:
     Initial_Foot_Positions():
         Gives the inital Foot Positions that are just below the actuators
     """
+    
+    L1 = 0.078  
+    L2 = 0.2
+    L3 = 0.3
+    
+    # Leg Names
+    LEGS = ['FL', 'FR', 'HL', 'HR']
+    
+    # Colors for plots and animations for the legs
+    COLORS = {'FL': 'blue', 'FR': 'red', 'HL': 'green', 'HR': 'orange'}
+
     def __init__(self):
         """ Lengths of the different parts of the robot in meters"""
         self.Torso_Lenght = 0.479   # m - Torso Lenght
@@ -62,13 +71,14 @@ class TarokDymensions:
         self.Tarok_Weight = self.Torso + 4 * self.Leg # kg
         
     def Shoulder_Positions(self):
-        """ Gives the Shoulder Positions for the Torso
+        """ 
+        Gives the Shoulder Positions for the Torso
         """
-        Front_Left  = [self.Torso_Lenght/2   , -self.Torso_Width/2 , 0]
-        Front_Right = [self.Torso_Lenght/2   , self.Torso_Width/2  , 0] 
-        Hind_Left   = [-self.Torso_Lenght/2  , -self.Torso_Width/2 , 0] 
-        Hind_Right  = [-self.Torso_Lenght/2  , self.Torso_Width/2  , 0]
-        Shoulder_Positions = [Front_Left, Front_Right, Hind_Left, Hind_Right]
+        Front_Left_Shoulder  = [self.Torso_Lenght/2   , -self.Torso_Width/2 , 0]
+        Front_Right_Shoulder = [self.Torso_Lenght/2   , self.Torso_Width/2  , 0] 
+        Hind_Left_Shoulder   = [-self.Torso_Lenght/2  , -self.Torso_Width/2 , 0] 
+        Hind_Right_Shoulder  = [-self.Torso_Lenght/2  , self.Torso_Width/2  , 0]
+        Shoulder_Positions = [Front_Left_Shoulder, Front_Right_Shoulder, Hind_Left_Shoulder, Hind_Right_Shoulder]
         return Shoulder_Positions
         
     def Initial_Foot_Positions(self):
