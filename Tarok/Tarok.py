@@ -469,9 +469,6 @@ try:
 except KeyboardInterrupt:
     print("KeyboardInterrupt received, shutting down...")
 
-    # Stopping main loop listener
-    main_listener.stop()
-
     # Stop motors
     print("Stopping motors...")
     Motor_Stop(bus0,ID_1)
@@ -495,4 +492,15 @@ except KeyboardInterrupt:
     bus2.shutdown()
     bus3.shutdown()
     print("CAN buses shut down")
+
+    # Stopping listeners if they were started and are still running
+    try:
+        pre_listener.stop()
+    except:
+        pass
+    try:        
+        main_listener.stop()
+    except:
+        pass
+
     print("Shutdown complete.")
