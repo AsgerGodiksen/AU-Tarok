@@ -7,7 +7,6 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 import can
 import time
 import numpy as np
-#import numpy as np
 from Robot import*
 
 # Old: CAN initialization in terminal: "sudo ip link set dev canX up type can bitrate 1000000" - with "X" being 0, 1, 2 and 3 for each bus
@@ -72,9 +71,6 @@ try:
     while True:
             # Loop count (if needed)
             count = count + 1
-        
-            '''
-            Battery_Voltage(bus0,ID_1)
 
             # Loop time managment (if needed)
             current_time = time.monotonic()
@@ -88,6 +84,9 @@ try:
             # Find closest value in t to elapsed in current cycle
             index = min(int(elapsed_cycle / dt), len(t) - 1)
 
+            '''
+            Battery_Voltage(bus0,ID_1)
+
             time.sleep(20)
 
             
@@ -98,9 +97,9 @@ try:
             Position_Control(bus0, ID_1, -180, 90)
 
             sleep(4)
-            '''
+            
 
-            '''
+            
             # Weak torque control to make movement of legs easy
             Torque_Control(bus0, ID_1, 0.15)
             Torque_Control(bus0, ID_2, 0.02)
@@ -150,6 +149,7 @@ try:
 except KeyboardInterrupt:
     print("KeyboardInterrupt received, shutting down...")
 
+    # Stop motors
     print("Stopping motors...")
     Motor_Stop(bus0,ID_1)
     Motor_Stop(bus0,ID_2)
@@ -165,11 +165,11 @@ except KeyboardInterrupt:
     Motor_Stop(bus3,ID_3)
     print("Motors stopped")
 
+    # Shutdown CAN buses
     print("Shutting down CAN buses...")
     bus0.shutdown()
     bus1.shutdown()
     bus2.shutdown()
     bus3.shutdown()
     print("CAN buses shut down")
-
     print("Shutdown complete.")
