@@ -35,6 +35,9 @@ def Inverse_Kinematics(P_org, Leg):
     upper_second_eq = 0.2 + 0.3
     distance_second_eq = np.sqrt(x**2 + y**2 + z**2 - 0.078**2)
     if distance_first_eq < lower_first_eq or distance_second_eq < lower_second_eq or distance_second_eq > upper_second_eq:
+        print(distance_first_eq, lower_first_eq)
+        print(distance_second_eq, lower_second_eq)
+        print(distance_second_eq, upper_second_eq)
         raise ValueError("The desired position is outside the reachable workspace of the specified leg.")
 
     # Check cartesian space limits (Only checking end-effector for obstruction with bounding box of body (including addition of physical foot size))

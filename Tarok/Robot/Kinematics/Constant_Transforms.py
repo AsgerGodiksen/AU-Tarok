@@ -111,6 +111,16 @@ def RB_0(V_0, Leg):
 
 # Function to rotate velocities from body frame to leg base frames
 def R0_B(V_B, Leg):
+    """
+    Function to Rotate Velociteis from Body Frame to Leg Base Frames
+
+    Args:
+        V_B (_type_): Velocity Vector in the Body Frame
+        Leg (_type_): Which Leg to Rotate to, 'FL', 'FR', 'HL' or 'HR' to specify considered leg
+
+    Returns:
+        V_0: Velocity Vector in the Base Frame of the specific leg
+    """
     # Input:
         # V_B: Velocity in the body frame of the robot
         # Leg: 'FL', 'FR', 'HL' or 'HR' to specify considered leg

@@ -1,8 +1,6 @@
-from time import sleep, time
+import time
 import can
 import struct
-
-
 
 
 def Read_Voltage(bus,id):
@@ -17,7 +15,7 @@ def Read_Voltage(bus,id):
                         is_extended_id=False)
     
     bus.send(send_msg)
-    sleep(0.0001)
+    time.sleep(0.0001)
 
     # Filter for our own reply - discard any stale  replies from other commands
     while True:
@@ -57,7 +55,7 @@ def Read_Torque_Current(bus, id):
                         data=data, 
                         is_extended_id=False)
     bus.send(send_msg)
-    sleep(0.0001)
+    time.sleep(0.0001)
     
     # Filter for our own reply - discard any stale  replies from other commands
     while True:
@@ -98,7 +96,7 @@ def Read_Encoder_Postion(bus,id):
                         data=data, 
                         is_extended_id=False)
     bus.send(send_msg)
-    sleep(0.0001)
+    time.sleep(0.0001)
 
     # Filter for our own reply - discard any stale  replies from other commands
     while True:
@@ -141,7 +139,7 @@ def Read_Angle(bus,id):
     
     can_data = msg.data  # this is a bytes object (or bytearray)
 
-    # Build 64-bit integer from bytes 1–7 (like in C++)
+    # Build 64-bit integer from bytes 1-7 (like in C++)
     multi_angle_position = (
         (0x00 << 56)
         | (can_data[7] << 48)
@@ -185,7 +183,7 @@ def Read_Angle(bus,id):
     '''
 
     bus.send(send_msg)
-    sleep(0.0001)
+    time.sleep(0.0001)
 
     # Filter for our own reply - discard any stale  replies from other commands
     while True:
@@ -221,7 +219,7 @@ def Read_Motor_Temperature(bus,id):
                         data=data, 
                         is_extended_id=False)
     bus.send(send_msg)
-    sleep(0.0001)
+    time.sleep(0.0001)
 
     # Filter for our own reply - discard any stale  replies from other commands
     while True:
@@ -249,7 +247,7 @@ def Read_Speed(bus,id):
                         data=data, 
                         is_extended_id=False)
     bus.send(send_msg)
-    sleep(0.0001)
+    time.sleep(0.0001)
 
     # Filter for our own reply - discard any stale  replies from other commands
     while True:
@@ -285,7 +283,7 @@ def Read_PID(bus,id):
                         data=data, 
                         is_extended_id=False)
     bus.send(send_msg)
-    sleep(0.0001)
+    time.sleep(0.0001)
     # Filter for our own reply - discard any stale  replies from other commands
     while True:
         msg = bus.recv(1)

@@ -27,6 +27,15 @@ class TarokDymensions:
     
     # Colors for plots and animations for the legs
     COLORS = {'FL': 'blue', 'FR': 'red', 'HL': 'green', 'HR': 'orange'}
+    
+    # Leg Offsets for Walking where Front Left is the inital used. 
+    # Then Hind Right Leg Trajectory can be shifted with 25% and so on.
+    CRAWL_OFFSETS= {
+    'FL': 0.00,
+    'HR': 0.25,
+    'FR': 0.50,
+    'HL': 0.75,}
+    
 
     def __init__(self):
         """ Lengths of the different parts of the robot in meters"""
@@ -74,12 +83,12 @@ class TarokDymensions:
         """ 
         Gives the Shoulder Positions for the Torso
         """
-        Front_Left_Shoulder  = [self.Torso_Lenght/2   , -self.Torso_Width/2 , 0]
-        Front_Right_Shoulder = [self.Torso_Lenght/2   , self.Torso_Width/2  , 0] 
-        Hind_Left_Shoulder   = [-self.Torso_Lenght/2  , -self.Torso_Width/2 , 0] 
-        Hind_Right_Shoulder  = [-self.Torso_Lenght/2  , self.Torso_Width/2  , 0]
-        Shoulder_Positions = [Front_Left_Shoulder, Front_Right_Shoulder, Hind_Left_Shoulder, Hind_Right_Shoulder]
-        return Shoulder_Positions
+        Front_Left_Shoulder     = np.array([[ self.K_L/2], [ self.K_W/2 + self.L1], [0]])
+        Front_Right_Shoulder    = np.array([[ self.K_L/2], [-self.K_W/2 - self.L1], [0]])
+        Hind_Left_Shoulder      = np.array([[-self.K_L/2], [ self.K_W/2 + self.L1], [0]])
+        Hind_Right_Shoulder     = np.array([[-self.K_L/2], [-self.K_W/2 - self.L1], [0]])
+        
+        return [Front_Left_Shoulder, Front_Right_Shoulder, Hind_Left_Shoulder, Hind_Right_Shoulder]
         
     def Initial_Foot_Positions(self):
         """ 
