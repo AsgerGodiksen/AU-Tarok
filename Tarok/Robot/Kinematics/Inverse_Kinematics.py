@@ -52,7 +52,8 @@ def Inverse_Kinematics(P_org, Leg):
     H = np.sqrt(x**2 + y**2 - 0.078**2)
 
     # Compute theta1
-    theta1 = np.arctan2(config*y, x) - np.arctan2(0.078, H)
+    #theta1 = np.arctan2(config*y, x) - np.arctan2(0.078, H)
+    theta1 = config*(np.arctan2(config*y, x) - np.arctan2(0.078, H))
 
     # Determine constants needed
     rsqr = H**2 + z**2
