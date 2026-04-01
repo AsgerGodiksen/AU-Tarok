@@ -60,10 +60,10 @@ print(Bezier_Trajectory.shape)
 Front_Left_Shoulder, Front_Right_Shoulder, Hind_Left_Shoulder, Hind_Right_Shoulder = Tarok.Shoulder_Positions()
 print(Front_Left_Shoulder.shape)
 FL_Bezier_Trajectory = (Bezier_Trajectory + Front_Left_Shoulder) 
-FR_Bezier_Trajectory = Bezier_Trajectory * np.array([[-1], [1], [1]]) + Front_Right_Shoulder
-HL_Bezier_Trajectory = Bezier_Trajectory * np.array([[-1], [1], [1]]) + Hind_Left_Shoulder
-# FR_Bezier_Trajectory = (Bezier_Trajectory + Front_Right_Shoulder)
-# HL_Bezier_Trajectory = (Bezier_Trajectory + Hind_Left_Shoulder)  
+#FR_Bezier_Trajectory = Bezier_Trajectory * np.array([[-1], [1], [1]]) + Front_Right_Shoulder
+#HL_Bezier_Trajectory = Bezier_Trajectory * np.array([[-1], [1], [1]]) + Hind_Left_Shoulder
+FR_Bezier_Trajectory = (Bezier_Trajectory + Front_Right_Shoulder)
+HL_Bezier_Trajectory = (Bezier_Trajectory + Hind_Left_Shoulder)  
 HR_Bezier_Trajectory = (Bezier_Trajectory + Hind_Right_Shoulder) 
 
 
