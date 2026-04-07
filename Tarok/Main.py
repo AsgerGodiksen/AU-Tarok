@@ -84,12 +84,14 @@ try:
             # Find closest value in t to elapsed in current cycle
             index = min(int(elapsed_cycle / dt), len(t) - 1)
 
-            '''
+            
             Battery_Voltage(bus0,ID_1)
+
+            Read_Motor_Temperature(bus0,ID_1)
 
             time.sleep(20)
 
-            
+            '''
             Position_Control(bus0, ID_1, 0, 90)
 
             sleep(2)

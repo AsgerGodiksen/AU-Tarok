@@ -84,10 +84,10 @@ try:
 
             # Print the current positions of all 4 legs
             print("  ")
-            print(f"Joint positions for Front Left:   theta1 = {FL_theta1:.2f},  theta2 = {FL_theta2:.2f},  theta3 = {FL_theta3:.2f}")
-            print(f"Joint positions for Front Right:  theta1 = {FR_theta1:.2f},  theta2 = {FR_theta2:.2f},  theta3 = {FR_theta3:.2f}")
-            print(f"Joint positions for Hind Left:    theta1 = {HL_theta1:.2f},  theta2 = {HL_theta2:.2f},  theta3 = {HL_theta3:.2f}")
-            print(f"Joint positions for Hind Right:   theta1 = {HR_theta1:.2f},  theta2 = {HR_theta2:.2f},  theta3 = {HR_theta3:.2f}")
+            print(f"Joint positions for Front Left:   theta1 = {FL_theta1:1f},  theta2 = {FL_theta2:1f},  theta3 = {FL_theta3:1f}")
+            print(f"Joint positions for Front Right:  theta1 = {FR_theta1:1f},  theta2 = {FR_theta2:1f},  theta3 = {FR_theta3:1f}")
+            print(f"Joint positions for Hind Left:    theta1 = {HL_theta1:1f},  theta2 = {HL_theta2:1f},  theta3 = {HL_theta3:1f}")
+            print(f"Joint positions for Hind Right:   theta1 = {HR_theta1:1f},  theta2 = {HR_theta2:1f},  theta3 = {HR_theta3:1f}")
             print(f"========== ======== {count}")
             print("Loop running - Move legs to zero-configuration and check that angles are correct - Press ctrl+c in terminal for shutdown")
 
