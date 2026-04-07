@@ -19,7 +19,7 @@ def Read_Voltage(bus,id):
 
     # Filter for our own reply - discard any stale  replies from other commands
     while True:
-        msg = bus.recv(1)
+        msg = bus.recv(0.1)
         if msg is None:
             # Print("No response received.")    # only print for debug - slows process down
             return None
