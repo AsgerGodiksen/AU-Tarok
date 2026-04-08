@@ -24,8 +24,8 @@ PHASE_OFFSET = Tarok.CRAWL_OFFSETS
 #  Parameters - For Time related things
 # ─────────────────────────────────────────────
 
-Swing_Time_Scalar = 3.0     # [s] swing phase duration
-Swing_Time_Steps = 600      # Number of Steps in the Swing
+Swing_Time_Scalar = 1.5     # [s] swing phase duration
+Swing_Time_Steps = 300      # Number of Steps in the Swing
 
 Stand_Time_Scalar  = 3 * Swing_Time_Scalar # [s] stand phase duration
 Stand_Time_Steps = 3 * Swing_Time_Steps

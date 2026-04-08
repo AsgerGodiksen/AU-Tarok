@@ -26,7 +26,7 @@ PHASE_OFFSET = Tarok.CRAWL_OFFSETS
 # Time parameters
 dt = 0.005 # seconds (200 Hz)
 
-Swing_Time_Scalar = 3.0     # [s] swing phase duration
+Swing_Time_Scalar = 1.5     # [s] swing phase duration
 Stand_Time_Scalar  = 3 * Swing_Time_Scalar # [s] stand phase duration
 
 total_time = Swing_Time_Scalar + Stand_Time_Scalar
