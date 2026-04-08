@@ -1,3 +1,17 @@
 Tarok_Enviroment/
 .vscode/
 __pycache__/
+dev_ws/
+
+
+# onshape-to-robot API credentials
+#   Tarok/Robot/dev_ws/src/tarok_description/keys
+
+# onshape-to-robot generated files (re-exported from Onshape)
+#   Tarok/Robot/dev_ws/src/tarok_description/robot.urdf
+#   Tarok/Robot/dev_ws/src/tarok_description/assets/
+
+# colcon build artifacts
+#  Tarok/Robot/dev_ws/build/
+#  Tarok/Robot/dev_ws/install/
+#  Tarok/Robot/dev_ws/log/

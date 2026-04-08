@@ -13,7 +13,7 @@ import csv
 
 from Robot import*
 
-def can_listener(bus):
+def can_listener(bus, bus_label):
     # Thread function to continuously receive CAN messages and update latest_status
     while running:
         for motor_id in [ID_1, ID_2, ID_3]:
@@ -22,7 +22,7 @@ def can_listener(bus):
                 continue  # Skip updating if no response received
             
             with lock:
-                latest_status[motor_id] = (Torque_Current, Torque)
+                latest_status[(bus_label, motor_id)] = (Torque_Current, Torque)
 
 
 print("Performing pre-computations...")
@@ -87,16 +87,23 @@ for bus in [bus0, bus1, bus2, bus3]:
             
 # Define threading variables
 latest_status = {
-    ID_1: None,
-    ID_2: None,
-    ID_3: None
+    ("bus0", ID_1): None,  ("bus0", ID_2): None,  ("bus0", ID_3): None,
+    ("bus1", ID_1): None,  ("bus1", ID_2): None,  ("bus1", ID_3): None,
+    ("bus2", ID_1): None,  ("bus2", ID_2): None,  ("bus2", ID_3): None,
+    ("bus3", ID_1): None,  ("bus3", ID_2): None,  ("bus3", ID_3): None,
 }
 lock = threading.Lock()
 running = True
 
 # Initialize receiver thread
-thread = threading.Thread(target=can_listener, args=(bus0,), daemon=True)
-thread.start()
+thread0 = threading.Thread(target=can_listener, args=(bus0, "bus0"), daemon=True)
+thread1 = threading.Thread(target=can_listener, args=(bus1, "bus1"), daemon=True)
+thread2 = threading.Thread(target=can_listener, args=(bus2, "bus2"), daemon=True)
+thread3 = threading.Thread(target=can_listener, args=(bus3, "bus3"), daemon=True)
+thread0.start()
+thread1.start()
+thread2.start()
+thread3.start()
 
 ### Initiating Data Logging
 ## Initiating Data Logging — By Making a Unique file
@@ -115,7 +122,7 @@ data = np.zeros((1500000,4))  # Adjust size as needed (current run for max of 83
 data_count = 0
 
 
-print("Initialization compltete, moving to zero position")
+print("Initialization complete, moving to zero position")
 Position_Control(bus0,ID_1,0,30)
 Position_Control(bus0,ID_2,0,30)
 Position_Control(bus0,ID_3,0,30)
@@ -170,17 +177,22 @@ try:
 
         # Log data using thread
         with lock:
-            s1 = latest_status[ID_1]
-            s2 = latest_status[ID_2]
-            s3 = latest_status[ID_3]
+            s_FL1 = latest_status[("bus0", ID_1)]
+            s_FL2 = latest_status[("bus0", ID_2)]
+            s_FL3 = latest_status[("bus0", ID_3)]
+            # Clear after reading so we never log stale data again
+            latest_status[("bus0", ID_1)] = None
+            latest_status[("bus0", ID_2)] = None
+            latest_status[("bus0", ID_3)] = None
 
-        if s1 is None or s2 is None or s3 is None:
+
+        if  s_FL1 is None or s_FL2 is None or s_FL3 is None:
             time.sleep(0.005)
             continue  # skip this cycle until all motors have reported
 
-        _, Torque_1 = s1
-        _, Torque_2 = s2
-        _, Torque_3 = s3    
+        _, Torque_1 = s_FL1
+        _, Torque_2 = s_FL2
+        _, Torque_3 = s_FL3    
             
             
         data[data_count, :] = [elapsed_total, Torque_1, Torque_2, Torque_3]
@@ -205,7 +217,10 @@ try:
 except KeyboardInterrupt:
     print("KeyboardInterrupt received, shutting down...")
     running = False
-    thread.join(timeout=1.0)
+    thread0.join(timeout=1.0)
+    thread1.join(timeout=1.0)
+    thread2.join(timeout=1.0)
+    thread3.join(timeout=1.0)
     print("Receiver thread has been terminated.")
         # Stop motors
     print("Stopping motors...")
