@@ -59,6 +59,9 @@ def Bezier_Control_Points():
     Y = np.array([0.500,  0.500,   0.3611, 0.3611, 0.3611, 0.3611, 0.3611, 0.3214, 0.3214, 0.3214, 0.500, 0.500]) # [m]
     Scaling_Factor = 0.6
     Offset = 0.16
+    # Note that the height of stand to swing phase transition is at H = Scaling_Factor * 0.500 + Offset
+    # For example, Scaling_factor = 0.6 and Offset = 0.16 gives transition at H = 0.46 m
+    # This should always be below 0.48 m 
     
     # Scaling and Offsetting the Control points
     c_kX = Scaling_Factor * X

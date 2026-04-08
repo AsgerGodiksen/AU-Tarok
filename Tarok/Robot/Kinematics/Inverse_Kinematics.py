@@ -65,11 +65,11 @@ def Inverse_Kinematics(P_org, Leg):
     
     # Determine constants needed for theta2
     beta = np.arctan2(0.3 * np.sin(theta3), 0.2 + 0.3 * np.cos(theta3))
-    gamma = np.arctan2(-z, H)
+    #gamma = np.arctan2(-z, H) ### OLD
+    gamma = np.arctan2(-config*z, H)
 
     # Compute theta2
-    #theta2 = gamma - beta ### OLD
-    theta2 = config*gamma - beta
+    theta2 = gamma - beta 
    
     # Check joint space limits
     if Leg == 'FL' or Leg == 'HR':
