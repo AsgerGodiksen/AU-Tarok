@@ -144,10 +144,10 @@ def Up_Down_State(bus0, bus1, bus2, bus3, ID_1, ID_2, ID_3):
         term_FR_UD = JT_FR_UD @ Jac_i_FR_UD + (damp**2)*np.eye(3)
         term_HL_UD = JT_HL_UD @ Jac_i_HL_UD + (damp**2)*np.eye(3)
         term_HR_UD = JT_HR_UD @ Jac_i_HR_UD + (damp**2)*np.eye(3)
-        Theta_dot_FL_UD[:, i] = np.linalg.solve(term_FL_UD, JT_FL_UD @ V_FL_base_UD[:, i].flatten())
-        Theta_dot_FR_UD[:, i] = np.linalg.solve(term_FR_UD, JT_FR_UD @ V_FR_base_UD[:, i].flatten())
-        Theta_dot_HL_UD[:, i] = np.linalg.solve(term_HL_UD, JT_HL_UD @ V_HL_base_UD[:, i].flatten())
-        Theta_dot_HR_UD[:, i] = np.linalg.solve(term_HR_UD, JT_HR_UD @ V_HR_base_UD[:, i].flatten())
+        Theta_dot_FL_UD[:, i] = np.linalg.solve(term_FL_UD, JT_FL_UD @ V_FL_base_UD[i].flatten())
+        Theta_dot_FR_UD[:, i] = np.linalg.solve(term_FR_UD, JT_FR_UD @ V_FR_base_UD[i].flatten())
+        Theta_dot_HL_UD[:, i] = np.linalg.solve(term_HL_UD, JT_HL_UD @ V_HL_base_UD[i].flatten())
+        Theta_dot_HR_UD[:, i] = np.linalg.solve(term_HR_UD, JT_HR_UD @ V_HR_base_UD[i].flatten())
 
     # Convert joint angles and velocities to degrees and abs(degrees/s) for right units for motor control
     Theta_FL_UD = np.rad2deg(Theta_FL_UD)

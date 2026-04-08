@@ -30,11 +30,17 @@ class TarokDymensions:
     
     # Leg Offsets for Walking where Front Left is the inital used. 
     # Then Hind Right Leg Trajectory can be shifted with 25% and so on.
-    CRAWL_OFFSETS= {
+    CRAWL_OFFSETS_Mixed= {
     'FL': 0.00,
     'HR': 0.25,
     'FR': 0.50,
     'HL': 0.75,}
+
+    CRAWL_OFFSETS= {
+    'FL': 0.00,
+    'FR': 0.25,
+    'HL': 0.50,
+    'HR': 0.75,}
     
 
     def __init__(self):
