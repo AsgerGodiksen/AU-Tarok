@@ -23,6 +23,22 @@ def can_listener(bus):
                 latest_status[motor_id] = (Torque_Current, Torque)
 
 
+def safe_motor_stop(bus, motor_id):
+    """
+    Stop a single motor, draining stale RX messages first.
+    Catches RuntimeError so that one failed stop does not abort the rest.
+    """
+    # Drain stale replies left by Position_Control or the listener thread
+    while True:
+        msg = bus.recv(timeout=0.001)
+        if msg is None:
+            break
+    try:
+        Motor_Stop(bus, motor_id)
+    except RuntimeError as e:
+        print(f"  Warning: {e} — motor may already be stopped.")
+
+
 print("Performing pre-computations...")
 # Define kinematic body lengths
 l_k = 0.7048  # Length of body in kinematic model (meters)
@@ -93,10 +109,10 @@ log_filename = os.path.join(log_dir, f"Stand_Pose_Torque_Log_{time.strftime('%Y-
 
 with open(log_filename, 'w', newline='') as csvfile:
     writer = csv.writer(csvfile)
-    writer.writerow(["Timestamp (s)", "FL_J1_Torque_Current", "FL_J1_Torque", "FL_J2_Torque", "FL_J3_Torque"])
+    writer.writerow(["Timestamp (s)", "FL_J1_Torque", "FL_J2_Torque", "FL_J3_Torque"])
 
 # Preallocate data storage array
-data = np.zeros((1500000, 5))
+data = np.zeros((1500000, 4))
 data_count = 0
 
 print("Initialization complete, moving to zero position")
@@ -133,29 +149,34 @@ time.sleep(6)
 
 print("Pre-loop sequence complete, starting loop...")
 print("Loop started - Press Ctrl+C in terminal for shutdown")
-start_time = cycle_start = current_time = time.monotonic()
+start_time = current_time = time.monotonic()
 
 try:
     while True:
         current_time = time.monotonic()
         elapsed_total = current_time - start_time
 
-        # Read latest torque values from listener thread
+        # --- FIX 1: Read latest torque values WITHOUT clearing them ---
+        # The listener thread updates latest_status continuously.
+        # We read the most recent value each cycle rather than clearing to None,
+        # which previously caused almost all cycles to be skipped because the
+        # listener thread (which does 3 sequential CAN round-trips) couldn't
+        # repopulate all three entries fast enough.
         with lock:
             s1 = latest_status[ID_1]
             s2 = latest_status[ID_2]
             s3 = latest_status[ID_3]
 
-        # Skip cycle if any motor has not yet reported
+        # Skip only the very first cycle(s) before any data has arrived at all
         if s1 is None or s2 is None or s3 is None:
-            time.sleep(0.005)
+            time.sleep(0.001)
             continue
 
-        Torque_Current, Torque_1 = s1
+        _, Torque_1 = s1
         _, Torque_2 = s2
         _, Torque_3 = s3
 
-        data[data_count, :] = [elapsed_total, Torque_Current, Torque_1, Torque_2, Torque_3]
+        data[data_count, :] = [elapsed_total, Torque_1, Torque_2, Torque_3]
         data_count += 1
 
         # Send position commands to hold stand pose
@@ -175,23 +196,27 @@ try:
 
 except KeyboardInterrupt:
     print("KeyboardInterrupt received, shutting down...")
+
+    # Stop the listener thread first so it no longer competes for CAN RX
     running = False
     thread.join(timeout=1.0)
     print("Receiver thread terminated.")
 
+    # --- FIX 2: Drain + safe stop for each motor ---
+    # After the listener thread exits, each bus may still hold stale replies
+    # from the last round of Position_Control commands. Motor_Stop sends 0x81
+    # and waits for a matching 0x81 reply — if it reads a stale reply with a
+    # different command byte first, it loops forever and eventually raises
+    # RuntimeError. We drain each bus before stopping, and catch any
+    # RuntimeError so that one unresponsive motor doesn't abort the rest.
     print("Stopping motors...")
-    Motor_Stop(bus0, ID_1)
-    Motor_Stop(bus0, ID_2)
-    Motor_Stop(bus0, ID_3)
-    Motor_Stop(bus1, ID_1)
-    Motor_Stop(bus1, ID_2)
-    Motor_Stop(bus1, ID_3)
-    Motor_Stop(bus2, ID_1)
-    Motor_Stop(bus2, ID_2)
-    Motor_Stop(bus2, ID_3)
-    Motor_Stop(bus3, ID_1)
-    Motor_Stop(bus3, ID_2)
-    Motor_Stop(bus3, ID_3)
+    for bus in [bus0, bus1, bus2, bus3]:
+        while bus.recv(timeout=0.001) is not None:
+            pass  # drain stale replies
+
+    for bus, label in [(bus0,"bus0"),(bus1,"bus1"),(bus2,"bus2"),(bus3,"bus3")]:
+        for motor_id in [ID_1, ID_2, ID_3]:
+            safe_motor_stop(bus, motor_id)
     print("Motors stopped.")
 
     print("Shutting down CAN buses...")
@@ -205,6 +230,6 @@ except KeyboardInterrupt:
     with open(log_filename, "a") as file:
         for i in range(data_count):
             row = data[i, :]
-            file.write(f"{row[0]:.4f},{row[1]:.4f},{row[2]:.4f},{row[3]:.4f},{row[4]:.4f}\n")
-    print("Logged data stored.")
+            file.write(f"{row[0]:.4f},{row[1]:.4f},{row[2]:.4f},{row[3]:.4f}\n")
+    print(f"Logged {data_count} rows to {log_filename}")
     print("Shutdown complete.")
