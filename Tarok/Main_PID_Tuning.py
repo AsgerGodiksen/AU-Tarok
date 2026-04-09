@@ -69,7 +69,7 @@ pid_params = {
     'torque_ki': 17
 }
 
-print("Update to new PID parameters USING RAM")
+print("Update to new PID parameters USING ROM")
 # PID_ROM_Control(bus0,ID_1, pid_params)
 # PID_ROM_Control(bus0,ID_2, pid_params)
 # PID_ROM_Control(bus0,ID_3, pid_params)

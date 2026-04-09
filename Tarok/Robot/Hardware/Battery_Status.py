@@ -37,7 +37,7 @@ def Calculate_Percentage(Cell_Voltage):
     # Check if the given voltage is below 20%
     if Cell_Voltage <= mapping[-5][1]:
         print("CHARGE Battery")
-        return 0  
+        #return 0  
 
     # Perfom Linear Interpolation between the given Voltage points
     for i in range(len(mapping) -1):
