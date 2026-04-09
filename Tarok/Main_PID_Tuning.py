@@ -69,22 +69,22 @@ pid_params = {
     'torque_ki': 17
 }
 
-print("Update to new PID parameters USING ROM")
-# PID_ROM_Control(bus0,ID_1, pid_params)
-# PID_ROM_Control(bus0,ID_2, pid_params)
-# PID_ROM_Control(bus0,ID_3, pid_params)
-# 
-# PID_ROM_Control(bus1,ID_1, pid_params)
-# PID_ROM_Control(bus1,ID_2, pid_params)
-# PID_ROM_Control(bus1,ID_3, pid_params)
-# 
-# PID_ROM_Control(bus2,ID_1, pid_params)
-# PID_ROM_Control(bus2,ID_2, pid_params)
-# PID_ROM_Control(bus2,ID_3, pid_params)
-# 
-# PID_ROM_Control(bus3,ID_1, pid_params)
-# PID_ROM_Control(bus3,ID_2, pid_params)
-# PID_ROM_Control(bus3,ID_3, pid_params)
+print("Update to new PID parameters USING RAM")
+PID_ROM_Control(bus0,ID_1, pid_params)
+PID_ROM_Control(bus0,ID_2, pid_params)
+PID_ROM_Control(bus0,ID_3, pid_params)
+
+PID_ROM_Control(bus1,ID_1, pid_params)
+PID_ROM_Control(bus1,ID_2, pid_params)
+PID_ROM_Control(bus1,ID_3, pid_params)
+
+PID_ROM_Control(bus2,ID_1, pid_params)
+PID_ROM_Control(bus2,ID_2, pid_params)
+PID_ROM_Control(bus2,ID_3, pid_params)
+
+PID_ROM_Control(bus3,ID_1, pid_params)
+PID_ROM_Control(bus3,ID_2, pid_params)
+PID_ROM_Control(bus3,ID_3, pid_params)
 time.sleep(2)
 
 
