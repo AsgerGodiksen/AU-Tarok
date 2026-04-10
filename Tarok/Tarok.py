@@ -101,6 +101,18 @@ def main_on_press(key):
             State = "BEZIER WALK GAIT"
             print("W key pressed - Changing state to BEZIER WALK GAIT")
 
+# Helper functions for trajectory generation
+def cos_interp(t, z_start, z_end, t_start, t_end):
+    '''Smooth cosine interpolation from z_start to z_end over [t_start, t_end]'''
+    tau = (t - t_start) / (t_end - t_start)  # Normalized time 0->1
+    return z_start + (z_end - z_start) * 0.5 * (1 - np.cos(np.pi * tau))
+
+def cos_interp_dot(t, z_start, z_end, t_start, t_end):
+    '''Derivative of cosine interpolation'''
+    duration = t_end - t_start
+    tau = (t - t_start) / duration
+    return (z_end - z_start) * 0.5 * np.pi / duration * np.sin(np.pi * tau)
+
 ### STATE FUNCTIONS ###
 # Define functions for each state here, such as standing pose, walking gait, etc. Each function should implement the behavior for that state and return to standing pose at the end of the state.
 
@@ -119,18 +131,6 @@ def Low_Battery_State(bus0, bus1, bus2, bus3, ID_1, ID_2, ID_3):
     Returns:
     - None, but runs the low battery trajectory until the system is shut down    
     '''
-
-    # Helper functions for trajectory generation
-    def cos_interp(t, z_start, z_end, t_start, t_end):
-        '''Smooth cosine interpolation from z_start to z_end over [t_start, t_end]'''
-        tau = (t - t_start) / (t_end - t_start)  # Normalized time 0->1
-        return z_start + (z_end - z_start) * 0.5 * (1 - np.cos(np.pi * tau))
-
-    def cos_interp_dot(t, z_start, z_end, t_start, t_end):
-        '''Derivative of cosine interpolation'''
-        duration = t_end - t_start
-        tau = (t - t_start) / duration
-        return (z_end - z_start) * 0.5 * np.pi / duration * np.sin(np.pi * tau)
 
     print("Executing LOW BATTERY state")
     print("Performing pre-computations for LOW BATTERY state...")
@@ -313,95 +313,103 @@ def Up_Down_State(bus0, bus1, bus2, bus3, ID_1, ID_2, ID_3):
 
     # Define local time series
     dt = 0.005 # seconds (200 Hz) - not directly the control frequency, but the discretization used for precomputations
-    total_time = 10  # Total time in seconds of one up/down cycle
+    total_time = 10  # Total time in seconds of one cycle of the trajectory
     num_time_steps = int(total_time / dt) + 1
     t = np.linspace(0, total_time, num_time_steps)
 
+    # Segment boundaries for the trajectory: 0->5s, 5->10s
+    conditions = [(t >= 0)   & (t < 5),   # Up:    -0.36 -> -0.46
+                  (t >= 5)   & (t < 10),  # Down:  -0.46 -> -0.36
+                  (t >= 10)]               # Hold:  -0.36 (hold at -0.36 after 10s))
+
     # Define desired end-effector trajectory as function of time for all 4 legs (in body frame)
-    x_FL_UD = x_FR_UD = (l_k/2)*np.ones_like(t)  # X position in meters (constant)
-    x_HL_UD = x_HR_UD = (-l_k/2)*np.ones_like(t)  # X position in meters (constant)
-    y_FL_UD = y_HL_UD = (w_k/2 + 0.078)*np.ones_like(t)  # Y position in meters (constant)
-    y_FR_UD = y_HR_UD = (-w_k/2 - 0.078)*np.ones_like(t)  # Y position in meters (constant)
-    z_UD = np.piecewise(t, [t < 5, t >=5], [lambda t: -0.46 + (0.10/5)*t, lambda t: -0.36 - (0.10/5)*(t-5)])  # Z position in meters (linear wave from -0.46 to -0.36 and back to -0.46 in 10 seconds)
+    x_FL = x_FR = (l_k/2)*np.ones_like(t)  # X position in meters (constant)
+    x_HL = x_HR = (-l_k/2)*np.ones_like(t)  # X position in meters (constant)
+    y_FL = y_HL = (w_k/2 + 0.078)*np.ones_like(t)  # Y position in meters (constant)
+    y_FR = y_HR = (-w_k/2 - 0.078)*np.ones_like(t)  # Y position in meters (constant)
+    z = np.piecewise(t, conditions, [lambda t: cos_interp(t, -0.36, -0.46, 0, 5),
+                                     lambda t: cos_interp(t, -0.46, -0.36, 5, 10),
+                                     lambda t: -0.36*np.ones_like(t)])  # Z position in meters (cosine wave from -0.36 to -0.46, then to -0.36, then hold at -0.36)
 
     # Define desired end effector velocity (foot velocity) as functions of time for all 4 legs (in body frame) - Note, it is the same for all legs in body frame for this trajectory
-    x_dot_UD = np.zeros_like(t)  # X velocity in meters/second (constant)
-    y_dot_UD = np.zeros_like(t)  # Y velocity in meters/second (constant)
-    z_dot_UD = np.piecewise(t, [t < 5, t >= 5], [lambda t: 0.10/5*np.ones_like(t), lambda t: -0.10/5*np.ones_like(t)])  # Z velocity in meters/second (linear wave from 0.10 m/s to -0.10 m/s and back to 0.10 m/s in 10 seconds)
+    x_dot = np.zeros_like(t)  # X velocity in meters/second (constant)
+    y_dot = np.zeros_like(t)  # Y velocity in meters/second (constant)
+    z_dot = np.piecewise(t, conditions, [lambda t: cos_interp_dot(t, -0.36, -0.46, 0, 5),
+                                         lambda t: cos_interp_dot(t, -0.46, -0.36, 5, 10),
+                                         lambda t: np.zeros_like(t)])
 
     ### Transformations ###
     # Combine trajectories into position arrays for each leg
-    P_FL_body_UD = np.vstack((x_FL_UD, y_FL_UD, z_UD))
-    P_FR_body_UD = np.vstack((x_FR_UD, y_FR_UD, z_UD))
-    P_HL_body_UD = np.vstack((x_HL_UD, y_HL_UD, z_UD))
-    P_HR_body_UD = np.vstack((x_HR_UD, y_HR_UD, z_UD))
+    P_FL_body = np.vstack((x_FL, y_FL, z))
+    P_FR_body = np.vstack((x_FR, y_FR, z))
+    P_HL_body = np.vstack((x_HL, y_HL, z))
+    P_HR_body = np.vstack((x_HR, y_HR, z))
 
     # Transform desired end-effector trajectory from body frame to leg base frames
-    P_FL_base_UD = np.array([T0_B(P_FL_body_UD[:, i].reshape((3, 1)), 'FL') for i in range(len(t))])
-    P_FR_base_UD = np.array([T0_B(P_FR_body_UD[:, i].reshape((3, 1)), 'FR') for i in range(len(t))])
-    P_HL_base_UD = np.array([T0_B(P_HL_body_UD[:, i].reshape((3, 1)), 'HL') for i in range(len(t))])
-    P_HR_base_UD = np.array([T0_B(P_HR_body_UD[:, i].reshape((3, 1)), 'HR') for i in range(len(t))])
+    P_FL_base = np.array([T0_B(P_FL_body[:, i].reshape((3, 1)), 'FL') for i in range(len(t))])
+    P_FR_base = np.array([T0_B(P_FR_body[:, i].reshape((3, 1)), 'FR') for i in range(len(t))])
+    P_HL_base = np.array([T0_B(P_HL_body[:, i].reshape((3, 1)), 'HL') for i in range(len(t))])
+    P_HR_base = np.array([T0_B(P_HR_body[:, i].reshape((3, 1)), 'HR') for i in range(len(t))])
 
     # Combine body frame trajectory cartesian velocities into array
-    V_body_UD = np.vstack((x_dot_UD, y_dot_UD, z_dot_UD))
-
+    V_body = np.vstack((x_dot, y_dot, z_dot))
     # Transform desired end-effector velocity from body frame to leg base frames
-    V_FL_base_UD = np.array([R0_B(V_body_UD[:, i].reshape((3, 1)), 'FL') for i in range(len(t))])
-    V_FR_base_UD = np.array([R0_B(V_body_UD[:, i].reshape((3, 1)), 'FR') for i in range(len(t))])
-    V_HL_base_UD = np.array([R0_B(V_body_UD[:, i].reshape((3, 1)), 'HL') for i in range(len(t))])
-    V_HR_base_UD = np.array([R0_B(V_body_UD[:, i].reshape((3, 1)), 'HR') for i in range(len(t))])
+    V_FL_base = np.array([R0_B(V_body[:, i].reshape((3, 1)), 'FL') for i in range(len(t))])
+    V_FR_base = np.array([R0_B(V_body[:, i].reshape((3, 1)), 'FR') for i in range(len(t))])
+    V_HL_base = np.array([R0_B(V_body[:, i].reshape((3, 1)), 'HL') for i in range(len(t))])
+    V_HR_base = np.array([R0_B(V_body[:, i].reshape((3, 1)), 'HR') for i in range(len(t))])
 
     ### Kinematics ###
     # Determine joint angles for all 4 legs using inverse kinematics
-    Theta_FL_UD = np.array([Inverse_Kinematics(P_FL_base_UD[i], 'FL') for i in range(len(t))]) # Shape (num_time_steps, 3), containing theta1, theta2, theta3 for each time step
-    Theta_FR_UD = np.array([Inverse_Kinematics(P_FR_base_UD[i], 'FR') for i in range(len(t))]) # Shape (num_time_steps, 3), containing theta1, theta2, theta3 for each time step
-    Theta_HL_UD = np.array([Inverse_Kinematics(P_HL_base_UD[i], 'HL') for i in range(len(t))]) # Shape (num_time_steps, 3), containing theta1, theta2, theta3 for each time step
-    Theta_HR_UD = np.array([Inverse_Kinematics(P_HR_base_UD[i], 'HR') for i in range(len(t))]) # Shape (num_time_steps, 3), containing theta1, theta2, theta3 for each time step
+    Theta_FL = np.array([Inverse_Kinematics(P_FL_base[i], 'FL') for i in range(len(t))]) # Shape (num_time_steps, 3), containing theta1, theta2, theta3 for each time step
+    Theta_FR = np.array([Inverse_Kinematics(P_FR_base[i], 'FR') for i in range(len(t))]) # Shape (num_time_steps, 3), containing theta1, theta2, theta3 for each time step
+    Theta_HL = np.array([Inverse_Kinematics(P_HL_base[i], 'HL') for i in range(len(t))]) # Shape (num_time_steps, 3), containing theta1, theta2, theta3 for each time step
+    Theta_HR = np.array([Inverse_Kinematics(P_HR_base[i], 'HR') for i in range(len(t))]) # Shape (num_time_steps, 3), containing theta1, theta2, theta3 for each time step
 
     # Determine joint velocities for all 4 legs using Jacobian
     # Damped least squares inverse to avoid singularities - theta_dot = (J^T*J + damp^2*I)^-1 * J^T * cartesian_velocity 
-    Theta_dot_FL_UD = np.zeros((3, len(t)))  # Initialize joint velocity array
-    Theta_dot_FR_UD = np.zeros((3, len(t)))  # Initialize joint velocity array
-    Theta_dot_HL_UD = np.zeros((3, len(t)))  # Initialize joint velocity array
-    Theta_dot_HR_UD = np.zeros((3, len(t)))  # Initialize joint velocity array
+    Theta_dot_FL = np.zeros((3, len(t)))  # Initialize joint velocity array
+    Theta_dot_FR = np.zeros((3, len(t)))  # Initialize joint velocity array
+    Theta_dot_HL = np.zeros((3, len(t)))  # Initialize joint velocity array
+    Theta_dot_HR = np.zeros((3, len(t)))  # Initialize joint velocity array
     damp = 0.001  # Damping factor
     for i in range(len(t)):
-        Jac_i_FL_UD = Jacobian(Theta_FL_UD[i, 0], Theta_FL_UD[i, 1], Theta_FL_UD[i, 2], 'FL')
-        Jac_i_FR_UD = Jacobian(Theta_FR_UD[i, 0], Theta_FR_UD[i, 1], Theta_FR_UD[i, 2], 'FR')
-        Jac_i_HL_UD = Jacobian(Theta_HL_UD[i, 0], Theta_HL_UD[i, 1], Theta_HL_UD[i, 2], 'HL')
-        Jac_i_HR_UD = Jacobian(Theta_HR_UD[i, 0], Theta_HR_UD[i, 1], Theta_HR_UD[i, 2], 'HR')
-        JT_FL_UD = Jac_i_FL_UD.T
-        JT_FR_UD = Jac_i_FR_UD.T
-        JT_HL_UD = Jac_i_HL_UD.T
-        JT_HR_UD = Jac_i_HR_UD.T
-        term_FL_UD = JT_FL_UD @ Jac_i_FL_UD + (damp**2)*np.eye(3)
-        term_FR_UD = JT_FR_UD @ Jac_i_FR_UD + (damp**2)*np.eye(3)
-        term_HL_UD = JT_HL_UD @ Jac_i_HL_UD + (damp**2)*np.eye(3)
-        term_HR_UD = JT_HR_UD @ Jac_i_HR_UD + (damp**2)*np.eye(3)
-        Theta_dot_FL_UD[:, i] = np.linalg.solve(term_FL_UD, JT_FL_UD @ V_FL_base_UD[i].flatten())
-        Theta_dot_FR_UD[:, i] = np.linalg.solve(term_FR_UD, JT_FR_UD @ V_FR_base_UD[i].flatten())
-        Theta_dot_HL_UD[:, i] = np.linalg.solve(term_HL_UD, JT_HL_UD @ V_HL_base_UD[i].flatten())
-        Theta_dot_HR_UD[:, i] = np.linalg.solve(term_HR_UD, JT_HR_UD @ V_HR_base_UD[i].flatten())
+        Jac_i_FL = Jacobian(Theta_FL[i, 0], Theta_FL[i, 1], Theta_FL[i, 2], 'FL')
+        Jac_i_FR = Jacobian(Theta_FR[i, 0], Theta_FR[i, 1], Theta_FR[i, 2], 'FR')
+        Jac_i_HL = Jacobian(Theta_HL[i, 0], Theta_HL[i, 1], Theta_HL[i, 2], 'HL')
+        Jac_i_HR = Jacobian(Theta_HR[i, 0], Theta_HR[i, 1], Theta_HR[i, 2], 'HR')
+        JT_FL = Jac_i_FL.T
+        JT_FR = Jac_i_FR.T
+        JT_HL = Jac_i_HL.T
+        JT_HR = Jac_i_HR.T
+        term_FL = JT_FL @ Jac_i_FL + (damp**2)*np.eye(3)
+        term_FR = JT_FR @ Jac_i_FR + (damp**2)*np.eye(3)
+        term_HL = JT_HL @ Jac_i_HL + (damp**2)*np.eye(3)
+        term_HR = JT_HR @ Jac_i_HR + (damp**2)*np.eye(3)
+        Theta_dot_FL[:, i] = np.linalg.solve(term_FL, JT_FL @ V_FL_base[i].flatten())
+        Theta_dot_FR[:, i] = np.linalg.solve(term_FR, JT_FR @ V_FR_base[i].flatten())
+        Theta_dot_HL[:, i] = np.linalg.solve(term_HL, JT_HL @ V_HL_base[i].flatten())
+        Theta_dot_HR[:, i] = np.linalg.solve(term_HR, JT_HR @ V_HR_base[i].flatten())
 
     # Convert joint angles and velocities to degrees and abs(degrees/s) for right units for motor control
-    Theta_FL_UD = np.rad2deg(Theta_FL_UD)
-    Theta_FR_UD = np.rad2deg(Theta_FR_UD)
-    Theta_HL_UD = np.rad2deg(Theta_HL_UD)
-    Theta_HR_UD = np.rad2deg(Theta_HR_UD)
-    Theta_dot_FL_UD = np.abs(np.rad2deg(Theta_dot_FL_UD))
-    Theta_dot_FR_UD = np.abs(np.rad2deg(Theta_dot_FR_UD))
-    Theta_dot_HL_UD = np.abs(np.rad2deg(Theta_dot_HL_UD))
-    Theta_dot_HR_UD = np.abs(np.rad2deg(Theta_dot_HR_UD))
+    Theta_FL = np.rad2deg(Theta_FL)
+    Theta_FR = np.rad2deg(Theta_FR)
+    Theta_HL = np.rad2deg(Theta_HL)
+    Theta_HR = np.rad2deg(Theta_HR)
+    Theta_dot_FL = np.abs(np.rad2deg(Theta_dot_FL))
+    Theta_dot_FR = np.abs(np.rad2deg(Theta_dot_FR))
+    Theta_dot_HL = np.abs(np.rad2deg(Theta_dot_HL))
+    Theta_dot_HR = np.abs(np.rad2deg(Theta_dot_HR))
 
     # Roll arrays by 501 time steps to start at the standing position
-    Theta_FL_UD = np.roll(Theta_FL_UD, 501, axis=0)
-    Theta_FR_UD = np.roll(Theta_FR_UD, 501, axis=0)
-    Theta_HL_UD = np.roll(Theta_HL_UD, 501, axis=0)
-    Theta_HR_UD = np.roll(Theta_HR_UD, 501, axis=0)
-    Theta_dot_FL_UD = np.roll(Theta_dot_FL_UD, 501, axis=1)
-    Theta_dot_FR_UD = np.roll(Theta_dot_FR_UD, 501, axis=1)
-    Theta_dot_HL_UD = np.roll(Theta_dot_HL_UD, 501, axis=1)
-    Theta_dot_HR_UD = np.roll(Theta_dot_HR_UD, 501, axis=1)
+    Theta_FL = np.roll(Theta_FL, 501, axis=0)
+    Theta_FR = np.roll(Theta_FR, 501, axis=0)
+    Theta_HL = np.roll(Theta_HL, 501, axis=0)
+    Theta_HR = np.roll(Theta_HR, 501, axis=0)
+    Theta_dot_FL = np.roll(Theta_dot_FL, 501, axis=1)
+    Theta_dot_FR = np.roll(Theta_dot_FR, 501, axis=1)
+    Theta_dot_HL = np.roll(Theta_dot_HL, 501, axis=1)
+    Theta_dot_HR = np.roll(Theta_dot_HR, 501, axis=1)
 
     print("Pre-loop sequence complete, writing up/down state PI parameters...")
 
