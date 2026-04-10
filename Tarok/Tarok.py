@@ -56,6 +56,7 @@ pi_low_battery = {
     'torque_ki': 25
 }
 
+'''
 # Up/Down state PI parameters (Manufacturing parameters)
 pi_up_down = {
     'angle_kp':  100,
@@ -64,6 +65,17 @@ pi_up_down = {
     'speed_ki':  40,
     'torque_kp': 50,
     'torque_ki': 50
+}
+'''
+
+# Up/Down state PI parameters (compromise parameters)
+pi_up_down = {
+    'angle_kp':  110,
+    'angle_ki':  50,
+    'speed_kp':  55,
+    'speed_ki':  20,
+    'torque_kp': 55,
+    'torque_ki': 25
 }
 
 # Bezier walk state PI parameters - currently the ones tuned for up/down (Test 19)
@@ -451,18 +463,18 @@ def Up_Down_State(bus0, bus1, bus2, bus3, ID_1, ID_2, ID_3):
             index = min(int(elapsed_cycle / dt), len(t) - 1)
             
             # Send position control commands to motors for current time step
-            Position_Control(bus0, ID_1, Theta_FL_UD[index, 0], Theta_dot_FL_UD[0, index])
-            Position_Control(bus0, ID_2, Theta_FL_UD[index, 1], Theta_dot_FL_UD[1, index])
-            Position_Control(bus0, ID_3, Theta_FL_UD[index, 2], Theta_dot_FL_UD[2, index])
-            Position_Control(bus1, ID_1, Theta_FR_UD[index, 0], Theta_dot_FR_UD[0, index])
-            Position_Control(bus1, ID_2, Theta_FR_UD[index, 1], Theta_dot_FR_UD[1, index])
-            Position_Control(bus1, ID_3, Theta_FR_UD[index, 2], Theta_dot_FR_UD[2, index])
-            Position_Control(bus2, ID_1, Theta_HL_UD[index, 0], Theta_dot_HL_UD[0, index])
-            Position_Control(bus2, ID_2, Theta_HL_UD[index, 1], Theta_dot_HL_UD[1, index])
-            Position_Control(bus2, ID_3, Theta_HL_UD[index, 2], Theta_dot_HL_UD[2, index])
-            Position_Control(bus3, ID_1, Theta_HR_UD[index, 0], Theta_dot_HR_UD[0, index])
-            Position_Control(bus3, ID_2, Theta_HR_UD[index, 1], Theta_dot_HR_UD[1, index])
-            Position_Control(bus3, ID_3, Theta_HR_UD[index, 2], Theta_dot_HR_UD[2, index])
+            Position_Control(bus0, ID_1, Theta_FL[index, 0], Theta_dot_FL[0, index])
+            Position_Control(bus0, ID_2, Theta_FL[index, 1], Theta_dot_FL[1, index])
+            Position_Control(bus0, ID_3, Theta_FL[index, 2], Theta_dot_FL[2, index])
+            Position_Control(bus1, ID_1, Theta_FR[index, 0], Theta_dot_FR[0, index])
+            Position_Control(bus1, ID_2, Theta_FR[index, 1], Theta_dot_FR[1, index])
+            Position_Control(bus1, ID_3, Theta_FR[index, 2], Theta_dot_FR[2, index])
+            Position_Control(bus2, ID_1, Theta_HL[index, 0], Theta_dot_HL[0, index])
+            Position_Control(bus2, ID_2, Theta_HL[index, 1], Theta_dot_HL[1, index])
+            Position_Control(bus2, ID_3, Theta_HL[index, 2], Theta_dot_HL[2, index])
+            Position_Control(bus3, ID_1, Theta_HR[index, 0], Theta_dot_HR[0, index])
+            Position_Control(bus3, ID_2, Theta_HR[index, 1], Theta_dot_HR[1, index])
+            Position_Control(bus3, ID_3, Theta_HR[index, 2], Theta_dot_HR[2, index])
 
     except KeyboardInterrupt:
         raise # Just raise the exception to be caught in the main loop try-except block for shutdown
