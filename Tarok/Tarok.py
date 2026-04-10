@@ -36,17 +36,17 @@ Tarok = TarokDymensions()
 PHASE_OFFSET = Tarok.CRAWL_OFFSETS
 
 ## PI PARAMETERS ## 
-# Stand state PI parameters
+# Stand state PI parameters (test 10)
 pi_stand = {
     'angle_kp':  120,
     'angle_ki':  25,
     'speed_kp':  60,
     'speed_ki':  10,
     'torque_kp': 60,
-    'torque_ki': 12.5
+    'torque_ki': 13
 }
 
-# Low Battery state PI parameters
+# Low Battery state PI parameters (Compromise parameters)
 pi_low_battery = {
     'angle_kp':  110,
     'angle_ki':  50,
@@ -56,18 +56,17 @@ pi_low_battery = {
     'torque_ki': 25
 }
 
-# Up/Down state PI parameters NOT CORRECT test 19
+# Up/Down state PI parameters (Manufacturing parameters)
 pi_up_down = {
-    'angle_kp':  110,
-    'angle_ki':  40,
-    'speed_kp':  55,
-    'speed_ki':  16,
-    'torque_kp': 55,
-    'torque_ki': 20
+    'angle_kp':  100,
+    'angle_ki':  100,
+    'speed_kp':  50,
+    'speed_ki':  40,
+    'torque_kp': 50,
+    'torque_ki': 50
 }
 
-# Bezier walk state PI parameters - currently the same as up/down
-# Up/Down state PI parameters NOT CORRECT test 19
+# Bezier walk state PI parameters - currently the ones tuned for up/down (Test 19)
 pi_bezier_walk = {
     'angle_kp':  110,
     'angle_ki':  40,
