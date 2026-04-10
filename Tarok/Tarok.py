@@ -35,6 +35,48 @@ State = "STAND"             # Define state variable, initial state is standing p
 Tarok = TarokDymensions()
 PHASE_OFFSET = Tarok.CRAWL_OFFSETS
 
+## PI PARAMETERS ## 
+# Stand state PI parameters
+pi_stand = {
+    'angle_kp':  120,
+    'angle_ki':  25,
+    'speed_kp':  60,
+    'speed_ki':  10,
+    'torque_kp': 60,
+    'torque_ki': 12.5
+}
+
+# Low Battery state PI parameters
+pi_low_battery = {
+    'angle_kp':  110,
+    'angle_ki':  50,
+    'speed_kp':  55,
+    'speed_ki':  20,
+    'torque_kp': 55,
+    'torque_ki': 25
+}
+
+# Up/Down state PI parameters NOT CORRECT test 19
+pi_up_down = {
+    'angle_kp':  110,
+    'angle_ki':  40,
+    'speed_kp':  55,
+    'speed_ki':  16,
+    'torque_kp': 55,
+    'torque_ki': 20
+}
+
+# Bezier walk state PI parameters - currently the same as up/down
+# Up/Down state PI parameters NOT CORRECT test 19
+pi_bezier_walk = {
+    'angle_kp':  110,
+    'angle_ki':  40,
+    'speed_kp':  55,
+    'speed_ki':  16,
+    'torque_kp': 55,
+    'torque_ki': 20
+}
+
 ### FUNCTION DEFINITIONS ###
 
 # Thread-safe function to handle key presses for pre-loop sequence
@@ -195,11 +237,26 @@ def Low_Battery_State(bus0, bus1, bus2, bus3, ID_1, ID_2, ID_3):
     Theta_dot_HL = np.abs(np.rad2deg(Theta_dot_HL))
     Theta_dot_HR = np.abs(np.rad2deg(Theta_dot_HR))
 
-    print("Pre-loop sequence complete, starting LOW BATTERY loop...")
+    print("Pre-loop sequence complete, writing low battery state PI parameters and starting LOW BATTERY loop...")
+    
+    # Write low battery state PI parameters
+    PID_RAM_Control(bus0,ID_1, pi_low_battery)
+    PID_RAM_Control(bus0,ID_2, pi_low_battery)
+    PID_RAM_Control(bus0,ID_3, pi_low_battery)
+    PID_RAM_Control(bus1,ID_1, pi_low_battery)
+    PID_RAM_Control(bus1,ID_2, pi_low_battery)
+    PID_RAM_Control(bus1,ID_3, pi_low_battery)
+    PID_RAM_Control(bus2,ID_1, pi_low_battery)  
+    PID_RAM_Control(bus2,ID_2, pi_low_battery)
+    PID_RAM_Control(bus2,ID_3, pi_low_battery)
+    PID_RAM_Control(bus3,ID_1, pi_low_battery)
+    PID_RAM_Control(bus3,ID_2, pi_low_battery)
+    PID_RAM_Control(bus3,ID_3, pi_low_battery)
+
     print("Press ctrl+c in terminal for shutdown")
 
     # Note start time
-    start_time = cycle_start = current_time = time.monotonic()
+    cycle_start = current_time = time.monotonic()
     try:
         while True:
             # Loop time managment
@@ -347,17 +404,31 @@ def Up_Down_State(bus0, bus1, bus2, bus3, ID_1, ID_2, ID_3):
     Theta_dot_HL_UD = np.roll(Theta_dot_HL_UD, 501, axis=1)
     Theta_dot_HR_UD = np.roll(Theta_dot_HR_UD, 501, axis=1)
 
-    print("Pre-loop sequence complete, starting UP/DOWN loop...")
+    print("Pre-loop sequence complete, writing up/down state PI parameters...")
+
+    # Write up/down state PI parameters
+    PID_RAM_Control(bus0,ID_1, pi_up_down)
+    PID_RAM_Control(bus0,ID_2, pi_up_down)
+    PID_RAM_Control(bus0,ID_3, pi_up_down)
+    PID_RAM_Control(bus1,ID_1, pi_up_down)
+    PID_RAM_Control(bus1,ID_2, pi_up_down)
+    PID_RAM_Control(bus1,ID_3, pi_up_down)
+    PID_RAM_Control(bus2,ID_1, pi_up_down)  
+    PID_RAM_Control(bus2,ID_2, pi_up_down)
+    PID_RAM_Control(bus2,ID_3, pi_up_down)
+    PID_RAM_Control(bus3,ID_1, pi_up_down)
+    PID_RAM_Control(bus3,ID_2, pi_up_down)
+    PID_RAM_Control(bus3,ID_3, pi_up_down)
+
     print("Press 'S' to switch to standing pose - Press ctrl+c in terminal for shutdown")
 
     # Note start time
-    start_time = cycle_start = current_time = time.monotonic()
+    cycle_start = current_time = time.monotonic()
     try:
         while True:
             # Loop time managment
             current_time = time.monotonic()
             elapsed_cycle = current_time - cycle_start # Elapsed time in current cycle
-            #elapsed_total = current_time - start_time  # Elapsed time since start of program
 
             # Check if current cycle is over -> start new cycle
             if elapsed_cycle >= total_time:
@@ -502,9 +573,24 @@ def Bezier_Walk_State(bus0, bus1, bus2, bus3, ID_1, ID_2, ID_3):
     Theta_dot_HL = np.abs(np.rad2deg(Theta_dot_HL))
     Theta_dot_HR = np.abs(np.rad2deg(Theta_dot_HR))
 
-    print("Moving to tinitial trajectory position before starting the loop...")
+    print("Writing Bezier walk state PI parameters and moving to tinitial trajectory position before starting the loop...")
 
-    #### MOVE TO INITIAL POSITION IN REASONABLE WA
+    # Write Bezier walk state PI parameters
+    PID_RAM_Control(bus0,ID_1, pi_bezier_walk)
+    PID_RAM_Control(bus0,ID_2, pi_bezier_walk)
+    PID_RAM_Control(bus0,ID_3, pi_bezier_walk)
+    PID_RAM_Control(bus1,ID_1, pi_bezier_walk)
+    PID_RAM_Control(bus1,ID_2, pi_bezier_walk)
+    PID_RAM_Control(bus1,ID_3, pi_bezier_walk)
+    PID_RAM_Control(bus2,ID_1, pi_bezier_walk)  
+    PID_RAM_Control(bus2,ID_2, pi_bezier_walk)
+    PID_RAM_Control(bus2,ID_3, pi_bezier_walk)
+    PID_RAM_Control(bus3,ID_1, pi_bezier_walk)
+    PID_RAM_Control(bus3,ID_2, pi_bezier_walk)
+    PID_RAM_Control(bus3,ID_3, pi_bezier_walk)
+
+    #### MOVE TO INITIAL POSITION IN REASONABLE WAY
+    ##### THIS IS NOT GOOD ENOUGH YET
     Position_Control(bus0, ID_1, Theta_FL[0, 0], 20)
     Position_Control(bus0, ID_2, Theta_FL[0, 1], 20)
     Position_Control(bus0, ID_3, Theta_FL[0, 2], 20)
@@ -518,7 +604,7 @@ def Bezier_Walk_State(bus0, bus1, bus2, bus3, ID_1, ID_2, ID_3):
     Position_Control(bus3, ID_2, Theta_HR[0, 1], 20)
     Position_Control(bus3, ID_3, Theta_HR[0, 2], 20)
 
-    time.sleep(4) # Wait for 4 seconds to allow robot to move to initial position before starting the loop
+    time.sleep(2) # Wait for 2 seconds to allow robot to move to initial position before starting the loop
 
     print("Pre-loop sequence complete, starting BEZIER WALK GAIT loop...")
     print("Press 'S' to switch to standing pose - Press ctrl+c in terminal for shutdown")
@@ -562,7 +648,7 @@ def Bezier_Walk_State(bus0, bus1, bus2, bus3, ID_1, ID_2, ID_3):
         raise # Just raise the exception to be caught in the main loop try-except block for shutdown
     
     # Move to standing pose at the end of the state
-    print("Moving to standing pose at the end of UP/DOWN state...")
+    print("Moving to standing pose at the end of BEZIER WALK GAIT state...")
     Position_Control(bus0,ID_1,Theta_FL_stand[0],20)
     Position_Control(bus0,ID_2,Theta_FL_stand[1],20)
     Position_Control(bus0,ID_3,Theta_FL_stand[2],20)
@@ -642,9 +728,6 @@ for bus in [bus0, bus1, bus2, bus3]:
         if msg:
             print(msg)
 
-# Loop count
-count = 0
-
 print("Initialization complete, starting pre-loop verification sequence...")
 
 ## PRE-LOOP VERIFICATION SEQUENCE ##
@@ -694,7 +777,6 @@ try:
         print(f"Joint positions for Front Right:  theta1 = {FR_theta1:.2f},  theta2 = {FR_theta2:.2f},  theta3 = {FR_theta3:.2f}")
         print(f"Joint positions for Hind Left:    theta1 = {HL_theta1:.2f},  theta2 = {HL_theta2:.2f},  theta3 = {HL_theta3:.2f}")
         print(f"Joint positions for Hind Right:   theta1 = {HR_theta1:.2f},  theta2 = {HR_theta2:.2f},  theta3 = {HR_theta3:.2f}")
-        print(f"========== ======== {count}")
         print("Check startup positions - Move legs to zero-configuration and check that angles are correct")
         print("Press 'enter' to continue if correct positions are verified")
         print("Press 'ctrl+c' in terminal for shutdown if positions are not correct to avoid damage to the robot")
@@ -713,7 +795,23 @@ except KeyboardInterrupt:
 pre_listener.stop()  
 
 ### PRE-LOOP MOVEMENT SEQUENCE ###
-print("Pre-loop verification sequence complete, starting pre-loop movement sequence...")
+print("Pre-loop verification sequence complete, writing stand state PI parameters and starting pre-loop movement sequence...")
+
+# Write stand state PI parameters
+PID_RAM_Control(bus0,ID_1, pi_stand)
+PID_RAM_Control(bus0,ID_2, pi_stand)
+PID_RAM_Control(bus0,ID_3, pi_stand)
+PID_RAM_Control(bus1,ID_1, pi_stand)
+PID_RAM_Control(bus1,ID_2, pi_stand)
+PID_RAM_Control(bus1,ID_3, pi_stand)
+PID_RAM_Control(bus2,ID_1, pi_stand)  
+PID_RAM_Control(bus2,ID_2, pi_stand)
+PID_RAM_Control(bus2,ID_3, pi_stand)
+PID_RAM_Control(bus3,ID_1, pi_stand)
+PID_RAM_Control(bus3,ID_2, pi_stand)
+PID_RAM_Control(bus3,ID_3, pi_stand)
+
+time.sleep(1) # Wait for 1 second to ensure PID parameters are written before starting movement sequence
 
 # Move to zero position 
 print("Moving to zero position...")
@@ -759,12 +857,15 @@ main_listener.start()  # Start the listener in a separate thread
 print("Loop started - Press ctrl+c in terminal for shutdown")
 
 # Note start time
-start_time = cycle_start = current_time = time.monotonic()
+#start_time = cycle_start = current_time = time.monotonic()
 
 try:
     while True:
         # Print loop info
         print("Current state: Standing pose - Loop running - Press ctrl+c in terminal for shutdown")
+
+        # Set returned from state flag
+        returned_from_state = False
 
         # Check battery voltage percentage and if low switch to low battery state to indicating need for recharge
         _, Voltage_Percentage = Battery_Voltage(bus0, ID_1) # Read battery voltage percentage from one of the motors (assuming all motors have the same battery voltage)
@@ -801,11 +902,28 @@ try:
             Up_Down_State(bus0, bus1, bus2, bus3, ID_1, ID_2, ID_3)
             with lock:
                 State = "STAND" # After finishing the state function, switch back to standing pose state
+            returned_from_state = True
         elif current_state == "BEZIER WALK GAIT":
             Bezier_Walk_State(bus0, bus1, bus2, bus3, ID_1, ID_2, ID_3)
             with lock:
                 State = "STAND" # After finishing the state function, switch back to standing pose state
+            returned_from_state = True
         # add more states here as needed with elif statements
+
+        # If returned from any state: Update PI parameters to be for stand state
+        if returned_from_state:
+            PID_RAM_Control(bus0,ID_1, pi_stand)
+            PID_RAM_Control(bus0,ID_2, pi_stand)
+            PID_RAM_Control(bus0,ID_3, pi_stand)
+            PID_RAM_Control(bus1,ID_1, pi_stand)
+            PID_RAM_Control(bus1,ID_2, pi_stand)
+            PID_RAM_Control(bus1,ID_3, pi_stand)
+            PID_RAM_Control(bus2,ID_1, pi_stand)  
+            PID_RAM_Control(bus2,ID_2, pi_stand)
+            PID_RAM_Control(bus2,ID_3, pi_stand)
+            PID_RAM_Control(bus3,ID_1, pi_stand)
+            PID_RAM_Control(bus3,ID_2, pi_stand)
+            PID_RAM_Control(bus3,ID_3, pi_stand)
 
 # Stop loop with Ctrl+C in terminal
 except KeyboardInterrupt:
