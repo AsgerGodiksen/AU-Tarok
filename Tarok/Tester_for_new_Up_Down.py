@@ -27,29 +27,29 @@ w_k = 0.220   # Width of body in kinematic model (meters)
 
 # Define local time series
 dt = 0.005 # seconds (200 Hz) - not directly the control frequency, but the discretization used for precomputations
-total_time = 10  # Total time in seconds of one cycle of the trajectory
+total_time = 6  # Total time in seconds of one cycle of the trajectory
 num_time_steps = int(total_time / dt) + 1
 t = np.linspace(0, total_time, num_time_steps)
 
-# Segment boundaries for the trajectory: 0->5s, 5->10s
-conditions = [(t >= 0)   & (t < 5),   # Up:    -0.36 -> -0.46
-              (t >= 5)   & (t < 10),  # Down:  -0.46 -> -0.36
-              (t >= 10)]               # Hold:  -0.36 (hold at -0.36 after 10s))
+# Segment boundaries for the trajectory: 0->3s, 3->6s
+conditions = [(t >= 0)   & (t < 3),   # Up:    -0.36 -> -0.46
+              (t >= 3)   & (t < 6),   # Down:  -0.46 -> -0.36
+              (t >= 6)]               # Hold:  -0.36 (hold at -0.36 after 6s))
 
 # Define desired end-effector trajectory as function of time for all 4 legs (in body frame)
 x_FL = x_FR = (l_k/2)*np.ones_like(t)  # X position in meters (constant)
 x_HL = x_HR = (-l_k/2)*np.ones_like(t)  # X position in meters (constant)
 y_FL = y_HL = (w_k/2 + 0.078)*np.ones_like(t)  # Y position in meters (constant)
 y_FR = y_HR = (-w_k/2 - 0.078)*np.ones_like(t)  # Y position in meters (constant)
-z = np.piecewise(t, conditions, [lambda t: cos_interp(t, -0.36, -0.46, 0, 5),
-                                 lambda t: cos_interp(t, -0.46, -0.36, 5, 10),
+z = np.piecewise(t, conditions, [lambda t: cos_interp(t, -0.36, -0.46, 0, 3),
+                                 lambda t: cos_interp(t, -0.46, -0.36, 3, 6),
                                  lambda t: -0.36*np.ones_like(t)])  # Z position in meters (cosine wave from -0.36 to -0.46, then to -0.36, then hold at -0.36)
 
 # Define desired end effector velocity (foot velocity) as functions of time for all 4 legs (in body frame) - Note, it is the same for all legs in body frame for this trajectory
 x_dot = np.zeros_like(t)  # X velocity in meters/second (constant)
 y_dot = np.zeros_like(t)  # Y velocity in meters/second (constant)
-z_dot = np.piecewise(t, conditions, [lambda t: cos_interp_dot(t, -0.36, -0.46, 0, 5),
-                                     lambda t: cos_interp_dot(t, -0.46, -0.36, 5, 10),
+z_dot = np.piecewise(t, conditions, [lambda t: cos_interp_dot(t, -0.36, -0.46, 0, 3),
+                                     lambda t: cos_interp_dot(t, -0.46, -0.36, 3, 6),
                                      lambda t: np.zeros_like(t)])
 
 ### Transformations ###

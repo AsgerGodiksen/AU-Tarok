@@ -51,14 +51,18 @@ def Calculate_Percentage(Cell_Voltage):
 def Battery_Voltage(bus,id):
     # Function that will print out the average cell voltage
     # And give a Battery procentage that are left
-    #bus0 = can.interface.Bus(channel="can1", interface="socketcan")
+    
     Battery_Voltage = Read_Voltage(bus, id)
+
+    if Battery_Voltage is None:
+        print("Error reading battery voltage, returning None for both voltage and percentage")
+        return None, None
+
     print("Battery Voltage: ", f"{Battery_Voltage:7.2f}", "V")
     Cell_Voltage = Battery_Voltage/6
     Voltage_Procentage = Calculate_Percentage(Cell_Voltage)
     print("Cell Voltage: ", round(Cell_Voltage,1), "V  ", "Percentage: ",Voltage_Procentage,"%")
     print("--------------------------------------------------")
     print("")
-    #bus0.flush_tx_buffer()
-    #bus0.shutdown()
+
     return Cell_Voltage , Voltage_Procentage
