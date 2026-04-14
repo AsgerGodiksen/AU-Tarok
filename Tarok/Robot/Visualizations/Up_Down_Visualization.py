@@ -145,6 +145,45 @@ plt.title('HR Leg')
 plt.legend()
 
 
+# Plot with 4 subplots showing joint positions theta1, theta2, theta3 for each leg over time
+plt.figure(figsize=(12, 8))
+plt.subplot(2, 2, 1)
+plt.plot(t, np.rad2deg(Theta_FL[:, 0]), label='theta1')
+plt.plot(t, np.rad2deg(Theta_FL[:, 1]), label='theta2')
+plt.plot(t, np.rad2deg(Theta_FL[:, 2]), label='theta3')
+plt.ylabel('Joint Position (deg)')
+plt.title('FL Leg')
+plt.legend()
+
+plt.subplot(2, 2, 2)
+plt.plot(t, np.rad2deg(Theta_FR[:, 0]), label='theta1')
+plt.plot(t, np.rad2deg(Theta_FR[:, 1]), label='theta2')
+plt.plot(t, np.rad2deg(Theta_FR[:, 2]), label='theta3')
+plt.ylabel('Joint Position (deg)')
+plt.title('FR Leg')
+plt.legend()
+
+plt.subplot(2, 2, 3)
+plt.plot(t, np.rad2deg(Theta_HL[:, 0]), label='theta1')
+plt.plot(t, np.rad2deg(Theta_HL[:, 1]), label='theta2')
+plt.plot(t, np.rad2deg(Theta_HL[:, 2]), label='theta3')
+plt.xlabel('Time (s)')
+plt.ylabel('Joint Position (deg)')
+plt.title('HL Leg')
+plt.legend()
+
+plt.subplot(2, 2, 4)
+plt.plot(t, np.rad2deg(Theta_HR[:, 0]), label='theta1')
+plt.plot(t, np.rad2deg(Theta_HR[:, 1]), label='theta2')
+plt.plot(t, np.rad2deg(Theta_HR[:, 2]), label='theta3')
+plt.xlabel('Time (s)')
+plt.ylabel('Joint Position (deg)')
+plt.title('HR Leg')
+plt.legend()
+
+plt.suptitle('Joint Positions - Up/Down Motion', fontsize=13, fontweight='bold')
+plt.tight_layout()
+
 #### ANIMATION #### (Note: not true time)
 # Animation which plots the trajectory of the legs in 3D space based on the computed joint angles and forward kinematics, showing the up/down motion of the legs as defined by the desired end-effector trajectory. The animation will show the movement of the legs over time, with the foot positions being updated according to the forward kinematics computed from the inverse kinematics joint angles.
 # Note that the end-effector positions computed from the forward kinematics should be transformed to the body frame using CT.TB_0xx functions before plotting, to ensure that the trajectory is visualized in the correct frame of reference.

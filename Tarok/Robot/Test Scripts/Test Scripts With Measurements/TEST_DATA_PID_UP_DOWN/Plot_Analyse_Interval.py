@@ -124,7 +124,7 @@ def analyse_joint(time, values):
 
 def plot_interval(df, t_start, t_end, output_name):
     mask = (df["Timestamp (s)"] >= t_start) & (df["Timestamp (s)"] <= t_end)
-    sub  = df[mask].copy()
+    sub  = df[mask].iloc[::10].copy()
     time = sub["Timestamp (s)"]
 
     fig, axes = plt.subplots(2, 2, figsize=(14, 8), sharex=True)
@@ -143,7 +143,7 @@ def plot_interval(df, t_start, t_end, output_name):
         ax.axhline(0, color="black", linewidth=0.6, linestyle="--", alpha=0.4)
         ax.set_title(f"{leg} Leg", fontsize=11)
         ax.set_ylabel("Torque (Nm)")
-        ax.set_ylim(-6, 6)
+        ax.set_ylim(-10, 10)
         ax.legend(loc="upper right", fontsize=8)
         ax.grid(True, alpha=0.3)
 
