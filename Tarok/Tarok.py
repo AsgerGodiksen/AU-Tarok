@@ -113,18 +113,6 @@ def main_on_press(key):
             State = "BEZIER WALK GAIT"
             print("W key pressed - Changing state to BEZIER WALK GAIT")
 
-# Helper functions for trajectory generation
-def cos_interp(t, z_start, z_end, t_start, t_end):
-    '''Smooth cosine interpolation from z_start to z_end over [t_start, t_end]'''
-    tau = (t - t_start) / (t_end - t_start)  # Normalized time 0->1
-    return z_start + (z_end - z_start) * 0.5 * (1 - np.cos(np.pi * tau))
-
-def cos_interp_dot(t, z_start, z_end, t_start, t_end):
-    '''Derivative of cosine interpolation'''
-    duration = t_end - t_start
-    tau = (t - t_start) / duration
-    return (z_end - z_start) * 0.5 * np.pi / duration * np.sin(np.pi * tau)
-
 ### STATE FUNCTIONS ###
 # Define functions for each state here, such as standing pose, walking gait, etc. Each function should implement the behavior for that state and return to standing pose at the end of the state.
 

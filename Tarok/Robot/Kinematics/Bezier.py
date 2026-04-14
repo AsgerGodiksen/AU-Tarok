@@ -1,7 +1,10 @@
 import numpy as np
 from scipy.special import comb
 
+
+
 from Robot.Kinematics import Inverse_Kinematics
+from Robot.Kinematics.Interpolation import cos_interp, cos_interp_dot
 
 def Bezier_Curve(c_k, t):
     """
@@ -138,7 +141,7 @@ def Generate_Bezier_Stand_Trajectory(Swing_Trajectory,Stand_Time_Scalar,Stand_Ti
     x_start = Swing_Trajectory[-1, 0]   # Where swing ended
     x_end   = Swing_Trajectory[ 0, 0]   # Where swing started (return target)
     y_const = Swing_Trajectory[-1, 1]   # Height is constant during stand
-    
+
     # ─────────────────────────────────────────────
     # OUTPUTS
     
@@ -156,7 +159,100 @@ def Generate_Bezier_Stand_Trajectory(Swing_Trajectory,Stand_Time_Scalar,Stand_Ti
     Stand_Velocity = np.column_stack((x_dot_Stand, y_dot_Stand))
 
     return Stand_Time_Vector,Stand_Trajectory, Stand_Velocity
+
+def Generate_Bezier_Stand_Trajectory_Modified(Swing_Trajectory,Stand_Time_Scalar,Stand_Time_Steps,Leg):
+    """
+    Generate the modified stand-phase trajectory that follows a swing phase.
+
+    The foot returns linearly (in the Backward direction) from the swing end-point
+    back to the swing start-point, while holding a constant height.
     
+    Happens in Bézier Frame
+
+    Args:
+        Swing_Trajectory (np.ndarray, shape (N, 2)): Output of Generate_Bezier_Swing_Trajectory.
+        Stand_Time  (float): Duration of the stand phase [s].
+        Stand_Time_Steps (int):  Number of discrete time steps for the stand phase.
+        Leg (str): The leg for which to generate the trajectory, either "FL", "FR", "HL" or "HR" - Note that FL and HL are equal, and FR and HR are equal.
+        
+    Returns:
+        Stand_Time_Vector     (np.ndarray, shape (num_steps,)): Time vector, offset to start
+                        at T_swing (must be shifted by caller if needed).
+        Stand_Trajectory  (np.ndarray, shape (num_steps, 2)):
+                        [:, 0] = forward position (Bézier frame x),
+                        [:, 1] = height position  (Bézier frame y).
+        Stand_Velocity    (np.ndarray, shape (num_steps, 2)):
+                        [:, 0] = forward velocity (Bézier frame x),
+                        [:, 1] = height velocity  (Bézier frame y).
+    """
+    # Extrating the start and end points of the Swing Trajectory
+    x_start = Swing_Trajectory[-1, 0]   # Where swing ended
+    x_end   = Swing_Trajectory[ 0, 0]   # Where swing started (return target)
+    y_normal = Swing_Trajectory[-1, 1]   # Normal height for stand phase
+
+    # Computing height for "stretch" and "fold" cases
+    y_stretch = y_normal + 0.02  # Example: 2 cm higher than normal
+    y_fold = y_normal - 0.02     # Example: 2 cm lower than normal
+
+    # Time variables
+    t = np.linspace(0, Stand_Time_Scalar, Stand_Time_Steps) # Time vector for the total stand phase
+    Stand_Time_Vector = t # Output variable
+    one_segment_time = Stand_Time_Scalar / 3  # Time duration for each segment of the stand phase
+
+    # Segment boundaries for the stand phase trajectory
+    conditions = [(t >= 0) & (t < 0.2*one_segment_time),                        # "Bezier" -> "Stretch" or "Fold"
+                  (t >= 0.2*one_segment_time) & (t < 0.9*one_segment_time),     # "Stretch" or "Fold"
+                  (t >= 0.9*one_segment_time) & (t < 1.1*one_segment_time),     # "Stretch" or "Fold" -> "Normal"
+                  (t >= 1.1*one_segment_time) & (t < 1.9*one_segment_time),     # "Normal"
+                  (t >= 1.9*one_segment_time) & (t < 2.1*one_segment_time),     # "Normal" -> "Stretch" or "Fold"
+                  (t >= 2.1*one_segment_time) & (t < 2.8*one_segment_time),     # "Stretch" or "Fold"
+                  (t >= 2.8*one_segment_time) & (t <= 3*one_segment_time)]      # "Stretch" or "Fold" -> "Bezier"
+    
+    # Stand coordinates for the end effector
+    x_Stand = np.linspace(x_start,x_end,Stand_Time_Steps)
+    if Leg == "FL" or Leg == "HL":
+        # Sequence: "Bezier" -> "Stretch" -> "Normal" -> "Fold"
+        y_Stand = np.piecewise(t, conditions, [lambda t: cos_interp(t, y_normal, y_stretch, 0, 0.2*one_segment_time),
+                                               lambda t: y_stretch*np.ones_like(t),
+                                               lambda t: cos_interp(t, y_stretch, y_normal, 0.9*one_segment_time, 1.1*one_segment_time),
+                                               lambda t: y_normal*np.ones_like(t),
+                                               lambda t: cos_interp(t, y_normal, y_fold, 1.9*one_segment_time, 2.1*one_segment_time),
+                                               lambda t: y_fold*np.ones_like(t),
+                                               lambda t: cos_interp(t, y_fold, y_normal, 2.8*one_segment_time, 3*one_segment_time)])  
+    elif Leg == "FR" or Leg == "HR":
+        # Sequence: "Bezier" -> "Fold" -> "Normal" -> "Stretch"
+        y_Stand = np.piecewise(t, conditions, [lambda t: cos_interp(t, y_normal, y_fold, 0, 0.2*one_segment_time),
+                                               lambda t: y_fold*np.ones_like(t),
+                                               lambda t: cos_interp(t, y_fold, y_normal, 0.9*one_segment_time, 1.1*one_segment_time),
+                                               lambda t: y_normal*np.ones_like(t),
+                                               lambda t: cos_interp(t, y_normal, y_stretch, 1.9*one_segment_time, 2.1*one_segment_time),
+                                               lambda t: y_stretch*np.ones_like(t),
+                                               lambda t: cos_interp(t, y_stretch, y_normal, 2.8*one_segment_time, 3*one_segment_time)])  
+    # Assembling the Stand Trajectory
+    Stand_Trajectory = np.column_stack((x_Stand, y_Stand))
+
+    # Stand Velocities
+    x_dot_Stand = np.full(Stand_Time_Steps, (x_end - x_start) / Stand_Time_Scalar)
+    if Leg == "FL" or Leg == "HL":
+        y_dot_Stand = np.piecewise(t, conditions, [lambda t: cos_interp_dot(t, y_normal, y_stretch, 0, 0.2*one_segment_time),
+                                                   lambda t: np.zeros_like(t),
+                                                   lambda t: cos_interp_dot(t, y_stretch, y_normal, 0.9*one_segment_time, 1.1*one_segment_time),
+                                                   lambda t: np.zeros_like(t),
+                                                   lambda t: cos_interp_dot(t, y_normal, y_fold, 1.9*one_segment_time, 2.1*one_segment_time),
+                                                   lambda t: np.zeros_like(t),
+                                                   lambda t: cos_interp_dot(t, y_fold, y_normal, 2.8*one_segment_time, 3*one_segment_time)])
+    elif Leg == "FR" or Leg == "HR":
+        y_dot_Stand = np.piecewise(t, conditions, [lambda t: cos_interp_dot(t, y_normal, y_fold, 0, 0.2*one_segment_time),
+                                                   lambda t: np.zeros_like(t),
+                                                   lambda t: cos_interp_dot(t, y_fold, y_normal, 0.9*one_segment_time, 1.1*one_segment_time),
+                                                   lambda t: np.zeros_like(t),
+                                                   lambda t: cos_interp_dot(t, y_normal, y_stretch, 1.9*one_segment_time, 2.1*one_segment_time),
+                                                   lambda t: np.zeros_like(t),
+                                                   lambda t: cos_interp_dot(t, y_stretch, y_normal, 2.8*one_segment_time, 3*one_segment_time)]) 
+    # Assembling the Stand Velocity
+    Stand_Velocity = np.column_stack((x_dot_Stand, y_dot_Stand))
+
+    return Stand_Time_Vector,Stand_Trajectory, Stand_Velocity 
 
 def Assemble_Bezier_Trajectory(
                                 Swing_Trajectory,
@@ -219,7 +315,9 @@ def Building_Bezier_Trajectories(
                                 Swing_Time_Scalar,
                                 Stand_Time_Scalar,
                                 Swing_Time_Steps,
-                                Stand_Time_Steps
+                                Stand_Time_Steps,
+                                Stand_Phase_type = "Constant",
+                                Leg = "FL"
                                 ):
     """
     Building the Bezier Trajectory for one leg in the Body Frame
@@ -229,7 +327,9 @@ def Building_Bezier_Trajectories(
         Stand_Time_Scalar (float): The Stand Time
         Swing_Time_Steps (int): Swing Time Steps
         Stand_Time_Steps (int): Stand Time Steps
-
+        Stand_Phase_type (str): The type of stand phase trajectory, either "Constant", "Modified" or "Hyun"
+        Leg (str): The leg for which to generate the trajectory, either "FL", "FR", "HL" or "HR"
+        
     Returns:
         Position_Body_Bezier (np.ndarray):   The Bezier Curve in the Body Frame
         Velocity_Body_Bezier (np.ndarray):   The Velocity of the Bezier Curve in the Body Frame
@@ -242,7 +342,17 @@ def Building_Bezier_Trajectories(
     Swing_Time_Vector, Swing_Trajectory , Swing_Velocity = Generate_Bezier_Swing_Trajectory(c_k,Swing_Time_Scalar,Swing_Time_Steps)
     
     # Generating the Stand Phase
-    Stand_Time_Vector,Stand_Trajectory, Stand_Velocity = Generate_Bezier_Stand_Trajectory(Swing_Trajectory,Stand_Time_Scalar,Stand_Time_Steps)
+    if Stand_Phase_type == "Constant":
+         Stand_Time_Vector, Stand_Trajectory, Stand_Velocity = Generate_Bezier_Stand_Trajectory(Swing_Trajectory,Stand_Time_Scalar,Stand_Time_Steps)
+    elif Stand_Phase_type == "Modified":
+        if Leg == "FL" or Leg == "HL":
+            Stand_Time_Vector, Stand_Trajectory, Stand_Velocity = Generate_Bezier_Stand_Trajectory_Modified(Swing_Trajectory,Stand_Time_Scalar,Stand_Time_Steps,Leg)
+        elif Leg == "FR" or Leg == "HR":
+            Stand_Time_Vector, Stand_Trajectory, Stand_Velocity = Generate_Bezier_Stand_Trajectory_Modified(Swing_Trajectory,Stand_Time_Scalar,Stand_Time_Steps,Leg)
+    elif Stand_Phase_type == "Hyun":
+        print("Hyun stand phase not implemented yet")
+        return None, None, None
+        #Stand_Time_Vector, Stand_Trajectory, Stand_Velocity = Generate_Bezier_Stand_Trajectory_Hyun(Swing_Trajectory,Stand_Time_Scalar,Stand_Time_Steps)
 
     # Assembling the Swing and Stand Phase
     Position_Body_Bezier, Velocity_Body_Bezier, Time_Bezier = Assemble_Bezier_Trajectory(
@@ -261,7 +371,7 @@ def Building_Bezier_Trajectories(
 
 def Apply_Phase_Offset(Trajectory, Velocity, Phase_Offset):
     N_total = Trajectory.shape[1]
-    shift   = int(round(Phase_Offset * N_total))
+    shift   = int(round(Phase_Offset * N_total)) + 1
     return np.roll(Trajectory, shift, axis=1), np.roll(Velocity, shift, axis=1)
 
 
