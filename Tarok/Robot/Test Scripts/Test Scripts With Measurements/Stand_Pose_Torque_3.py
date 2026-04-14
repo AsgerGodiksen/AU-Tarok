@@ -144,10 +144,10 @@ for bus in [bus0, bus1, bus2, bus3]:
 # Data logging setup — now logging all 12 motor torques
 # ─────────────────────────────────────────────────────────────────────────────
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-log_dir = os.path.join(SCRIPT_DIR, "TEST_DATA")
+log_dir = os.path.join(SCRIPT_DIR, "TEST_DATA_PID")
 os.makedirs(log_dir, exist_ok=True)
 log_filename = os.path.join(
-    log_dir, f"Stand_Pose_Torque_Log_{time.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
+    log_dir, f"Stand_Pose_Torque_Log_TEST_15_{time.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
 )
 
 with open(log_filename, 'w', newline='') as csvfile:
@@ -174,7 +174,7 @@ for bus in [bus0, bus1, bus2, bus3]:
     Position_Control(bus, ID_1, 0, 30)
     Position_Control(bus, ID_2, 0, 30)
     Position_Control(bus, ID_3, 0, 30)
-time.sleep(5)
+time.sleep(2)
 
 print("Moved to zero position, moving to stand pose...")
 for bus, angles in [(bus0, Theta_FL), (bus1, Theta_FR),
@@ -182,7 +182,7 @@ for bus, angles in [(bus0, Theta_FL), (bus1, Theta_FR),
     Position_Control(bus, ID_1, angles[0], 30)
     Position_Control(bus, ID_2, angles[1], 30)
     Position_Control(bus, ID_3, angles[2], 30)
-time.sleep(6)
+time.sleep(3)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Main loop — target 200 Hz (5 ms budget per cycle)
@@ -207,6 +207,7 @@ loop_times = []
 
 print("Pre-loop sequence complete, starting loop...")
 print("Loop started - Press Ctrl+C in terminal for shutdown")
+time.sleep(5)  # brief pause before starting loop
 start_time = time.monotonic()
 
 def safe_torque(fb, i):

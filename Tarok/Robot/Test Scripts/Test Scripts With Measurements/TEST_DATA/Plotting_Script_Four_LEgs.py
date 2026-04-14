@@ -7,7 +7,7 @@ import os
 # CONFIGURATION — point this to your log file
 # ---------------------------------------------------------------
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-LOG_FILE   = os.path.join(SCRIPT_DIR, "Up_Down_Torque_Log_2026-04-09_13-51-19.csv")
+LOG_FILE   = os.path.join(SCRIPT_DIR, "Stand_Pose_Torque_Log_2026-04-13_11-23-55.csv")
 
 # ---------------------------------------------------------------
 # READ DATA

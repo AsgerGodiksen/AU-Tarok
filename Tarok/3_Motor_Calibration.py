@@ -9,7 +9,7 @@ from ASGER_METHODS import*
 if __name__ == "__main__":
     try:
         bus0 = can.interface.Bus(channel="can0", interface="socketcan")
-        bus0.flush_tx_buffer()		# Clean any CAN signals on the line
+        #bus0.flush_tx_buffer()		# Clean any CAN signals on the line
         for i in range(100):		# Now Listens for any signals 100 times with 0,001 s in between. Prints if any.
             msg = bus0.recv(0.01)
             if msg:
@@ -65,5 +65,5 @@ if __name__ == "__main__":
         msg = bus0.recv(4)
         print(msg)
         print("Keyboard interrupt detected. Shutting down CAN bus.")
-        bus0.flush_tx_buffer()
+        #bus0.flush_tx_buffer()
         bus0.shutdown()

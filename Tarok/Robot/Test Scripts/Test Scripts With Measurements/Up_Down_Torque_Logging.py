@@ -195,10 +195,10 @@ for bus in [bus0, bus1, bus2, bus3]:
 # Data logging setup
 # ─────────────────────────────────────────────────────────────────────────────
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-log_dir = os.path.join(SCRIPT_DIR, "TEST_DATA")
+log_dir = os.path.join(SCRIPT_DIR, "TEST_DATA_PID_UP_DOWN")
 os.makedirs(log_dir, exist_ok=True)
 log_filename = os.path.join(
-    log_dir, f"Up_Down_Torque_Log_{time.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
+    log_dir, f"Up_Down_Torque_Log_Test_1_{time.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
 )
 
 with open(log_filename, 'w', newline='') as csvfile:

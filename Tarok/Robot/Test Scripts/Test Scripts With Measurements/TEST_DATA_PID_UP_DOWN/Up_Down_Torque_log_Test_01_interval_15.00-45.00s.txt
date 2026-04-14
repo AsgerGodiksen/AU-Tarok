@@ -1,0 +1,96 @@
+================================================================
+  PID ANALYSIS   interval: 15.000 s -> 45.000 s  (30.000 s)   samples: 4137
+================================================================
+
+  --------------------------------------------------------
+  LEG: FL
+  --------------------------------------------------------
+  Joint    Steady(Nm)  Pk-Pk(Nm)  RMSE(Nm)  Std(Nm) FreqFFT(Hz) FreqPk(Hz) Settle(s)  Overshoot%
+  -------- ---------- ---------- --------- -------- ----------- ---------- --------- -----------
+  J1           -0.789      0.808     0.140    0.139        0.10      45.90    29.934       -58.0
+  J2           -2.158      6.500     1.563    1.480        0.10      39.69       N/A      -185.6
+  J3            3.994      2.458     0.540    0.505        0.10      32.66       N/A       +32.4
+
+  --------------------------------------------------------
+  LEG: FR
+  --------------------------------------------------------
+  Joint    Steady(Nm)  Pk-Pk(Nm)  RMSE(Nm)  Std(Nm) FreqFFT(Hz) FreqPk(Hz) Settle(s)  Overshoot%
+  -------- ---------- ---------- --------- -------- ----------- ---------- --------- -----------
+  J1            0.292      1.381     0.328    0.322        0.10      34.44       N/A      +257.9
+  J2            2.047      7.207     1.686    1.558        0.10      35.53       N/A      +230.7
+  J3           -3.656      2.964     0.682    0.639        0.10      37.94       N/A       -44.6
+
+  --------------------------------------------------------
+  LEG: HL
+  --------------------------------------------------------
+  Joint    Steady(Nm)  Pk-Pk(Nm)  RMSE(Nm)  Std(Nm) FreqFFT(Hz) FreqPk(Hz) Settle(s)  Overshoot%
+  -------- ---------- ---------- --------- -------- ----------- ---------- --------- -----------
+  J1            1.378      1.414     0.306    0.305        0.10      15.37       N/A       -56.0
+  J2            1.453      6.230     1.489    1.414        0.10      36.65       N/A      +294.0
+  J3           -3.881      2.458     0.489    0.434        0.10      39.80       N/A       -37.1
+
+  --------------------------------------------------------
+  LEG: HR
+  --------------------------------------------------------
+  Joint    Steady(Nm)  Pk-Pk(Nm)  RMSE(Nm)  Std(Nm) FreqFFT(Hz) FreqPk(Hz) Settle(s)  Overshoot%
+  -------- ---------- ---------- --------- -------- ----------- ---------- --------- -----------
+  J1           -1.417      1.482     0.254    0.253        0.10      38.19       N/A       +54.8
+  J2           -2.567      7.207     1.652    1.526        0.10      34.82       N/A      -159.8
+  J3            4.006      2.694     0.538    0.523        0.10      38.79       N/A       +37.9
+
+================================================================
+  HOW TO READ THESE NUMBERS
+================================================================
+
+  STEADY (Nm)  — The average torque the motor holds at the end of the
+    interval. This is the 'resting load' once things have calmed down.
+    A value close to zero means the joint is nearly unloaded.
+    A large value means the motor is working hard just to hold position.
+
+  PK-PK (Nm)  — The total swing from the lowest to the highest torque
+    value seen. Think of it as 'how wild was the signal?'
+    Small Pk-Pk = the joint is calm and stable.
+    Large Pk-Pk = the joint is bouncing around a lot.
+    Goal: get this as small as possible without slowing the response.
+
+  RMSE (Nm)  — On average, how far was the torque from its steady value?
+    Lower is better. This is your main PID performance score —
+    if two tests have the same Pk-Pk, the one with lower RMSE
+    spent less time far from the target.
+
+  STD (Nm)  — How much the torque 'jitters' around its average.
+    A low Std but high RMSE means the signal is smooth but offset.
+    A high Std means the signal is noisy or still oscillating.
+    Compare Std between tests with the same PID gains to judge noise.
+
+  FREQFFT (Hz)  — The dominant oscillation frequency found by
+    mathematically decomposing the whole signal (FFT method).
+    FreqPk finds the same thing by measuring the time between peaks.
+    If both agree -> the signal has a clear, repeating oscillation.
+    If they disagree -> the oscillation is irregular or fading out.
+    Higher frequency = faster wobbling. A PID that is too aggressive
+    (high P or I) will push this frequency up.
+
+  SETTLE (s)  — How many seconds passed before the torque stayed
+    within +-0.3 Nm of its final value and did not leave again.
+    This is how long the robot took to 'settle in' to its pose.
+    Shorter = better. A PID that never settles will show 'N/A'.
+    Tip: if Settle is long but Pk-Pk is small, the robot is slow but
+    stable — try increasing P a little.
+
+  OVERSHOOT (%)  — How far past the final resting torque did the signal
+    fly before settling? Expressed as a percentage of the steady value.
+    +120 % means the torque peaked at more than double its final value.
+    Negative sign means it undershot (went the wrong way first).
+    High overshoot = too much P or too little D.
+    Near zero overshoot with long Settle = too much D (overdamped).
+
+  QUICK TUNING GUIDE
+  ------------------
+  Oscillating / high Pk-Pk and Std  -> reduce P or increase D
+  Slow to settle / low overshoot    -> increase P or reduce D
+  Steady-state offset (Steady != 0) -> increase I
+  Noisy but stable                  -> reduce P slightly, check D filter
+  FreqFFT and FreqPk very different -> oscillation is irregular,
+                                       focus on Settle and RMSE instead
+================================================================

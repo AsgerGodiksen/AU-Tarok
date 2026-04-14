@@ -13,10 +13,10 @@ import os
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 TESTS = [
-    {"file": "Stand_Pose_Torque_Log_NEW_PID_Test_1.csv", "label": "PID Test 1"},
-    {"file": "Stand_Pose_Torque_Log_NEW_PID_Test_2.csv", "label": "PID Test 2"},
-    {"file": "Stand_Pose_Torque_Log_NEW_PID_Test_3.csv", "label": "PID Test 3"},
-    {"file": "Stand_Pose_Torque_Log_NEW_PID_Test_4.csv", "label": "PID Test 4"},
+    {"file": "Stand_Pose_Torque_Log_2026-04-14_09-31-48.csv", "label": "PID Test 1"},
+    {"file": "Stand_Pose_Torque_Log_2026-04-14_09-32-29.csv", "label": "PID Test 2"},
+    {"file": "Stand_Pose_Torque_Log_2026-04-14_09-33-18.csv", "label": "PID Test 3"},
+    {"file": "Stand_Pose_Torque_Log_2026-04-14_09-34-03.csv", "label": "PID Test 4"},
 ]
 
 # ---------------------------------------------------------------
@@ -74,6 +74,7 @@ for test, data in zip(TESTS, all_data):
         ax.axhline(0, color='black', linewidth=0.5, linestyle='--')
         ax.grid(True)
         ax.legend()
+        ax.set_ylim(-5, 5)
 
     plt.tight_layout()
 

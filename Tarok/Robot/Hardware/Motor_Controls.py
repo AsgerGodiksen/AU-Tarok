@@ -7,7 +7,7 @@ import re
 import binascii
 import struct
 
-# Default values
+# Default values From Manufacturing
 PID_DEFAULTS = {
     'angle_kp':  100,
     'angle_ki':  100,

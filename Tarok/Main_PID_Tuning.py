@@ -58,15 +58,15 @@ print("Initialization complete, starting pre-loop sequence...")
 print(" Reading the PID Parameters")
 Read_PID(bus0,ID_1)
 
-time.sleep(2)
+time.sleep(1)
 # Parameters for PID Tuning:
 pid_params = {
-    'angle_kp':  110,
-    'angle_ki':  50,
-    'speed_kp':  55,
-    'speed_ki':  13,
-    'torque_kp': 55,
-    'torque_ki': 17
+    #'angle_kp':  110,
+    #'angle_ki':  20,
+    #'speed_kp':  60,
+    #'speed_ki':  8,
+    #'torque_kp': 60,
+    #'torque_ki': 10,
 }
 
 print("Update to new PID parameters USING RAM")
@@ -85,7 +85,7 @@ PID_ROM_Control(bus2,ID_3, pid_params)
 PID_ROM_Control(bus3,ID_1, pid_params)
 PID_ROM_Control(bus3,ID_2, pid_params)
 PID_ROM_Control(bus3,ID_3, pid_params)
-time.sleep(2)
+time.sleep(1)
 
 
 
