@@ -1,4 +1,4 @@
-# Script for testing up and down movement of the robot in linear motion.
+# Script for testing up and down movement of the robot using cosine interpolation.
 # Build on Main_Template.py for the structure of the code, and Test_visualization.py for the precomputation etc.
 
 # Imports
@@ -13,6 +13,18 @@ from Robot import*
 # Old: CAN initialization in terminal: "sudo ip link set dev canX up type can bitrate 1000000" - with "X" being 0, 1, 2 and 3 for each bus
 # New: CAN initialization in terminal: "for i in 0 1 2 3; do sudo ip link set dev can$i up type can bitrate 1000000 && sudo ip link set can$i txqueuelen 1000; done"
 
+# Helper functions for trajectory generation
+def cos_interp(t, z_start, z_end, t_start, t_end):
+    '''Smooth cosine interpolation from z_start to z_end over [t_start, t_end]'''
+    tau = (t - t_start) / (t_end - t_start)  # Normalized time 0->1
+    return z_start + (z_end - z_start) * 0.5 * (1 - np.cos(np.pi * tau))
+
+def cos_interp_dot(t, z_start, z_end, t_start, t_end):
+    '''Derivative of cosine interpolation'''
+    duration = t_end - t_start
+    tau = (t - t_start) / duration
+    return (z_end - z_start) * 0.5 * np.pi / duration * np.sin(np.pi * tau)
+
 ### SCRIPT START ###
 ## PRECOMPUTATIONS ##
 print("Performing pre-computations...")
@@ -23,21 +35,30 @@ w_k = 0.220   # Width of body in kinematic model (meters)
 
 # Define time series
 dt = 0.005 # seconds (200 Hz)
-total_time = 10  # Total time in seconds
+total_time = 6  # Total time in seconds
 num_time_steps = int(total_time / dt) + 1
 t = np.linspace(0, total_time, num_time_steps)
+
+# Segment boundaries for the trajectory: 0->3s, 3->6s
+conditions = [(t >= 0)   & (t < 3),   # Up:    -0.36 -> -0.46
+              (t >= 3)   & (t < 6),   # Down:  -0.46 -> -0.36
+              (t >= 6)]               # Hold:  -0.36 (hold at -0.36 after 6s))
 
 # Define desired end-effector trajectory as function of time for all 4 legs (in body frame)
 x_FL = x_FR = (l_k/2)*np.ones_like(t)  # X position in meters (constant)
 x_HL = x_HR = (-l_k/2)*np.ones_like(t)  # X position in meters (constant)
 y_FL = y_HL = (w_k/2 + 0.078)*np.ones_like(t)  # Y position in meters (constant)
 y_FR = y_HR = (-w_k/2 - 0.078)*np.ones_like(t)  # Y position in meters (constant)
-z = np.piecewise(t, [t < 5, t >=5], [lambda t: -0.46 + (0.10/5)*t, lambda t: -0.36 - (0.10/5)*(t-5)])  # Z position in meters (linear wave from -0.46 to -0.36 and back to -0.46 in 10 seconds)
+z = np.piecewise(t, conditions, [lambda t: cos_interp(t, -0.36, -0.46, 0, 3),
+                                 lambda t: cos_interp(t, -0.46, -0.36, 3, 6),
+                                 lambda t: -0.36*np.ones_like(t)])  # Z position in meters (cosine wave from -0.36 to -0.46, then to -0.36, then hold at -0.36)
 
 # Define desired end effector velocity (foot velocity) as functions of time for all 4 legs (in body frame) - Note, it is the same for all legs in body frame for this trajectory
 x_dot = np.zeros_like(t)  # X velocity in meters/second (constant)
 y_dot = np.zeros_like(t)  # Y velocity in meters/second (constant)
-z_dot = np.piecewise(t, [t < 5, t >= 5], [lambda t: 0.10/5*np.ones_like(t), lambda t: -0.10/5*np.ones_like(t)])  # Z velocity in meters/second (linear wave from 0.10 m/s to -0.10 m/s and back to 0.10 m/s in 10 seconds)
+z_dot = np.piecewise(t, conditions, [lambda t: cos_interp_dot(t, -0.36, -0.46, 0, 3),
+                                     lambda t: cos_interp_dot(t, -0.46, -0.36, 3, 6),
+                                     lambda t: np.zeros_like(t)])
 
 ### Transformations ###
 # Combine trajectories into position arrays for each leg
@@ -103,6 +124,16 @@ Theta_dot_FR = np.abs(np.rad2deg(Theta_dot_FR))
 Theta_dot_HL = np.abs(np.rad2deg(Theta_dot_HL))
 Theta_dot_HR = np.abs(np.rad2deg(Theta_dot_HR))
 
+# Roll arrays by 501 time steps to start at the standing position
+Theta_FL = np.roll(Theta_FL, 501, axis=0)
+Theta_FR = np.roll(Theta_FR, 501, axis=0)
+Theta_HL = np.roll(Theta_HL, 501, axis=0)
+Theta_HR = np.roll(Theta_HR, 501, axis=0)
+Theta_dot_FL = np.roll(Theta_dot_FL, 501, axis=1)
+Theta_dot_FR = np.roll(Theta_dot_FR, 501, axis=1)
+Theta_dot_HL = np.roll(Theta_dot_HL, 501, axis=1)
+Theta_dot_HR = np.roll(Theta_dot_HR, 501, axis=1)
+
 print("Pre-computations complete.")
 
 ## INITIALIZATION ##
@@ -132,6 +163,34 @@ count = 0
 
 print("Initialization complete, starting pre-loop sequence...")
 
+# Write PI parameters to motors - adjust as needed for your application, or remove if not needed
+# Note: This is old compromise paramters
+PI_Params = {
+    'angle_kp':  110,
+    'angle_ki':  50,
+    'speed_kp':  55,
+    'speed_ki':  20,
+    'torque_kp': 55,
+    'torque_ki': 25
+}
+
+print("Writing PI parameters to motors...")
+PID_RAM_Control(bus0,ID_1, PI_Params)
+PID_RAM_Control(bus0,ID_2, PI_Params)
+PID_RAM_Control(bus0,ID_3, PI_Params)
+PID_RAM_Control(bus1,ID_1, PI_Params)
+PID_RAM_Control(bus1,ID_2, PI_Params)
+PID_RAM_Control(bus1,ID_3, PI_Params)
+PID_RAM_Control(bus2,ID_1, PI_Params)  
+PID_RAM_Control(bus2,ID_2, PI_Params)
+PID_RAM_Control(bus2,ID_3, PI_Params)
+PID_RAM_Control(bus3,ID_1, PI_Params)
+PID_RAM_Control(bus3,ID_2, PI_Params)
+PID_RAM_Control(bus3,ID_3, PI_Params)
+
+time.sleep(0.2) # Sleep for a short time to ensure parameters are written before starting loop, adjust as needed
+
+
 # Move to zero position 
 print("Moving to zero position...")
 Position_Control(bus0,ID_1,0,30)
@@ -147,7 +206,7 @@ Position_Control(bus3,ID_1,0,30)
 Position_Control(bus3,ID_2,0,30)
 Position_Control(bus3,ID_3,0,30)
 
-time.sleep(6)
+time.sleep(4)
 
 # Move to initial position
 print("Moved to zero position, moving to initial trajectory position...")
@@ -164,7 +223,7 @@ Position_Control(bus3,ID_1,Theta_HR[0, 0],30)
 Position_Control(bus3,ID_2,Theta_HR[0, 1],30)
 Position_Control(bus3,ID_3,Theta_HR[0, 2],30)
 
-time.sleep(6)
+time.sleep(4)
 
 print("Pre-loop sequence complete, starting loop...")
 print("Loop started - Press ctrl+c in terminal for shutdown")

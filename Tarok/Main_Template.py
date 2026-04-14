@@ -57,6 +57,33 @@ print("Initialization complete, starting pre-loop sequence...")
 
 ## PRE-LOOP SEQUENCE ##
 
+# Write PI parameters to motors - adjust as needed for your application, or remove if not needed
+# Note: This is old compromise paramters
+PI_Params = {
+    'angle_kp':  110,
+    'angle_ki':  50,
+    'speed_kp':  55,
+    'speed_ki':  20,
+    'torque_kp': 55,
+    'torque_ki': 25
+}
+
+print("Writing PI parameters to motors...")
+PID_RAM_Control(bus0,ID_1, PI_Params)
+PID_RAM_Control(bus0,ID_2, PI_Params)
+PID_RAM_Control(bus0,ID_3, PI_Params)
+PID_RAM_Control(bus1,ID_1, PI_Params)
+PID_RAM_Control(bus1,ID_2, PI_Params)
+PID_RAM_Control(bus1,ID_3, PI_Params)
+PID_RAM_Control(bus2,ID_1, PI_Params)  
+PID_RAM_Control(bus2,ID_2, PI_Params)
+PID_RAM_Control(bus2,ID_3, PI_Params)
+PID_RAM_Control(bus3,ID_1, PI_Params)
+PID_RAM_Control(bus3,ID_2, PI_Params)
+PID_RAM_Control(bus3,ID_3, PI_Params)
+
+time.sleep(0.5) # Sleep for a short time to ensure parameters are written before starting loop, adjust as needed
+
 # Insert optional pre-loop sequence here
 
 print("Pre-loop sequence complete, starting loop...")
