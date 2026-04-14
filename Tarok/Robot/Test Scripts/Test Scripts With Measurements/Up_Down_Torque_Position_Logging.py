@@ -1,8 +1,12 @@
-# Script for up/down movement with torque data logging for all 12 motors.
-# Combines trajectory from Test_Up_Down_Full.py with parallel feedback/logging
-# pattern from Stand_Pose_Torque_3.py.
+# Script for up/down movement with torque AND position data logging for all 12 motors.
+# Based on Up_Down_Torque_Logging.py — extends the feedback function to also decode
+# the actual joint position from the motor reply (bytes 6-7, single-turn encoder).
+#
+# CSV columns:
+#   Timestamp (s), Trajectory Index,
+#   FL_J1_Torque .. HR_J3_Torque  (Nm, actual feedback),
+#   FL_J1_Pos    .. HR_J3_Pos     (deg, output shaft, decoded from encoder reply)
 
-# Imports
 import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
@@ -17,12 +21,19 @@ import concurrent.futures
 from Robot import *
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Position_Control_With_Feedback  (same as Stand_Pose_Torque_3.py)
+# Position_Control_With_Feedback  — returns torque AND actual position
 # ─────────────────────────────────────────────────────────────────────────────
 def Position_Control_With_Feedback(bus, motor_id, new_position, max_speed, timeout=0.005):
     """
-    Send a position command and return the torque feedback from the reply.
-    Returns (torque_current_A, torque_Nm), or (None, None) on timeout.
+    Send a position command and return torque + actual position from the reply.
+    Returns (torque_Nm, position_deg), or (None, None) on timeout.
+
+    Reply byte layout (command 0xA4):
+      [0]   command byte  0xA4
+      [1]   temperature   (°C)
+      [2-3] iq current    (int16, LSB = 33 A / 2048)
+      [4-5] speed         (int16, 1 dps/LSB at motor shaft)
+      [6-7] encoder       (uint16, 0-65535 = 0-360° motor shaft, single-turn)
     """
     data = [0xA4, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
 
@@ -49,9 +60,9 @@ def Position_Control_With_Feedback(bus, motor_id, new_position, max_speed, timeo
             bus.send(msg)
             break
         except can.CanOperationError:
-            time.sleep(0.001)  # give the HW buffer a moment to drain
+            time.sleep(0.001)
     else:
-        return None, None  # all retries failed — treat like a timeout
+        return None, None
 
     deadline = time.monotonic() + timeout
     while True:
@@ -64,16 +75,21 @@ def Position_Control_With_Feedback(bus, motor_id, new_position, max_speed, timeo
         if msg.arbitration_id == motor_id and msg.data[0] == 0xA4:
             break
 
-    iq_raw = struct.unpack('<h', bytes([msg.data[2], msg.data[3]]))[0]
-    torque_current_A = (iq_raw / 2048.0) * 33.0
-    torque_Nm        = torque_current_A * 2.09
-    return torque_current_A, torque_Nm
+    # Decode torque
+    iq_raw       = struct.unpack('<h', bytes([msg.data[2], msg.data[3]]))[0]
+    torque_Nm    = (iq_raw / 2048.0) * 33.0 * 2.09
+
+    # Decode actual position from single-turn encoder (bytes 6-7)
+    encoder_raw  = struct.unpack('<H', bytes([msg.data[6], msg.data[7]]))[0]
+    position_deg = (encoder_raw / 65535.0) * 360.0 / 9.0  # output shaft degrees
+
+    return torque_Nm, position_deg
 
 
 def send_leg(bus, angles, speeds):
     """
-    Command one leg's 3 motors with individual speeds and collect torque feedback.
-    Returns list of (torque_current_A, torque_Nm) for [J1, J2, J3].
+    Command one leg's 3 motors and collect torque + position feedback.
+    Returns list of (torque_Nm, position_deg) for [J1, J2, J3].
     """
     return [
         Position_Control_With_Feedback(bus, motor_id, angle, speed)
@@ -82,13 +98,19 @@ def send_leg(bus, angles, speeds):
 
 
 def safe_torque(fb, i):
-    """Return torque_Nm from feedback list, 0.0 on timeout (None)."""
+    """Return torque_Nm from feedback, 0.0 on timeout."""
+    val = fb[i][0]
+    return val if val is not None else 0.0
+
+
+def safe_position(fb, i):
+    """Return position_deg from feedback, 0.0 on timeout."""
     val = fb[i][1]
     return val if val is not None else 0.0
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Pre-computations  (from Test_Up_Down_Full.py)
+# Pre-computations  (identical to Up_Down_Torque_Logging.py)
 # ─────────────────────────────────────────────────────────────────────────────
 print("Performing pre-computations...")
 
@@ -100,7 +122,6 @@ total_time = 10
 num_time_steps = int(total_time / dt) + 1
 t = np.linspace(0, total_time, num_time_steps)
 
-# End-effector trajectory (body frame)
 x_FL = x_FR = (l_k / 2) * np.ones_like(t)
 x_HL = x_HR = (-l_k / 2) * np.ones_like(t)
 y_FL = y_HL = (w_k / 2 + 0.078) * np.ones_like(t)
@@ -109,14 +130,12 @@ z = np.piecewise(t, [t < 5, t >= 5],
                  [lambda t: -0.46 + (0.10 / 5) * t,
                   lambda t: -0.36 - (0.10 / 5) * (t - 5)])
 
-# End-effector velocity (body frame)
 x_dot = np.zeros_like(t)
 y_dot = np.zeros_like(t)
 z_dot = np.piecewise(t, [t < 5, t >= 5],
                      [lambda t: 0.10 / 5 * np.ones_like(t),
                       lambda t: -0.10 / 5 * np.ones_like(t)])
 
-### Transformations ###
 P_FL_body = np.vstack((x_FL, y_FL, z))
 P_FR_body = np.vstack((x_FR, y_FR, z))
 P_HL_body = np.vstack((x_HL, y_HL, z))
@@ -134,13 +153,11 @@ V_FR_base = np.array([R0_B(V_body[:, i].reshape((3, 1)), 'FR') for i in range(le
 V_HL_base = np.array([R0_B(V_body[:, i].reshape((3, 1)), 'HL') for i in range(len(t))])
 V_HR_base = np.array([R0_B(V_body[:, i].reshape((3, 1)), 'HR') for i in range(len(t))])
 
-### Kinematics ###
 Theta_FL = np.array([Inverse_Kinematics(P_FL_base[i], 'FL') for i in range(len(t))])
 Theta_FR = np.array([Inverse_Kinematics(P_FR_base[i], 'FR') for i in range(len(t))])
 Theta_HL = np.array([Inverse_Kinematics(P_HL_base[i], 'HL') for i in range(len(t))])
 Theta_HR = np.array([Inverse_Kinematics(P_HR_base[i], 'HR') for i in range(len(t))])
 
-# Joint velocities via damped least squares
 Theta_dot_FL = np.zeros((3, len(t)))
 Theta_dot_FR = np.zeros((3, len(t)))
 Theta_dot_HL = np.zeros((3, len(t)))
@@ -153,12 +170,11 @@ for i in range(len(t)):
         (Theta_HL, Theta_dot_HL, V_HL_base, 'HL'),
         (Theta_HR, Theta_dot_HR, V_HR_base, 'HR'),
     ]:
-        J = Jacobian(Th[i, 0], Th[i, 1], Th[i, 2], leg)
+        J  = Jacobian(Th[i, 0], Th[i, 1], Th[i, 2], leg)
         JT = J.T
         Th_dot[:, i] = np.linalg.solve(JT @ J + (damp**2) * np.eye(3),
                                         JT @ V_base[i].flatten())
 
-# Convert to degrees
 Theta_FL = np.rad2deg(Theta_FL)
 Theta_FR = np.rad2deg(Theta_FR)
 Theta_HL = np.rad2deg(Theta_HL)
@@ -198,20 +214,24 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 log_dir = os.path.join(SCRIPT_DIR, "TEST_DATA_PID_UP_DOWN")
 os.makedirs(log_dir, exist_ok=True)
 log_filename = os.path.join(
-    log_dir, f"Up_Down_Torque_Log_Test_5_{time.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
+    log_dir, f"Up_Down_TorquePos_Log_Test_1_{time.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
 )
 
 with open(log_filename, 'w', newline='') as csvfile:
     csv.writer(csvfile).writerow([
         "Timestamp (s)", "Trajectory Index",
-        "FL_J1", "FL_J2", "FL_J3",
-        "FR_J1", "FR_J2", "FR_J3",
-        "HL_J1", "HL_J2", "HL_J3",
-        "HR_J1", "HR_J2", "HR_J3",
+        "FL_J1_Torque", "FL_J2_Torque", "FL_J3_Torque",
+        "FR_J1_Torque", "FR_J2_Torque", "FR_J3_Torque",
+        "HL_J1_Torque", "HL_J2_Torque", "HL_J3_Torque",
+        "HR_J1_Torque", "HR_J2_Torque", "HR_J3_Torque",
+        "FL_J1_Pos", "FL_J2_Pos", "FL_J3_Pos",
+        "FR_J1_Pos", "FR_J2_Pos", "FR_J3_Pos",
+        "HL_J1_Pos", "HL_J2_Pos", "HL_J3_Pos",
+        "HR_J1_Pos", "HR_J2_Pos", "HR_J3_Pos",
     ])
 
-# Preallocate: timestamp + index + 12 torques = 14 columns
-data = np.zeros((1500000, 14))
+# Preallocate: timestamp + index + 12 torques + 12 positions = 26 columns
+data = np.zeros((1500000, 26))
 data_count = 0
 
 executor = concurrent.futures.ThreadPoolExecutor(max_workers=4)
@@ -235,14 +255,14 @@ for bus, angles in [(bus0, Theta_FL[0]), (bus1, Theta_FR[0]),
 time.sleep(6)
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Main loop — cyclic up/down trajectory with torque logging
+# Main loop — cyclic up/down trajectory with torque + position logging
 # ─────────────────────────────────────────────────────────────────────────────
 LOOP_PERIOD = 1.0 / 200.0
 loop_times = []
 
 print("Pre-loop sequence complete, starting loop...")
 print("Loop started - Press Ctrl+C in terminal for shutdown")
-time.sleep(5)  # small delay to ensure all motors are ready before starting loop timing
+time.sleep(5)
 start_time = cycle_start = time.monotonic()
 
 try:
@@ -251,46 +271,44 @@ try:
         elapsed_total = loop_start - start_time
         elapsed_cycle = loop_start - cycle_start
 
-        # ── Precise timing ──────────────────────────────────────────────────
         loop_elapsed = time.monotonic() - loop_start
         loop_times.append(loop_elapsed)
         sleep_time = LOOP_PERIOD - loop_elapsed
-        time.sleep(max(sleep_time, 0.001))  # always sleep at least 1 ms
+        time.sleep(max(sleep_time, 0.001))
 
-        # Check if current cycle is over -> start new cycle
         if elapsed_cycle >= total_time:
             cycle_start += total_time
             continue
 
-        # Find closest trajectory index
         index = min(int(elapsed_cycle / dt), len(t) - 1)
 
         # ── Send + receive all 4 legs in parallel ──────────────────────────
-        f_FL = executor.submit(send_leg, bus0,
-                               Theta_FL[index], Theta_dot_FL[:, index])
-        f_FR = executor.submit(send_leg, bus1,
-                               Theta_FR[index], Theta_dot_FR[:, index])
-        f_HL = executor.submit(send_leg, bus2,
-                               Theta_HL[index], Theta_dot_HL[:, index])
-        f_HR = executor.submit(send_leg, bus3,
-                               Theta_HR[index], Theta_dot_HR[:, index])
+        f_FL = executor.submit(send_leg, bus0, Theta_FL[index], Theta_dot_FL[:, index])
+        f_FR = executor.submit(send_leg, bus1, Theta_FR[index], Theta_dot_FR[:, index])
+        f_HL = executor.submit(send_leg, bus2, Theta_HL[index], Theta_dot_HL[:, index])
+        f_HR = executor.submit(send_leg, bus3, Theta_HR[index], Theta_dot_HR[:, index])
 
         fb_FL = f_FL.result()
         fb_FR = f_FR.result()
         fb_HL = f_HL.result()
         fb_HR = f_HR.result()
 
-        # ── Log torque data ─────────────────────────────────────────────────
+        # ── Log torque + position ───────────────────────────────────────────
         data[data_count, :] = [
             elapsed_total, index,
+            # Torques (Nm)
             safe_torque(fb_FL, 0), safe_torque(fb_FL, 1), safe_torque(fb_FL, 2),
             safe_torque(fb_FR, 0), safe_torque(fb_FR, 1), safe_torque(fb_FR, 2),
             safe_torque(fb_HL, 0), safe_torque(fb_HL, 1), safe_torque(fb_HL, 2),
             safe_torque(fb_HR, 0), safe_torque(fb_HR, 1), safe_torque(fb_HR, 2),
+            # Positions (deg, output shaft, from single-turn encoder reply)
+            safe_position(fb_FL, 0), safe_position(fb_FL, 1), safe_position(fb_FL, 2),
+            safe_position(fb_FR, 0), safe_position(fb_FR, 1), safe_position(fb_FR, 2),
+            safe_position(fb_HL, 0), safe_position(fb_HL, 1), safe_position(fb_HL, 2),
+            safe_position(fb_HR, 0), safe_position(fb_HR, 1), safe_position(fb_HR, 2),
         ]
         data_count += 1
 
-        # ── Precise timing ──────────────────────────────────────────────────
         loop_elapsed = time.monotonic() - loop_start
         loop_times.append(loop_elapsed)
         sleep_time = LOOP_PERIOD - loop_elapsed

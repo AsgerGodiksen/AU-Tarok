@@ -25,7 +25,7 @@ COLORS = ["tab:blue", "tab:orange", "tab:green"]
 
 
 def plot_test(csv_path, output_name):
-    df   = pd.read_csv(csv_path)
+    df   = pd.read_csv(csv_path).iloc[::10]
     time = df["Timestamp (s)"]
 
     fig, axes = plt.subplots(2, 2, figsize=(14, 8), sharex=True)
@@ -40,7 +40,7 @@ def plot_test(csv_path, output_name):
                 ax.plot(time, df[col], label=joint, color=color, linewidth=1.2)
         ax.set_title(f"{leg} Leg", fontsize=11)
         ax.set_ylabel("Torque (Nm)")
-        ax.set_ylim(-6, 6)
+        ax.set_ylim(-10, 10)
         ax.legend(loc="upper right", fontsize=8)
         ax.grid(True, alpha=0.3)
 
