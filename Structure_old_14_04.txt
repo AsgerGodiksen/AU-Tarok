@@ -1,0 +1,290 @@
+.
+├── How_To_Make_Structure_List.txt
+├── README.md
+├── requirements-local.txt
+├── requirements.txt
+├── Structure_old.txt
+├── Structure.txt
+└── Tarok
+    ├── 3_Motor_Calibration.py
+    ├── ASGER_METHODS.py
+    ├── Calibration.py
+    ├── Main_PID_Tuning.py
+    ├── Main.py
+    ├── Main_Template.py
+    ├── Robot
+    │   ├── Configurations
+    │   │   ├── Dynamic_Stand_Pose.py
+    │   │   ├── __init__.py
+    │   │   ├── Stand_Pose.py
+    │   │   └── TEST_DATA
+    │   │       └── Plotting_Script.py
+    │   ├── dev_ws
+    │   │   ├── build
+    │   │   │   ├── COLCON_IGNORE
+    │   │   │   └── tarok_description
+    │   │   │       ├── ament_cmake_core
+    │   │   │       │   ├── package.cmake
+    │   │   │       │   ├── stamps
+    │   │   │       │   │   ├── ament_prefix_path.sh.stamp
+    │   │   │       │   │   ├── nameConfig.cmake.in.stamp
+    │   │   │       │   │   ├── nameConfig-version.cmake.in.stamp
+    │   │   │       │   │   ├── package_xml_2_cmake.py.stamp
+    │   │   │       │   │   ├── package.xml.stamp
+    │   │   │       │   │   ├── path.sh.stamp
+    │   │   │       │   │   └── templates_2_cmake.py.stamp
+    │   │   │       │   ├── tarok_descriptionConfig.cmake
+    │   │   │       │   └── tarok_descriptionConfig-version.cmake
+    │   │   │       ├── ament_cmake_environment_hooks
+    │   │   │       │   ├── ament_prefix_path.dsv
+    │   │   │       │   ├── local_setup.bash
+    │   │   │       │   ├── local_setup.dsv
+    │   │   │       │   ├── local_setup.sh
+    │   │   │       │   ├── local_setup.zsh
+    │   │   │       │   ├── package.dsv
+    │   │   │       │   └── path.dsv
+    │   │   │       ├── ament_cmake_index
+    │   │   │       │   └── share
+    │   │   │       │       └── ament_index
+    │   │   │       │           └── resource_index
+    │   │   │       │               ├── package_run_dependencies
+    │   │   │       │               │   └── tarok_description
+    │   │   │       │               ├── packages
+    │   │   │       │               │   └── tarok_description
+    │   │   │       │               └── parent_prefix_path
+    │   │   │       │                   └── tarok_description
+    │   │   │       ├── ament_cmake_package_templates
+    │   │   │       │   └── templates.cmake
+    │   │   │       ├── ament_cmake_uninstall_target
+    │   │   │       │   └── ament_cmake_uninstall_target.cmake
+    │   │   │       ├── AMENT_IGNORE
+    │   │   │       ├── cmake_args.last
+    │   │   │       ├── CMakeCache.txt
+    │   │   │       ├── CMakeFiles
+    │   │   │       │   ├── 3.28.3
+    │   │   │       │   │   ├── CMakeCCompiler.cmake
+    │   │   │       │   │   ├── CMakeCXXCompiler.cmake
+    │   │   │       │   │   ├── CMakeDetermineCompilerABI_C.bin
+    │   │   │       │   │   ├── CMakeDetermineCompilerABI_CXX.bin
+    │   │   │       │   │   ├── CMakeSystem.cmake
+    │   │   │       │   │   ├── CompilerIdC
+    │   │   │       │   │   │   ├── a.out
+    │   │   │       │   │   │   ├── CMakeCCompilerId.c
+    │   │   │       │   │   │   └── tmp
+    │   │   │       │   │   └── CompilerIdCXX
+    │   │   │       │   │       ├── a.out
+    │   │   │       │   │       ├── CMakeCXXCompilerId.cpp
+    │   │   │       │   │       └── tmp
+    │   │   │       │   ├── cmake.check_cache
+    │   │   │       │   ├── CMakeConfigureLog.yaml
+    │   │   │       │   ├── CMakeDirectoryInformation.cmake
+    │   │   │       │   ├── CMakeRuleHashes.txt
+    │   │   │       │   ├── Makefile2
+    │   │   │       │   ├── Makefile.cmake
+    │   │   │       │   ├── pkgRedirects
+    │   │   │       │   ├── progress.marks
+    │   │   │       │   ├── TargetDirectories.txt
+    │   │   │       │   ├── tarok_description_uninstall.dir
+    │   │   │       │   │   ├── build.make
+    │   │   │       │   │   ├── cmake_clean.cmake
+    │   │   │       │   │   ├── compiler_depend.make
+    │   │   │       │   │   ├── compiler_depend.ts
+    │   │   │       │   │   ├── DependInfo.cmake
+    │   │   │       │   │   └── progress.make
+    │   │   │       │   └── uninstall.dir
+    │   │   │       │       ├── build.make
+    │   │   │       │       ├── cmake_clean.cmake
+    │   │   │       │       ├── compiler_depend.make
+    │   │   │       │       ├── compiler_depend.ts
+    │   │   │       │       ├── DependInfo.cmake
+    │   │   │       │       └── progress.make
+    │   │   │       ├── cmake_install.cmake
+    │   │   │       ├── colcon_build.rc
+    │   │   │       ├── colcon_command_prefix_build.sh
+    │   │   │       ├── colcon_command_prefix_build.sh.env
+    │   │   │       ├── CTestConfiguration.ini
+    │   │   │       ├── CTestCustom.cmake
+    │   │   │       ├── CTestTestfile.cmake
+    │   │   │       ├── install_manifest.txt
+    │   │   │       └── Makefile
+    │   │   ├── install
+    │   │   │   ├── COLCON_IGNORE
+    │   │   │   ├── local_setup.bash
+    │   │   │   ├── local_setup.ps1
+    │   │   │   ├── local_setup.sh
+    │   │   │   ├── _local_setup_util_ps1.py
+    │   │   │   ├── _local_setup_util_sh.py
+    │   │   │   ├── local_setup.zsh
+    │   │   │   ├── setup.bash
+    │   │   │   ├── setup.ps1
+    │   │   │   ├── setup.sh
+    │   │   │   ├── setup.zsh
+    │   │   │   └── tarok_description
+    │   │   │       └── share
+    │   │   │           ├── ament_index
+    │   │   │           │   └── resource_index
+    │   │   │           │       ├── package_run_dependencies
+    │   │   │           │       │   └── tarok_description
+    │   │   │           │       ├── packages
+    │   │   │           │       │   └── tarok_description
+    │   │   │           │       └── parent_prefix_path
+    │   │   │           │           └── tarok_description
+    │   │   │           ├── colcon-core
+    │   │   │           │   └── packages
+    │   │   │           │       └── tarok_description
+    │   │   │           └── tarok_description
+    │   │   │               ├── assets -> /home/asger/GITHUB - TAROK/AU-Tarok/Tarok/Robot/URDF/assets
+    │   │   │               ├── cmake
+    │   │   │               │   ├── tarok_descriptionConfig.cmake
+    │   │   │               │   └── tarok_descriptionConfig-version.cmake
+    │   │   │               ├── config
+    │   │   │               ├── environment
+    │   │   │               │   ├── ament_prefix_path.dsv
+    │   │   │               │   ├── ament_prefix_path.sh
+    │   │   │               │   ├── path.dsv
+    │   │   │               │   └── path.sh
+    │   │   │               ├── hook
+    │   │   │               │   ├── cmake_prefix_path.dsv
+    │   │   │               │   ├── cmake_prefix_path.ps1
+    │   │   │               │   └── cmake_prefix_path.sh
+    │   │   │               ├── launch
+    │   │   │               │   └── display.launch.py
+    │   │   │               ├── local_setup.bash
+    │   │   │               ├── local_setup.dsv
+    │   │   │               ├── local_setup.sh
+    │   │   │               ├── local_setup.zsh
+    │   │   │               ├── package.bash
+    │   │   │               ├── package.dsv
+    │   │   │               ├── package.ps1
+    │   │   │               ├── package.sh
+    │   │   │               ├── package.xml
+    │   │   │               ├── package.zsh
+    │   │   │               └── urdf
+    │   │   │                   └── robot.urdf
+    │   │   ├── log
+    │   │   │   ├── build_2026-04-07_17-46-06
+    │   │   │   │   ├── events.log
+    │   │   │   │   └── logger_all.log
+    │   │   │   ├── build_2026-04-07_17-58-30
+    │   │   │   │   ├── events.log
+    │   │   │   │   └── logger_all.log
+    │   │   │   ├── build_2026-04-07_18-08-27
+    │   │   │   │   ├── events.log
+    │   │   │   │   ├── logger_all.log
+    │   │   │   │   └── tarok_description
+    │   │   │   │       ├── command.log
+    │   │   │   │       ├── stderr.log
+    │   │   │   │       ├── stdout.log
+    │   │   │   │       ├── stdout_stderr.log
+    │   │   │   │       └── streams.log
+    │   │   │   ├── build_2026-04-07_18-09-01
+    │   │   │   │   ├── events.log
+    │   │   │   │   ├── logger_all.log
+    │   │   │   │   └── tarok_description
+    │   │   │   │       ├── command.log
+    │   │   │   │       ├── stderr.log
+    │   │   │   │       ├── stdout.log
+    │   │   │   │       ├── stdout_stderr.log
+    │   │   │   │       └── streams.log
+    │   │   │   ├── build_2026-04-07_18-16-59
+    │   │   │   │   ├── events.log
+    │   │   │   │   ├── logger_all.log
+    │   │   │   │   └── tarok_description
+    │   │   │   │       ├── command.log
+    │   │   │   │       ├── stderr.log
+    │   │   │   │       ├── stdout.log
+    │   │   │   │       ├── stdout_stderr.log
+    │   │   │   │       └── streams.log
+    │   │   │   ├── build_2026-04-08_09-00-08
+    │   │   │   │   ├── events.log
+    │   │   │   │   ├── logger_all.log
+    │   │   │   │   └── tarok_description
+    │   │   │   │       ├── command.log
+    │   │   │   │       ├── stderr.log
+    │   │   │   │       ├── stdout.log
+    │   │   │   │       ├── stdout_stderr.log
+    │   │   │   │       └── streams.log
+    │   │   │   ├── COLCON_IGNORE
+    │   │   │   ├── latest -> latest_build
+    │   │   │   └── latest_build -> build_2026-04-08_09-00-08
+    │   │   └── src
+    │   │       └── tarok_description
+    │   │           ├── assets
+    │   │           │   ├── foot.part
+    │   │           │   ├── foot.stl
+    │   │           │   ├── hip_knee_connector.part
+    │   │           │   ├── hip_knee_connector.stl
+    │   │           │   ├── hip_mount.part
+    │   │           │   ├── hip_mount.stl
+    │   │           │   ├── lower_leg.part
+    │   │           │   ├── lower_leg.stl
+    │   │           │   ├── motor_mount.part
+    │   │           │   ├── motor_mount.stl
+    │   │           │   ├── myactuator_case.part
+    │   │           │   ├── myactuator_case.stl
+    │   │           │   ├── myacuator_axel.part
+    │   │           │   ├── myacuator_axel.stl
+    │   │           │   ├── profile.part
+    │   │           │   ├── profile.stl
+    │   │           │   ├── upper_leg.part
+    │   │           │   └── upper_leg.stl
+    │   │           ├── CMakeLists.txt
+    │   │           ├── config
+    │   │           ├── config.json
+    │   │           ├── keys
+    │   │           ├── launch
+    │   │           │   ├── display.launch.py
+    │   │           │   └── stand_pose.launch.py
+    │   │           ├── package.xml
+    │   │           ├── robot.urdf
+    │   │           └── scripts
+    │   │               └── stand_pose_publisher.py
+    │   ├── Hardware
+    │   │   ├── Battery_Status.py
+    │   │   ├── IMU_BNO085.py
+    │   │   ├── __init__.py
+    │   │   ├── Leg_Reading.py
+    │   │   ├── Light.py
+    │   │   ├── Motor_Controls.py
+    │   │   ├── Motor_ID.py
+    │   │   ├── Motor_Readings.py
+    │   │   └── SMBUS2I2C.py
+    │   ├── __init__.py
+    │   ├── Kinematics
+    │   │   ├── Balance_Control.py
+    │   │   ├── Bezier.py
+    │   │   ├── Constant_Transforms.py
+    │   │   ├── Forward_Kinematics.py
+    │   │   ├── __init__.py
+    │   │   ├── Inverse_Kinematics.py
+    │   │   ├── Jacobian.py
+    │   │   ├── Kalman_Filter.py
+    │   │   ├── Pitch_And_Roll.py
+    │   │   └── TESTER
+    │   │       ├── Bezier_2.py
+    │   │       └── Bezier_4legs.py
+    │   ├── Tarok_Dymensions.py
+    │   ├── Test_Data
+    │   │   └── Torque_Test_DATA_NO_LOAD.ods
+    │   ├── Test Scripts
+    │   │   ├── Test_Bezier_Crawl.py
+    │   │   ├── Test Scripts With Measurements
+    │   │   │   └── Stand_Pose_Torque.py
+    │   │   ├── Test_Stand_Full.py
+    │   │   └── Test_Up_Down_Full.py
+    │   └── Visualizations
+    │       ├── Bezier_Gait Mikkel.py
+    │       ├── Bezier_Gait.py
+    │       ├── IMU_Orientation_Visualization.py
+    │       ├── Initial_Position_Visualization.py
+    │       ├── kinematics tester.py
+    │       ├── Pitch_And_Roll_Visualization_With_IMU.py
+    │       ├── Pitch_Visualization.py
+    │       ├── Pitch_Visualization_With_IMU.py
+    │       ├── Roll_Visualizations.py
+    │       ├── Up_Down_Visualization.py
+    │       └── +++_Visualization.py
+    ├── Show_angle.py
+    └── Tarok.py
+
+72 directories, 216 files

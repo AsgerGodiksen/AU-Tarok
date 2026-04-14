@@ -3,7 +3,7 @@
 ├── README.md
 ├── requirements-local.txt
 ├── requirements.txt
-├── Structure_old.txt
+├── Structure_old_14_04.txt
 ├── Structure.txt
 └── Tarok
     ├── 3_Motor_Calibration.py
@@ -19,234 +19,12 @@
     │   │   ├── Stand_Pose.py
     │   │   └── TEST_DATA
     │   │       └── Plotting_Script.py
-    │   ├── dev_ws
-    │   │   ├── build
-    │   │   │   ├── COLCON_IGNORE
-    │   │   │   └── tarok_description
-    │   │   │       ├── ament_cmake_core
-    │   │   │       │   ├── package.cmake
-    │   │   │       │   ├── stamps
-    │   │   │       │   │   ├── ament_prefix_path.sh.stamp
-    │   │   │       │   │   ├── nameConfig.cmake.in.stamp
-    │   │   │       │   │   ├── nameConfig-version.cmake.in.stamp
-    │   │   │       │   │   ├── package_xml_2_cmake.py.stamp
-    │   │   │       │   │   ├── package.xml.stamp
-    │   │   │       │   │   ├── path.sh.stamp
-    │   │   │       │   │   └── templates_2_cmake.py.stamp
-    │   │   │       │   ├── tarok_descriptionConfig.cmake
-    │   │   │       │   └── tarok_descriptionConfig-version.cmake
-    │   │   │       ├── ament_cmake_environment_hooks
-    │   │   │       │   ├── ament_prefix_path.dsv
-    │   │   │       │   ├── local_setup.bash
-    │   │   │       │   ├── local_setup.dsv
-    │   │   │       │   ├── local_setup.sh
-    │   │   │       │   ├── local_setup.zsh
-    │   │   │       │   ├── package.dsv
-    │   │   │       │   └── path.dsv
-    │   │   │       ├── ament_cmake_index
-    │   │   │       │   └── share
-    │   │   │       │       └── ament_index
-    │   │   │       │           └── resource_index
-    │   │   │       │               ├── package_run_dependencies
-    │   │   │       │               │   └── tarok_description
-    │   │   │       │               ├── packages
-    │   │   │       │               │   └── tarok_description
-    │   │   │       │               └── parent_prefix_path
-    │   │   │       │                   └── tarok_description
-    │   │   │       ├── ament_cmake_package_templates
-    │   │   │       │   └── templates.cmake
-    │   │   │       ├── ament_cmake_uninstall_target
-    │   │   │       │   └── ament_cmake_uninstall_target.cmake
-    │   │   │       ├── AMENT_IGNORE
-    │   │   │       ├── cmake_args.last
-    │   │   │       ├── CMakeCache.txt
-    │   │   │       ├── CMakeFiles
-    │   │   │       │   ├── 3.28.3
-    │   │   │       │   │   ├── CMakeCCompiler.cmake
-    │   │   │       │   │   ├── CMakeCXXCompiler.cmake
-    │   │   │       │   │   ├── CMakeDetermineCompilerABI_C.bin
-    │   │   │       │   │   ├── CMakeDetermineCompilerABI_CXX.bin
-    │   │   │       │   │   ├── CMakeSystem.cmake
-    │   │   │       │   │   ├── CompilerIdC
-    │   │   │       │   │   │   ├── a.out
-    │   │   │       │   │   │   ├── CMakeCCompilerId.c
-    │   │   │       │   │   │   └── tmp
-    │   │   │       │   │   └── CompilerIdCXX
-    │   │   │       │   │       ├── a.out
-    │   │   │       │   │       ├── CMakeCXXCompilerId.cpp
-    │   │   │       │   │       └── tmp
-    │   │   │       │   ├── cmake.check_cache
-    │   │   │       │   ├── CMakeConfigureLog.yaml
-    │   │   │       │   ├── CMakeDirectoryInformation.cmake
-    │   │   │       │   ├── CMakeRuleHashes.txt
-    │   │   │       │   ├── Makefile2
-    │   │   │       │   ├── Makefile.cmake
-    │   │   │       │   ├── pkgRedirects
-    │   │   │       │   ├── progress.marks
-    │   │   │       │   ├── TargetDirectories.txt
-    │   │   │       │   ├── tarok_description_uninstall.dir
-    │   │   │       │   │   ├── build.make
-    │   │   │       │   │   ├── cmake_clean.cmake
-    │   │   │       │   │   ├── compiler_depend.make
-    │   │   │       │   │   ├── compiler_depend.ts
-    │   │   │       │   │   ├── DependInfo.cmake
-    │   │   │       │   │   └── progress.make
-    │   │   │       │   └── uninstall.dir
-    │   │   │       │       ├── build.make
-    │   │   │       │       ├── cmake_clean.cmake
-    │   │   │       │       ├── compiler_depend.make
-    │   │   │       │       ├── compiler_depend.ts
-    │   │   │       │       ├── DependInfo.cmake
-    │   │   │       │       └── progress.make
-    │   │   │       ├── cmake_install.cmake
-    │   │   │       ├── colcon_build.rc
-    │   │   │       ├── colcon_command_prefix_build.sh
-    │   │   │       ├── colcon_command_prefix_build.sh.env
-    │   │   │       ├── CTestConfiguration.ini
-    │   │   │       ├── CTestCustom.cmake
-    │   │   │       ├── CTestTestfile.cmake
-    │   │   │       ├── install_manifest.txt
-    │   │   │       └── Makefile
-    │   │   ├── install
-    │   │   │   ├── COLCON_IGNORE
-    │   │   │   ├── local_setup.bash
-    │   │   │   ├── local_setup.ps1
-    │   │   │   ├── local_setup.sh
-    │   │   │   ├── _local_setup_util_ps1.py
-    │   │   │   ├── _local_setup_util_sh.py
-    │   │   │   ├── local_setup.zsh
-    │   │   │   ├── setup.bash
-    │   │   │   ├── setup.ps1
-    │   │   │   ├── setup.sh
-    │   │   │   ├── setup.zsh
-    │   │   │   └── tarok_description
-    │   │   │       └── share
-    │   │   │           ├── ament_index
-    │   │   │           │   └── resource_index
-    │   │   │           │       ├── package_run_dependencies
-    │   │   │           │       │   └── tarok_description
-    │   │   │           │       ├── packages
-    │   │   │           │       │   └── tarok_description
-    │   │   │           │       └── parent_prefix_path
-    │   │   │           │           └── tarok_description
-    │   │   │           ├── colcon-core
-    │   │   │           │   └── packages
-    │   │   │           │       └── tarok_description
-    │   │   │           └── tarok_description
-    │   │   │               ├── assets -> /home/asger/GITHUB - TAROK/AU-Tarok/Tarok/Robot/URDF/assets
-    │   │   │               ├── cmake
-    │   │   │               │   ├── tarok_descriptionConfig.cmake
-    │   │   │               │   └── tarok_descriptionConfig-version.cmake
-    │   │   │               ├── config
-    │   │   │               ├── environment
-    │   │   │               │   ├── ament_prefix_path.dsv
-    │   │   │               │   ├── ament_prefix_path.sh
-    │   │   │               │   ├── path.dsv
-    │   │   │               │   └── path.sh
-    │   │   │               ├── hook
-    │   │   │               │   ├── cmake_prefix_path.dsv
-    │   │   │               │   ├── cmake_prefix_path.ps1
-    │   │   │               │   └── cmake_prefix_path.sh
-    │   │   │               ├── launch
-    │   │   │               │   └── display.launch.py
-    │   │   │               ├── local_setup.bash
-    │   │   │               ├── local_setup.dsv
-    │   │   │               ├── local_setup.sh
-    │   │   │               ├── local_setup.zsh
-    │   │   │               ├── package.bash
-    │   │   │               ├── package.dsv
-    │   │   │               ├── package.ps1
-    │   │   │               ├── package.sh
-    │   │   │               ├── package.xml
-    │   │   │               ├── package.zsh
-    │   │   │               └── urdf
-    │   │   │                   └── robot.urdf
-    │   │   ├── log
-    │   │   │   ├── build_2026-04-07_17-46-06
-    │   │   │   │   ├── events.log
-    │   │   │   │   └── logger_all.log
-    │   │   │   ├── build_2026-04-07_17-58-30
-    │   │   │   │   ├── events.log
-    │   │   │   │   └── logger_all.log
-    │   │   │   ├── build_2026-04-07_18-08-27
-    │   │   │   │   ├── events.log
-    │   │   │   │   ├── logger_all.log
-    │   │   │   │   └── tarok_description
-    │   │   │   │       ├── command.log
-    │   │   │   │       ├── stderr.log
-    │   │   │   │       ├── stdout.log
-    │   │   │   │       ├── stdout_stderr.log
-    │   │   │   │       └── streams.log
-    │   │   │   ├── build_2026-04-07_18-09-01
-    │   │   │   │   ├── events.log
-    │   │   │   │   ├── logger_all.log
-    │   │   │   │   └── tarok_description
-    │   │   │   │       ├── command.log
-    │   │   │   │       ├── stderr.log
-    │   │   │   │       ├── stdout.log
-    │   │   │   │       ├── stdout_stderr.log
-    │   │   │   │       └── streams.log
-    │   │   │   ├── build_2026-04-07_18-16-59
-    │   │   │   │   ├── events.log
-    │   │   │   │   ├── logger_all.log
-    │   │   │   │   └── tarok_description
-    │   │   │   │       ├── command.log
-    │   │   │   │       ├── stderr.log
-    │   │   │   │       ├── stdout.log
-    │   │   │   │       ├── stdout_stderr.log
-    │   │   │   │       └── streams.log
-    │   │   │   ├── build_2026-04-08_09-00-08
-    │   │   │   │   ├── events.log
-    │   │   │   │   ├── logger_all.log
-    │   │   │   │   └── tarok_description
-    │   │   │   │       ├── command.log
-    │   │   │   │       ├── stderr.log
-    │   │   │   │       ├── stdout.log
-    │   │   │   │       ├── stdout_stderr.log
-    │   │   │   │       └── streams.log
-    │   │   │   ├── COLCON_IGNORE
-    │   │   │   ├── latest -> latest_build
-    │   │   │   └── latest_build -> build_2026-04-08_09-00-08
-    │   │   └── src
-    │   │       └── tarok_description
-    │   │           ├── assets
-    │   │           │   ├── foot.part
-    │   │           │   ├── foot.stl
-    │   │           │   ├── hip_knee_connector.part
-    │   │           │   ├── hip_knee_connector.stl
-    │   │           │   ├── hip_mount.part
-    │   │           │   ├── hip_mount.stl
-    │   │           │   ├── lower_leg.part
-    │   │           │   ├── lower_leg.stl
-    │   │           │   ├── motor_mount.part
-    │   │           │   ├── motor_mount.stl
-    │   │           │   ├── myactuator_case.part
-    │   │           │   ├── myactuator_case.stl
-    │   │           │   ├── myacuator_axel.part
-    │   │           │   ├── myacuator_axel.stl
-    │   │           │   ├── profile.part
-    │   │           │   ├── profile.stl
-    │   │           │   ├── upper_leg.part
-    │   │           │   └── upper_leg.stl
-    │   │           ├── CMakeLists.txt
-    │   │           ├── config
-    │   │           ├── config.json
-    │   │           ├── keys
-    │   │           ├── launch
-    │   │           │   ├── display.launch.py
-    │   │           │   └── stand_pose.launch.py
-    │   │           ├── package.xml
-    │   │           ├── robot.urdf
-    │   │           └── scripts
-    │   │               └── stand_pose_publisher.py
     │   ├── Hardware
     │   │   ├── Battery_Status.py
     │   │   ├── IMU_BNO085.py
     │   │   ├── __init__.py
-    │   │   ├── Leg_Reading.py
     │   │   ├── Light.py
     │   │   ├── Motor_Controls.py
-    │   │   ├── Motor_ID.py
     │   │   ├── Motor_Readings.py
     │   │   └── SMBUS2I2C.py
     │   ├── __init__.py
@@ -267,10 +45,110 @@
     │   ├── Test_Data
     │   │   └── Torque_Test_DATA_NO_LOAD.ods
     │   ├── Test Scripts
-    │   │   ├── Test_Bezier_Crawl.py
+    │   │   ├── Test_Bezier.py
     │   │   ├── Test Scripts With Measurements
-    │   │   │   └── Stand_Pose_Torque.py
+    │   │   │   ├── Stand_Pose_Torque_2.py
+    │   │   │   ├── Stand_Pose_Torque_3.py
+    │   │   │   ├── Stand_Pose_Torque.py
+    │   │   │   ├── TEST_DATA
+    │   │   │   │   ├── Four Tests After Calibration of Legs.png
+    │   │   │   │   ├── Four Tests Before Calibration of Legs.png
+    │   │   │   │   ├── Plotting_Script_Four_LEgs.py
+    │   │   │   │   ├── Plotting_Script.py
+    │   │   │   │   ├── Side_By_Side_Plots.py
+    │   │   │   │   ├── Stand_Pose_Torque_After_Calibration_1.csv
+    │   │   │   │   ├── Stand_Pose_Torque_After_Calibration_2.csv
+    │   │   │   │   ├── Stand_Pose_Torque_After_Calibration_3.csv
+    │   │   │   │   ├── Stand_Pose_Torque_After_Calibration_4.csv
+    │   │   │   │   ├── Stand_Pose_Torque_Log_2026-04-13_11-21-32.csv
+    │   │   │   │   ├── Stand_Pose_Torque_Log_2026-04-13_11-23-09.csv
+    │   │   │   │   ├── Stand_Pose_Torque_Log_2026-04-13_11-23-55.csv
+    │   │   │   │   ├── Stand_Pose_Torque_Log_2026-04-13_11-24-38.csv
+    │   │   │   │   ├── Stand_Pose_Torque_Log_2026-04-13_TEST1.csv
+    │   │   │   │   ├── Stand_Pose_Torque_Log_2026-04-13_TEST2.csv
+    │   │   │   │   ├── Stand_Pose_Torque_Log_2026-04-13_TEST3.csv
+    │   │   │   │   ├── Stand_Pose_Torque_Log_2026-Test_SHOWING_FOOT_PLACEMENT.csv
+    │   │   │   │   ├── Stand_Pose_Torque_Log_Floating_TEst.csv
+    │   │   │   │   ├── Stand_Pose_Torque_Log_Initial_PID.csv
+    │   │   │   │   ├── Stand_Pose_Torque_Log_NEW_PID_Test_1.csv
+    │   │   │   │   ├── Stand_Pose_Torque_Log_NEW_PID_Test_2.csv
+    │   │   │   │   ├── Stand_Pose_Torque_Log_NEW_PID_Test_3.csv
+    │   │   │   │   ├── Stand_Pose_Torque_Log_NEW_PID_Test_4.csv
+    │   │   │   │   ├── Stand_Pose_Torque_Log_Push_Test_2.csv
+    │   │   │   │   ├── Stand_Pose_Torque_Log_Push_Test.csv
+    │   │   │   │   ├── Up_Down_Torque_Log_2026-04-09_13-35-45.csv
+    │   │   │   │   ├── Up_Down_Torque_Log_2026-04-09_13-39-02.csv
+    │   │   │   │   ├── Up_Down_Torque_Log_2026-04-09_13-50-34.csv
+    │   │   │   │   ├── Up_Down_Torque_Log_2026-04-09_13-51-19.csv
+    │   │   │   │   ├── Up_Down_Torque_Log_Floating.csv
+    │   │   │   │   ├── Up_Down_Torque_Log_Initial_PID.csv
+    │   │   │   │   ├── Up_Down_Torque_Log_TEST_1.csv
+    │   │   │   │   └── Up_Down_Torque_Log_Test_2.csv
+    │   │   │   ├── TEST_DATA_PID_STAND_POSE
+    │   │   │   │   ├── HOW TO UNDERSTAND THE VALUES.txt
+    │   │   │   │   ├── Plot_Analyse_Interval.py
+    │   │   │   │   ├── Plot_PID_Tests.py
+    │   │   │   │   ├── Plot_Single_Test.py
+    │   │   │   │   ├── Stand_Pose_Torque_log_Test_00.png
+    │   │   │   │   ├── Stand_Pose_Torque_log_Test_01.png
+    │   │   │   │   ├── Stand_Pose_Torque_Log_TEST_0_2026-04-14_09-48-11.csv
+    │   │   │   │   ├── Stand_Pose_Torque_log_Test_02.png
+    │   │   │   │   ├── Stand_Pose_Torque_log_Test_03.png
+    │   │   │   │   ├── Stand_Pose_Torque_log_Test_04.png
+    │   │   │   │   ├── Stand_Pose_Torque_log_Test_05.png
+    │   │   │   │   ├── Stand_Pose_Torque_log_Test_06.png
+    │   │   │   │   ├── Stand_Pose_Torque_log_Test_07_interval_0.50-3.00s.png
+    │   │   │   │   ├── Stand_Pose_Torque_log_Test_07_interval_5.00-16.00s.png
+    │   │   │   │   ├── Stand_Pose_Torque_log_Test_07_interval_5.00-16.00s.txt
+    │   │   │   │   ├── Stand_Pose_Torque_log_Test_07.png
+    │   │   │   │   ├── Stand_Pose_Torque_log_Test_08.png
+    │   │   │   │   ├── Stand_Pose_Torque_log_Test_09.png
+    │   │   │   │   ├── Stand_Pose_Torque_Log_TEST_10_2026-04-14_10-25-42.csv
+    │   │   │   │   ├── Stand_Pose_Torque_log_Test_10.png
+    │   │   │   │   ├── Stand_Pose_Torque_Log_TEST_11_2026-04-14_10-26-42.csv
+    │   │   │   │   ├── Stand_Pose_Torque_log_Test_11.png
+    │   │   │   │   ├── Stand_Pose_Torque_Log_TEST_1_2026-04-14_09-49-34.csv
+    │   │   │   │   ├── Stand_Pose_Torque_Log_TEST_12_2026-04-14_10-43-58.csv
+    │   │   │   │   ├── Stand_Pose_Torque_log_Test_12.png
+    │   │   │   │   ├── Stand_Pose_Torque_Log_TEST_13_2026-04-14_10-47-03.csv
+    │   │   │   │   ├── Stand_Pose_Torque_Log_TEST_13_2026-04-14_10-47-39.csv
+    │   │   │   │   ├── Stand_Pose_Torque_log_Test_13a_interval_5.00-14.00s.png
+    │   │   │   │   ├── Stand_Pose_Torque_log_Test_13a_interval_5.00-14.00s.txt
+    │   │   │   │   ├── Stand_Pose_Torque_log_Test_13a.png
+    │   │   │   │   ├── Stand_Pose_Torque_log_Test_13b.png
+    │   │   │   │   ├── Stand_Pose_Torque_Log_TEST_14_2026-04-14_10-49-10.csv
+    │   │   │   │   ├── Stand_Pose_Torque_Log_TEST_14_2026-04-14_10-50-04.csv
+    │   │   │   │   ├── Stand_Pose_Torque_log_Test_14a_interval_5.00-15.00s.png
+    │   │   │   │   ├── Stand_Pose_Torque_log_Test_14a_interval_5.00-15.00s.txt
+    │   │   │   │   ├── Stand_Pose_Torque_log_Test_14a.png
+    │   │   │   │   ├── Stand_Pose_Torque_log_Test_14b.png
+    │   │   │   │   ├── Stand_Pose_Torque_Log_TEST_15_2026-04-14_12-55-43.csv
+    │   │   │   │   ├── Stand_Pose_Torque_log_Test_15.png
+    │   │   │   │   ├── Stand_Pose_Torque_Log_TEST_16_2026-04-14_13-03-06.csv
+    │   │   │   │   ├── Stand_Pose_Torque_log_Test_16_interval_0.00-40.00s.png
+    │   │   │   │   ├── Stand_Pose_Torque_log_Test_16_interval_0.00-40.00s.txt
+    │   │   │   │   ├── Stand_Pose_Torque_log_Test_16_interval_20.00-40.00s.png
+    │   │   │   │   ├── Stand_Pose_Torque_log_Test_16_interval_20.00-40.00s.txt
+    │   │   │   │   ├── Stand_Pose_Torque_log_Test_16.png
+    │   │   │   │   ├── Stand_Pose_Torque_Log_TEST_2_2026-04-14_09-50-32.csv
+    │   │   │   │   ├── Stand_Pose_Torque_Log_TEST_3_2026-04-14_09-53-31.csv
+    │   │   │   │   ├── Stand_Pose_Torque_Log_TEST_4_2026-04-14_09-54-24.csv
+    │   │   │   │   ├── Stand_Pose_Torque_Log_TEST_5_2026-04-14_09-55-21.csv
+    │   │   │   │   ├── Stand_Pose_Torque_Log_TEST_6_2026-04-14_10-13-36.csv
+    │   │   │   │   ├── Stand_Pose_Torque_Log_TEST_7_2026-04-14_10-18-09.csv
+    │   │   │   │   ├── Stand_Pose_Torque_Log_TEST_8_2026-04-14_10-19-18.csv
+    │   │   │   │   └── Stand_Pose_Torque_Log_TEST_9_2026-04-14_10-20-09.csv
+    │   │   │   ├── TEST_DATA_PID_UP_DOWN
+    │   │   │   │   ├── Plot_Analyse_Interval.py
+    │   │   │   │   ├── Plot_PID_Tests.py
+    │   │   │   │   ├── Plot_Single_Test.py
+    │   │   │   │   ├── Up_Down_Torque_log_Test_01_interval_15.00-45.00s.png
+    │   │   │   │   ├── Up_Down_Torque_log_Test_01_interval_15.00-45.00s.txt
+    │   │   │   │   ├── Up_Down_Torque_log_Test_01.png
+    │   │   │   │   └── Up_Down_Torque_Log_Test_1_2026-04-14_13-51-21.csv
+    │   │   │   └── Up_Down_Torque_Logging.py
     │   │   ├── Test_Stand_Full.py
+    │   │   ├── Test_Up_Down_Cosine.py
     │   │   └── Test_Up_Down_Full.py
     │   └── Visualizations
     │       ├── Bezier_Gait Mikkel.py
@@ -285,6 +163,7 @@
     │       ├── Up_Down_Visualization.py
     │       └── +++_Visualization.py
     ├── Show_angle.py
-    └── Tarok.py
+    ├── Tarok.py
+    └── Tester_for_new_Up_Down.py
 
-72 directories, 216 files
+15 directories, 152 files
