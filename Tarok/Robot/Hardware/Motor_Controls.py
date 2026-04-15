@@ -91,6 +91,9 @@ def Position_Control(bus,id,New_Position,Max_Rotation_Speed):
 
     data = [0xA4,0x00,0x00,0x00,0x00,0x00,0x00,0x00]
 
+    # Enforce minimum speed of 3 dps at output shaft - To avoid starving the motor with near-zero speed limits
+    Max_Rotation_Speed = max(abs(Max_Rotation_Speed), 3)  
+
     # The speed is converted as 1dps/LSB to uint16_t 
     speed_raw = int(Max_Rotation_Speed*9)  # Convert to the motor's expected format - *9 for gearing
     speed_bytes = struct.pack('<h', speed_raw)  # Convert to little-endian signed short
