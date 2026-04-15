@@ -1,11 +1,16 @@
 # Script for up/down movement with torque AND position data logging for all 12 motors.
-# Based on Up_Down_Torque_Logging.py — extends the feedback function to also decode
-# the actual joint position from the motor reply (bytes 6-7, single-turn encoder).
+# Based on Up_Down_Torque_Logging.py.
+#
+# Each motor step does two CAN round trips:
+#   1. 0xA4  — position command → torque decoded from reply bytes [2-3]
+#   2. 0x92  — read multi-turn angle (mirrors Read_Angle in Motor_Readings.py)
+#              → signed 56-bit angle in bytes [1-7], unit 0.01 deg/LSB motor shaft
+#              → divided by 900 gives output shaft degrees (multi-turn, signed)
 #
 # CSV columns:
 #   Timestamp (s), Trajectory Index,
-#   FL_J1_Torque .. HR_J3_Torque  (Nm, actual feedback),
-#   FL_J1_Pos    .. HR_J3_Pos     (deg, output shaft, decoded from encoder reply)
+#   FL_J1_Torque .. HR_J3_Torque  (Nm, from 0xA4 reply),
+#   FL_J1_Pos    .. HR_J3_Pos     (deg, output shaft, multi-turn, from 0x92 reply)
 
 import sys
 import os
@@ -25,16 +30,17 @@ from Robot import *
 # ─────────────────────────────────────────────────────────────────────────────
 def Position_Control_With_Feedback(bus, motor_id, new_position, max_speed, timeout=0.005):
     """
-    Send a position command and return torque + actual position from the reply.
-    Returns (torque_Nm, position_deg), or (None, None) on timeout.
+    Send a 0xA4 position command and a 0x9C read command per motor step.
 
-    Reply byte layout (command 0xA4):
-      [0]   command byte  0xA4
-      [1]   temperature   (°C)
-      [2-3] iq current    (int16, LSB = 33 A / 2048)
-      [4-5] speed         (int16, 1 dps/LSB at motor shaft)
-      [6-7] encoder       (uint16, 0-65535 = 0-360° motor shaft, single-turn)
+    Step 1 — 0xA4 position command:
+      Reply bytes [2-3]: iq current (int16) → torque_Nm
+
+    Step 2 — 0x92 read multi-turn angle (mirrors Read_Angle in Motor_Readings.py):
+      Reply bytes [1-7]: signed 56-bit angle, 0.01 deg/LSB motor shaft → / 900 = output deg
+
+    Returns (torque_Nm, angle_deg), or (None, None) on timeout.
     """
+    # ── Step 1: send 0xA4 position command, read torque from reply ────────────
     data = [0xA4, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
 
     speed_raw = int(max_speed * 9)
@@ -54,10 +60,10 @@ def Position_Control_With_Feedback(bus, motor_id, new_position, max_speed, timeo
     data[6] = pos_bytes[2]
     data[7] = pos_bytes[3]
 
-    msg = can.Message(arbitration_id=motor_id, data=data, is_extended_id=False)
+    msg_a4 = can.Message(arbitration_id=motor_id, data=data, is_extended_id=False)
     for attempt in range(3):
         try:
-            bus.send(msg)
+            bus.send(msg_a4)
             break
         except can.CanOperationError:
             time.sleep(0.001)
@@ -65,25 +71,45 @@ def Position_Control_With_Feedback(bus, motor_id, new_position, max_speed, timeo
         return None, None
 
     deadline = time.monotonic() + timeout
+    torque_Nm = None
     while True:
         remaining = deadline - time.monotonic()
         if remaining <= 0:
             return None, None
-        msg = bus.recv(remaining)
-        if msg is None:
+        reply = bus.recv(remaining)
+        if reply is None:
             return None, None
-        if msg.arbitration_id == motor_id and msg.data[0] == 0xA4:
+        if reply.arbitration_id == motor_id and reply.data[0] == 0xA4:
+            iq_raw    = struct.unpack('<h', bytes([reply.data[2], reply.data[3]]))[0]
+            torque_Nm = (iq_raw / 2048.0) * 33.0 * 2.09
             break
 
-    # Decode torque
-    iq_raw       = struct.unpack('<h', bytes([msg.data[2], msg.data[3]]))[0]
-    torque_Nm    = (iq_raw / 2048.0) * 33.0 * 2.09
+    # ── Step 2: send 0x92 read angle command, decode multi-turn position ─────
+    # Mirrors Read_Angle in Motor_Readings.py exactly.
+    msg_92 = can.Message(arbitration_id=motor_id,
+                         data=[0x92, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
+                         is_extended_id=False)
+    try:
+        bus.send(msg_92)
+    except can.CanOperationError:
+        return torque_Nm, None
 
-    # Decode actual position from single-turn encoder (bytes 6-7)
-    encoder_raw  = struct.unpack('<H', bytes([msg.data[6], msg.data[7]]))[0]
-    position_deg = (encoder_raw / 65535.0) * 360.0 / 9.0  # output shaft degrees
-
-    return torque_Nm, position_deg
+    deadline = time.monotonic() + timeout
+    while True:
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            return torque_Nm, None
+        reply = bus.recv(remaining)
+        if reply is None:
+            return torque_Nm, None
+        if reply.arbitration_id == motor_id and reply.data[0] == 0x92:
+            # Bytes [1-7]: signed 56-bit angle, little-endian, 0.01 deg/LSB (motor shaft)
+            raw_bytes  = bytes(reply.data[1:8]) + b'\x00'  # pad to 8 bytes for int64
+            angle_raw  = struct.unpack('<q', raw_bytes)[0]
+            if reply.data[7] & 0x80:                        # sign-extend from bit 55
+                angle_raw -= (1 << 56)
+            angle_deg = float(angle_raw) / 900.0            # output shaft degrees
+            return torque_Nm, angle_deg
 
 
 def send_leg(bus, angles, speeds):
@@ -104,9 +130,9 @@ def safe_torque(fb, i):
 
 
 def safe_position(fb, i):
-    """Return position_deg from feedback, 0.0 on timeout."""
+    """Return encoder position (0-65535) from feedback, 0 on timeout."""
     val = fb[i][1]
-    return val if val is not None else 0.0
+    return val if val is not None else 0
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -224,10 +250,10 @@ with open(log_filename, 'w', newline='') as csvfile:
         "FR_J1_Torque", "FR_J2_Torque", "FR_J3_Torque",
         "HL_J1_Torque", "HL_J2_Torque", "HL_J3_Torque",
         "HR_J1_Torque", "HR_J2_Torque", "HR_J3_Torque",
-        "FL_J1_Pos", "FL_J2_Pos", "FL_J3_Pos",
-        "FR_J1_Pos", "FR_J2_Pos", "FR_J3_Pos",
-        "HL_J1_Pos", "HL_J2_Pos", "HL_J3_Pos",
-        "HR_J1_Pos", "HR_J2_Pos", "HR_J3_Pos",
+        "FL_J1_Pos (deg)", "FL_J2_Pos (deg)", "FL_J3_Pos (deg)",
+        "FR_J1_Pos (deg)", "FR_J2_Pos (deg)", "FR_J3_Pos (deg)",
+        "HL_J1_Pos (deg)", "HL_J2_Pos (deg)", "HL_J3_Pos (deg)",
+        "HR_J1_Pos (deg)", "HR_J2_Pos (deg)", "HR_J3_Pos (deg)",
     ])
 
 # Preallocate: timestamp + index + 12 torques + 12 positions = 26 columns
