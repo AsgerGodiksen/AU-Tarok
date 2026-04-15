@@ -124,68 +124,16 @@ Theta_dot_FR = np.abs(np.rad2deg(Theta_dot_FR))
 Theta_dot_HL = np.abs(np.rad2deg(Theta_dot_HL))
 Theta_dot_HR = np.abs(np.rad2deg(Theta_dot_HR))
 
-# Roll arrays by 301 time steps to start at the standing position
-Theta_FL = np.roll(Theta_FL, 301, axis=0)
-Theta_FR = np.roll(Theta_FR, 301, axis=0)
-Theta_HL = np.roll(Theta_HL, 301, axis=0)
-Theta_HR = np.roll(Theta_HR, 301, axis=0)
-Theta_dot_FL = np.roll(Theta_dot_FL, 301, axis=1)
-Theta_dot_FR = np.roll(Theta_dot_FR, 301, axis=1)
-Theta_dot_HL = np.roll(Theta_dot_HL, 301, axis=1)
-Theta_dot_HR = np.roll(Theta_dot_HR, 301, axis=1)
-
-
-
-'''
-# Plot joint angles and velocities for FL
-import matplotlib.pyplot as plt
-plt.figure(figsize=(12, 6))
-plt.subplot(3, 1, 1)
-plt.plot(t, Theta_FL[:, 0], label='Theta1')
-plt.xlabel('Time (s)')
-plt.ylabel('Joint Angle (degrees)')
-plt.title('FL Joint 1 Angle')
-plt.grid()
-plt.subplot(3, 1, 2)
-plt.plot(t, Theta_FL[:, 1], label='Theta2')
-plt.xlabel('Time (s)')
-plt.ylabel('Joint Angle (degrees)')
-plt.title('FL Joint 2 Angle')
-plt.grid()
-plt.subplot(3, 1, 3)
-plt.plot(t, Theta_FL[:, 2], label='Theta3')
-plt.xlabel('Time (s)')
-plt.ylabel('Joint Angle (degrees)')
-plt.title('FL Joint 3 Angle')
-plt.grid()
-plt.tight_layout()
-
-# Plot joint velocities for FL
-plt.figure(figsize=(12, 6))
-plt.subplot(3, 1, 1)
-plt.plot(t, Theta_dot_FL[0, :], label='Theta1_dot')
-plt.xlabel('Time (s)')
-plt.ylabel('Joint Velocity (degrees/s)')
-plt.title('FL Joint 1 Velocity')
-plt.grid()
-plt.subplot(3, 1, 2)
-plt.plot(t, Theta_dot_FL[1, :], label='Theta2_dot')
-plt.xlabel('Time (s)')
-plt.ylabel('Joint Velocity (degrees/s)')
-plt.title('FL Joint 2 Velocity')
-plt.grid()
-plt.subplot(3, 1, 3)
-plt.plot(t, Theta_dot_FL[2, :], label='Theta3_dot')
-plt.xlabel('Time (s)')
-plt.ylabel('Joint Velocity (degrees/s)')
-plt.title('FL Joint 3 Velocity')
-plt.grid()
-plt.tight_layout()
-plt.show()
-
-'''
-
-
+# Roll arrays by 25% of time steps to start at the standing position
+roll_amount = num_time_steps - int((3/4 * total_time) / dt)
+Theta_FL = np.roll(Theta_FL, roll_amount, axis=0)
+Theta_FR = np.roll(Theta_FR, roll_amount, axis=0)
+Theta_HL = np.roll(Theta_HL, roll_amount, axis=0)
+Theta_HR = np.roll(Theta_HR, roll_amount, axis=0)
+Theta_dot_FL = np.roll(Theta_dot_FL, roll_amount, axis=1)
+Theta_dot_FR = np.roll(Theta_dot_FR, roll_amount, axis=1)
+Theta_dot_HL = np.roll(Theta_dot_HL, roll_amount, axis=1)
+Theta_dot_HR = np.roll(Theta_dot_HR, roll_amount, axis=1)
 
 print("Pre-computations complete.")
 

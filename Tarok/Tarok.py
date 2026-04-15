@@ -313,29 +313,29 @@ def Up_Down_State(bus0, bus1, bus2, bus3, ID_1, ID_2, ID_3):
 
     # Define local time series
     dt = 0.005 # seconds (200 Hz) - not directly the control frequency, but the discretization used for precomputations
-    total_time = 6  # Total time in seconds of one cycle of the trajectory
+    total_time = 4  # Total time in seconds of one cycle of the trajectory
     num_time_steps = int(total_time / dt) + 1
     t = np.linspace(0, total_time, num_time_steps)
 
-    # Segment boundaries for the trajectory: 0->3s, 3->6s
-    conditions = [(t >= 0)   & (t < 3),   # Up:    -0.36 -> -0.46
-                  (t >= 3)   & (t < 6),   # Down:  -0.46 -> -0.36
-                  (t >= 6)]               # Hold:  -0.36 (hold at -0.36 after 6s))
+    # Segment boundaries for the trajectory: 0->2s, 3->4s
+    conditions = [(t >= 0)   & (t < 2),   # Up:    -0.36 -> -0.46
+                  (t >= 2)   & (t < 4),   # Down:  -0.46 -> -0.36
+                  (t >= 4)]               # Hold:  -0.36 (hold at -0.36 after 4s))
 
     # Define desired end-effector trajectory as function of time for all 4 legs (in body frame)
     x_FL = x_FR = (l_k/2)*np.ones_like(t)  # X position in meters (constant)
     x_HL = x_HR = (-l_k/2)*np.ones_like(t)  # X position in meters (constant)
     y_FL = y_HL = (w_k/2 + 0.078)*np.ones_like(t)  # Y position in meters (constant)
     y_FR = y_HR = (-w_k/2 - 0.078)*np.ones_like(t)  # Y position in meters (constant)
-    z = np.piecewise(t, conditions, [lambda t: cos_interp(t, -0.36, -0.46, 0, 3),
-                                     lambda t: cos_interp(t, -0.46, -0.36, 3, 6),
+    z = np.piecewise(t, conditions, [lambda t: cos_interp(t, -0.36, -0.46, 0, 2),
+                                     lambda t: cos_interp(t, -0.46, -0.36, 2, 4),
                                      lambda t: -0.36*np.ones_like(t)])  # Z position in meters (cosine wave from -0.36 to -0.46, then to -0.36, then hold at -0.36)
 
     # Define desired end effector velocity (foot velocity) as functions of time for all 4 legs (in body frame) - Note, it is the same for all legs in body frame for this trajectory
     x_dot = np.zeros_like(t)  # X velocity in meters/second (constant)
     y_dot = np.zeros_like(t)  # Y velocity in meters/second (constant)
-    z_dot = np.piecewise(t, conditions, [lambda t: cos_interp_dot(t, -0.36, -0.46, 0, 3),
-                                         lambda t: cos_interp_dot(t, -0.46, -0.36, 3, 6),
+    z_dot = np.piecewise(t, conditions, [lambda t: cos_interp_dot(t, -0.36, -0.46, 0, 2),
+                                         lambda t: cos_interp_dot(t, -0.46, -0.36, 2, 4),
                                          lambda t: np.zeros_like(t)])
 
     ### Transformations ###
@@ -401,15 +401,16 @@ def Up_Down_State(bus0, bus1, bus2, bus3, ID_1, ID_2, ID_3):
     Theta_dot_HL = np.abs(np.rad2deg(Theta_dot_HL))
     Theta_dot_HR = np.abs(np.rad2deg(Theta_dot_HR))
 
-    # Roll arrays by 501 time steps to start at the standing position
-    Theta_FL = np.roll(Theta_FL, 501, axis=0)
-    Theta_FR = np.roll(Theta_FR, 501, axis=0)
-    Theta_HL = np.roll(Theta_HL, 501, axis=0)
-    Theta_HR = np.roll(Theta_HR, 501, axis=0)
-    Theta_dot_FL = np.roll(Theta_dot_FL, 501, axis=1)
-    Theta_dot_FR = np.roll(Theta_dot_FR, 501, axis=1)
-    Theta_dot_HL = np.roll(Theta_dot_HL, 501, axis=1)
-    Theta_dot_HR = np.roll(Theta_dot_HR, 501, axis=1)
+    # Roll arrays by 25% of time steps to start at the standing position
+    roll_amount = num_time_steps - int((3/4 * total_time) / dt)
+    Theta_FL = np.roll(Theta_FL, roll_amount, axis=0)
+    Theta_FR = np.roll(Theta_FR, roll_amount, axis=0)
+    Theta_HL = np.roll(Theta_HL, roll_amount, axis=0)
+    Theta_HR = np.roll(Theta_HR, roll_amount, axis=0)
+    Theta_dot_FL = np.roll(Theta_dot_FL, roll_amount, axis=1)
+    Theta_dot_FR = np.roll(Theta_dot_FR, roll_amount, axis=1)
+    Theta_dot_HL = np.roll(Theta_dot_HL, roll_amount, axis=1)
+    Theta_dot_HR = np.roll(Theta_dot_HR, roll_amount, axis=1)
 
     print("Pre-loop sequence complete, writing up/down state PI parameters...")
 
