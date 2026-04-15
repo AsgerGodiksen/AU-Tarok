@@ -124,15 +124,16 @@ Theta_dot_FR = np.abs(np.rad2deg(Theta_dot_FR))
 Theta_dot_HL = np.abs(np.rad2deg(Theta_dot_HL))
 Theta_dot_HR = np.abs(np.rad2deg(Theta_dot_HR))
 
-# Roll arrays by 501 time steps to start at the standing position
-Theta_FL = np.roll(Theta_FL, 501, axis=0)
-Theta_FR = np.roll(Theta_FR, 501, axis=0)
-Theta_HL = np.roll(Theta_HL, 501, axis=0)
-Theta_HR = np.roll(Theta_HR, 501, axis=0)
-Theta_dot_FL = np.roll(Theta_dot_FL, 501, axis=1)
-Theta_dot_FR = np.roll(Theta_dot_FR, 501, axis=1)
-Theta_dot_HL = np.roll(Theta_dot_HL, 501, axis=1)
-Theta_dot_HR = np.roll(Theta_dot_HR, 501, axis=1)
+# Roll arrays by 25% of time steps to start at the standing position
+roll_amount = num_time_steps - int((3/4 * total_time) / dt)
+Theta_FL = np.roll(Theta_FL, roll_amount, axis=0)
+Theta_FR = np.roll(Theta_FR, roll_amount, axis=0)
+Theta_HL = np.roll(Theta_HL, roll_amount, axis=0)
+Theta_HR = np.roll(Theta_HR, roll_amount, axis=0)
+Theta_dot_FL = np.roll(Theta_dot_FL, roll_amount, axis=1)
+Theta_dot_FR = np.roll(Theta_dot_FR, roll_amount, axis=1)
+Theta_dot_HL = np.roll(Theta_dot_HL, roll_amount, axis=1)
+Theta_dot_HR = np.roll(Theta_dot_HR, roll_amount, axis=1)
 
 print("Pre-computations complete.")
 

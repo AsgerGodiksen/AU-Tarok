@@ -191,8 +191,8 @@ def Generate_Bezier_Stand_Trajectory_Modified(Swing_Trajectory,Stand_Time_Scalar
     y_normal = Swing_Trajectory[-1, 1]   # Normal height for stand phase
 
     # Computing height for "stretch" and "fold" cases
-    y_stretch = y_normal + 0.02  # Example: 2 cm higher than normal
-    y_fold = y_normal - 0.02     # Example: 2 cm lower than normal
+    y_stretch = y_normal + 0.01  # Example: 1 cm higher than normal
+    y_fold = y_normal - 0.01     # Example: 1 cm lower than normal
 
     # Time variables
     t = np.linspace(0, Stand_Time_Scalar, Stand_Time_Steps) # Time vector for the total stand phase
@@ -200,55 +200,55 @@ def Generate_Bezier_Stand_Trajectory_Modified(Swing_Trajectory,Stand_Time_Scalar
     one_segment_time = Stand_Time_Scalar / 3  # Time duration for each segment of the stand phase
 
     # Segment boundaries for the stand phase trajectory
-    conditions = [(t >= 0) & (t < 0.2*one_segment_time),                        # "Bezier" -> "Stretch" or "Fold"
-                  (t >= 0.2*one_segment_time) & (t < 0.9*one_segment_time),     # "Stretch" or "Fold"
-                  (t >= 0.9*one_segment_time) & (t < 1.1*one_segment_time),     # "Stretch" or "Fold" -> "Normal"
-                  (t >= 1.1*one_segment_time) & (t < 1.9*one_segment_time),     # "Normal"
-                  (t >= 1.9*one_segment_time) & (t < 2.1*one_segment_time),     # "Normal" -> "Stretch" or "Fold"
-                  (t >= 2.1*one_segment_time) & (t < 2.8*one_segment_time),     # "Stretch" or "Fold"
-                  (t >= 2.8*one_segment_time) & (t <= 3*one_segment_time)]      # "Stretch" or "Fold" -> "Bezier"
+    conditions = [(t >= 0) & (t < 0.4*one_segment_time),                        # "Bezier" -> "Stretch" or "Fold"
+                  (t >= 0.4*one_segment_time) & (t < 0.8*one_segment_time),     # "Stretch" or "Fold"
+                  (t >= 0.8*one_segment_time) & (t < 1.2*one_segment_time),     # "Stretch" or "Fold" -> "Normal"
+                  (t >= 1.2*one_segment_time) & (t < 1.8*one_segment_time),     # "Normal"
+                  (t >= 1.8*one_segment_time) & (t < 2.2*one_segment_time),     # "Normal" -> "Stretch" or "Fold"
+                  (t >= 2.2*one_segment_time) & (t < 2.6*one_segment_time),     # "Stretch" or "Fold"
+                  (t >= 2.6*one_segment_time) & (t <= 3*one_segment_time)]      # "Stretch" or "Fold" -> "Bezier"
     
     # Stand coordinates for the end effector
     x_Stand = np.linspace(x_start,x_end,Stand_Time_Steps)
     if Leg == "FL" or Leg == "HL":
         # Sequence: "Bezier" -> "Stretch" -> "Normal" -> "Fold"
-        y_Stand = np.piecewise(t, conditions, [lambda t: cos_interp(t, y_normal, y_stretch, 0, 0.2*one_segment_time),
+        y_Stand = np.piecewise(t, conditions, [lambda t: cos_interp(t, y_normal, y_stretch, 0, 0.4*one_segment_time),
                                                lambda t: y_stretch*np.ones_like(t),
-                                               lambda t: cos_interp(t, y_stretch, y_normal, 0.9*one_segment_time, 1.1*one_segment_time),
+                                               lambda t: cos_interp(t, y_stretch, y_normal, 0.8*one_segment_time, 1.2*one_segment_time),
                                                lambda t: y_normal*np.ones_like(t),
-                                               lambda t: cos_interp(t, y_normal, y_fold, 1.9*one_segment_time, 2.1*one_segment_time),
+                                               lambda t: cos_interp(t, y_normal, y_fold, 1.8*one_segment_time, 2.2*one_segment_time),
                                                lambda t: y_fold*np.ones_like(t),
-                                               lambda t: cos_interp(t, y_fold, y_normal, 2.8*one_segment_time, 3*one_segment_time)])  
+                                               lambda t: cos_interp(t, y_fold, y_normal, 2.6*one_segment_time, 3*one_segment_time)])  
     elif Leg == "FR" or Leg == "HR":
         # Sequence: "Bezier" -> "Fold" -> "Normal" -> "Stretch"
-        y_Stand = np.piecewise(t, conditions, [lambda t: cos_interp(t, y_normal, y_fold, 0, 0.2*one_segment_time),
+        y_Stand = np.piecewise(t, conditions, [lambda t: cos_interp(t, y_normal, y_fold, 0, 0.4*one_segment_time),
                                                lambda t: y_fold*np.ones_like(t),
-                                               lambda t: cos_interp(t, y_fold, y_normal, 0.9*one_segment_time, 1.1*one_segment_time),
+                                               lambda t: cos_interp(t, y_fold, y_normal, 0.8*one_segment_time, 1.2*one_segment_time),
                                                lambda t: y_normal*np.ones_like(t),
-                                               lambda t: cos_interp(t, y_normal, y_stretch, 1.9*one_segment_time, 2.1*one_segment_time),
+                                               lambda t: cos_interp(t, y_normal, y_stretch, 1.8*one_segment_time, 2.2*one_segment_time),
                                                lambda t: y_stretch*np.ones_like(t),
-                                               lambda t: cos_interp(t, y_stretch, y_normal, 2.8*one_segment_time, 3*one_segment_time)])  
+                                               lambda t: cos_interp(t, y_stretch, y_normal, 2.6*one_segment_time, 3*one_segment_time)])  
     # Assembling the Stand Trajectory
     Stand_Trajectory = np.column_stack((x_Stand, y_Stand))
 
     # Stand Velocities
     x_dot_Stand = np.full(Stand_Time_Steps, (x_end - x_start) / Stand_Time_Scalar)
     if Leg == "FL" or Leg == "HL":
-        y_dot_Stand = np.piecewise(t, conditions, [lambda t: cos_interp_dot(t, y_normal, y_stretch, 0, 0.2*one_segment_time),
+        y_dot_Stand = np.piecewise(t, conditions, [lambda t: cos_interp_dot(t, y_normal, y_stretch, 0, 0.4*one_segment_time),
                                                    lambda t: np.zeros_like(t),
-                                                   lambda t: cos_interp_dot(t, y_stretch, y_normal, 0.9*one_segment_time, 1.1*one_segment_time),
+                                                   lambda t: cos_interp_dot(t, y_stretch, y_normal, 0.8*one_segment_time, 1.2*one_segment_time),
                                                    lambda t: np.zeros_like(t),
-                                                   lambda t: cos_interp_dot(t, y_normal, y_fold, 1.9*one_segment_time, 2.1*one_segment_time),
+                                                   lambda t: cos_interp_dot(t, y_normal, y_fold, 1.8*one_segment_time, 2.2*one_segment_time),
                                                    lambda t: np.zeros_like(t),
-                                                   lambda t: cos_interp_dot(t, y_fold, y_normal, 2.8*one_segment_time, 3*one_segment_time)])
+                                                   lambda t: cos_interp_dot(t, y_fold, y_normal, 2.6*one_segment_time, 3*one_segment_time)])
     elif Leg == "FR" or Leg == "HR":
-        y_dot_Stand = np.piecewise(t, conditions, [lambda t: cos_interp_dot(t, y_normal, y_fold, 0, 0.2*one_segment_time),
+        y_dot_Stand = np.piecewise(t, conditions, [lambda t: cos_interp_dot(t, y_normal, y_fold, 0, 0.4*one_segment_time),
                                                    lambda t: np.zeros_like(t),
-                                                   lambda t: cos_interp_dot(t, y_fold, y_normal, 0.9*one_segment_time, 1.1*one_segment_time),
+                                                   lambda t: cos_interp_dot(t, y_fold, y_normal, 0.8*one_segment_time, 1.2*one_segment_time),
                                                    lambda t: np.zeros_like(t),
-                                                   lambda t: cos_interp_dot(t, y_normal, y_stretch, 1.9*one_segment_time, 2.1*one_segment_time),
+                                                   lambda t: cos_interp_dot(t, y_normal, y_stretch, 1.8*one_segment_time, 2.2*one_segment_time),
                                                    lambda t: np.zeros_like(t),
-                                                   lambda t: cos_interp_dot(t, y_stretch, y_normal, 2.8*one_segment_time, 3*one_segment_time)]) 
+                                                   lambda t: cos_interp_dot(t, y_stretch, y_normal, 2.6*one_segment_time, 3*one_segment_time)]) 
     # Assembling the Stand Velocity
     Stand_Velocity = np.column_stack((x_dot_Stand, y_dot_Stand))
 
