@@ -211,13 +211,16 @@ def Read_Angle(bus,id):
     return angle_float
 
 def Read_Motor_Temperature(bus,id):
+    """
+    For Some reason the Temerature reading is not working for any of the motor protocol commands
+    """
     # This method is used to find out the temperature of the motor
-    data = [0x9A,0x00,0x00,0x00,0x00,0x00,0x00,0x00]
+    data = [0x9C,0x00,0x00,0x00,0x00,0x00,0x00,0x00]
     # Using Command 0x9C from the motor Protocol
     send_msg = can.Message(
-                        arbitration_id=id, 
-                        data=data, 
-                        is_extended_id=False)
+                arbitration_id=id, 
+                data=data, 
+                is_extended_id=False)
     bus.send(send_msg)
     time.sleep(0.0001)
 
@@ -227,12 +230,12 @@ def Read_Motor_Temperature(bus,id):
         if msg is None:
             # Print("No response received.")    # only print for debug - slows process down
             return None
-        if msg.arbitration_id == id and msg.data[0] == 0x9A:
+        if msg.arbitration_id == id and msg.data[0] == 0x9C:
             break
-    
+
     # Now we have the correct message, we can process it
     can_data = msg.data
-
+    print(can_data)
     motor_temperature = can_data[1] / 10
     print(f"Motor Temperature: {motor_temperature}°C")
 

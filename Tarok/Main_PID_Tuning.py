@@ -62,11 +62,11 @@ time.sleep(1)
 # Parameters for PID Tuning:
 pid_params = {
     'angle_kp':  110,
-    'angle_ki':  50,
+    'angle_ki':  25,
     'speed_kp':  55,
-    'speed_ki':  20,
+    'speed_ki':  12,
     'torque_kp': 55,
-    'torque_ki': 17,
+    'torque_ki': 13,
 }
 
 print("Update to new PID parameters USING RAM")

@@ -132,10 +132,10 @@ def plot_interval(df, t_start, t_end, output_name):
     time = sub["Timestamp (s)"]
 
     fig, axes = plt.subplots(2, 2, figsize=(14, 8), sharex=True)
-    fig.suptitle(
-        f"{output_name.replace('_', ' ')}  [{t_start:.2f} s – {t_end:.2f} s]",
-        fontsize=13, fontweight="bold"
-    )
+    #fig.suptitle(
+    #    f"{output_name.replace('_', ' ')}  [{t_start:.2f} s – {t_end:.2f} s]",
+    #    fontsize=13, fontweight="bold"
+    #)
 
     leg_axes = {
         "FL": axes[0, 0], "FR": axes[0, 1],

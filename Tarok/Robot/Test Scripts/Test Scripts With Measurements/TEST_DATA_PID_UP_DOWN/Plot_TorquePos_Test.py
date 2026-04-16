@@ -41,7 +41,7 @@ title_base = os.path.splitext(os.path.basename(csv_path))[0].replace("_", " ")
 
 # ── Figure 1: Torque ──────────────────────────────────────────────────────────
 fig1, axes1 = plt.subplots(2, 2, figsize=(14, 8), sharex=True)
-fig1.suptitle(f"Torque — {title_base}", fontsize=13, fontweight="bold")
+#fig1.suptitle(f"Torque — {title_base}", fontsize=13, fontweight="bold")
 
 leg_axes1 = {"FL": axes1[0, 0], "FR": axes1[0, 1],
              "HL": axes1[1, 0], "HR": axes1[1, 1]}
@@ -54,7 +54,7 @@ for leg, ax in leg_axes1.items():
     ax.set_title(f"{leg} Leg", fontsize=11)
     ax.set_ylabel("Torque (Nm)")
     ax.set_xlim(t_min, t_max)
-    ax.set_ylim(-10, 10)
+    ax.set_ylim(-11, 11)
     ax.legend(loc="upper right", fontsize=8)
     ax.grid(True, alpha=0.3)
 
@@ -64,7 +64,7 @@ fig1.tight_layout()
 
 # ── Figure 2: Position ────────────────────────────────────────────────────────
 fig2, axes2 = plt.subplots(2, 2, figsize=(14, 8), sharex=True)
-fig2.suptitle(f"Position — {title_base}", fontsize=13, fontweight="bold")
+#fig2.suptitle(f"Position — {title_base}", fontsize=13, fontweight="bold")
 
 leg_axes2 = {"FL": axes2[0, 0], "FR": axes2[0, 1],
              "HL": axes2[1, 0], "HR": axes2[1, 1]}
