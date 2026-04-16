@@ -87,7 +87,7 @@ try:
             
             Battery_Voltage(bus0,ID_1)
 
-            Read_Motor_Temperature(bus0,ID_1)
+            #Read_Motor_Temperature(bus1,ID_1)
 
             time.sleep(20)
 
