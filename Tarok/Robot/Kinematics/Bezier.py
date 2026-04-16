@@ -293,7 +293,7 @@ def Assemble_Bezier_Trajectory(
     x = np.concatenate((Swing_Trajectory[:,0], Stand_Trajectory[:,0]))
     y = np.zeros(Time_Steps_Bezier)
     z = - np.concatenate((Swing_Trajectory[:,1], Stand_Trajectory[:,1]))
-    
+
     # Generating Arrays for the Velocity
     x_dot = np.concatenate((Swing_Velocity[:,0], Stand_Velocity[:,0]))
     y_dot = np.zeros(Time_Steps_Bezier)    
@@ -371,7 +371,7 @@ def Building_Bezier_Trajectories(
 
 def Apply_Phase_Offset(Trajectory, Velocity, Phase_Offset):
     N_total = Trajectory.shape[1]
-    shift   = int(round(Phase_Offset * N_total)) + 1
+    shift   = int(round(Phase_Offset * N_total))
     return np.roll(Trajectory, shift, axis=1), np.roll(Velocity, shift, axis=1)
 
 
@@ -395,8 +395,5 @@ def Compute_Joint_Angles(Trajectory, leg):
         End_Effector_Postition = Trajectory[:, i].reshape(3, 1)
         
         # Using Inverse Kinematics to find the corresponding Angles for the End Effetor Position
-        Theta[i] = Inverse_Kinematics(End_Effector_Postition, leg)
-        
-        
-        
+        Theta[i] = Inverse_Kinematics(End_Effector_Postition, leg)    
     return Theta
