@@ -10,9 +10,6 @@ import time
 import numpy as np
 from Robot import*
 
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-
 # Old: CAN initialization in terminal: "sudo ip link set dev canX up type can bitrate 1000000" - with "X" being 0, 1, 2 and 3 for each bus
 # New: CAN initialization in terminal: "for i in 0 1 2 3; do sudo ip link set dev can$i up type can bitrate 1000000 && sudo ip link set can$i txqueuelen 1000; done"
 
@@ -29,9 +26,9 @@ PHASE_OFFSET = Tarok.CRAWL_OFFSETS_Mixed
 # Time parameters
 dt = 0.005 # seconds (200 Hz)
 
-Swing_Time_Scalar = 3    # [s] swing phase duration
+Swing_Time_Scalar = 1    # [s] swing phase duration
 Stand_Time_Scalar  = 3 * Swing_Time_Scalar # [s] stand phase duration
-Transfer_Time_Scalar = 2 # [s] duration of the COM transfer
+Transfer_Time_Scalar = 1.5 # [s] duration of the COM transfer
 
 total_time = Swing_Time_Scalar + Stand_Time_Scalar
 Total_Time_Steps = int(total_time / dt)
@@ -86,8 +83,8 @@ FR_Bezier_Velocities_with_transfer = np.zeros((3, Total_Time_Steps_with_transfer
 HL_Bezier_Velocities_with_transfer = np.zeros((3, Total_Time_Steps_with_transfer))
 HR_Bezier_Velocities_with_transfer = np.zeros((3, Total_Time_Steps_with_transfer))
 
-x_offset = 0.01 # [m] how much to move COM forward during transfer
-y_offset = 0.01 # [m] how much to move COM to the left during transfer
+x_offset = 0.03 # [m] how much to move COM forward during transfer
+y_offset = 0.04 # [m] how much to move COM to the left during transfer
 
 # FL swing: x offset positive, y offset positive for all legs
 # HR swing: x offset negative, y offset negative for all legs
@@ -102,17 +99,11 @@ Swing_Start_Index = {leg: int(round(PHASE_OFFSET[leg] * Total_Time_Steps))
 Swing_Start_Time  = {leg: t[Swing_Start_Index[leg]]
                      for leg in SWING_SEQUENCE_Mixed}
 
-print("Swing start indexes:", Swing_Start_Index)
-print("Swing start times:  ", Swing_Start_Time)
-
 # Create mew swing start index variable with Transfer_Time_Steps added to FL, 2*Transfer_Time_Steps added to HR, 3*Transfer_Time_Steps added to FR and 4*Transfer_Time_Steps added to HL
 Swing_Start_Index_with_transfer = {leg: Swing_Start_Index[leg] + (i + 1) * Transfer_Time_Steps
                                  for i, leg in enumerate(SWING_SEQUENCE_Mixed)}
 Swing_Start_Time_with_transfer  = {leg: t_with_transfer[Swing_Start_Index_with_transfer[leg]]
                                  for leg in SWING_SEQUENCE_Mixed}
-
-print("Swing start indexes with transfer:", Swing_Start_Index_with_transfer)
-print("Swing start times with transfer:  ", Swing_Start_Time_with_transfer)
 
 #### TRAJECTORIES - SWING AND STAND PHASES ####
 
@@ -302,8 +293,20 @@ print("Initialization complete, starting pre-loop sequence...")
 
 ## PRE-LOOP SEQUENCE ##
 
-# Write PI parameters to motors - adjust as needed for your application, or remove if not needed
-# Note: This is the ones tuned for up/down (Test 19)
+# Write PI parameters to motors
+
+# Manufacturing parameters
+PI_Params = {
+    'angle_kp':  100,
+    'angle_ki':  100,
+    'speed_kp':  50,
+    'speed_ki':  40,
+    'torque_kp': 50,
+    'torque_ki': 50
+}
+
+'''
+# Tuned for up/down (Test 19)
 PI_Params = {
     'angle_kp':  110,
     'angle_ki':  40,
@@ -312,6 +315,18 @@ PI_Params = {
     'torque_kp': 55,
     'torque_ki': 20
 }
+'''
+'''
+# Compromise parameters
+PI_Params = {
+    'angle_kp':  110,
+    'angle_ki':  50,
+    'speed_kp':  55,
+    'speed_ki':  20,
+    'torque_kp': 55,
+    'torque_ki': 25
+}
+'''
 
 print("Writing PI parameters to motors...")
 PID_RAM_Control(bus0,ID_1, PI_Params)
@@ -378,12 +393,12 @@ try:
             elapsed_cycle = current_time - cycle_start # Elapsed time in current cycle
             elapsed_total = current_time - start_time  # Elapsed time since start of program
             # Check if current cycle is over -> start new cycle
-            if elapsed_cycle >= total_time:
-                cycle_start += total_time # Force next cycle start time to be exactly total trajectory time after previous cycle start time to avoid drift
+            if elapsed_cycle >= total_time_with_transfer:
+                cycle_start += total_time_with_transfer # Force next cycle start time to be exactly total trajectory time after previous cycle start time to avoid drift
                 continue
 
             # Find closest value in t to elapsed in current cycle
-            index = min(int(elapsed_cycle / dt), len(t) - 1)
+            index = min(int(elapsed_cycle / dt), len(t_with_transfer) - 1)
             
             # Send position control commands to motors for current time step
             Position_Control(bus0, ID_1, Theta_FL[index, 0], Theta_dot_FL[0, index])
