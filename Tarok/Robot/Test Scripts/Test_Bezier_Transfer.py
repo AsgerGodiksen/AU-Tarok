@@ -23,6 +23,10 @@ LEGS = Tarok.LEGS
 COLORS = Tarok.COLORS
 PHASE_OFFSET = Tarok.CRAWL_OFFSETS_Mixed
 
+# Offsets for COM transfer during stand phase
+x_offset = 0.03 # [m] how much to move COM forward during transfer
+y_offset = 0.04 # [m] how much to move COM to the left during transfer
+
 # Time parameters
 dt = 0.005 # seconds (200 Hz)
 
@@ -82,9 +86,6 @@ FL_Bezier_Velocities_with_transfer = np.zeros((3, Total_Time_Steps_with_transfer
 FR_Bezier_Velocities_with_transfer = np.zeros((3, Total_Time_Steps_with_transfer))
 HL_Bezier_Velocities_with_transfer = np.zeros((3, Total_Time_Steps_with_transfer))
 HR_Bezier_Velocities_with_transfer = np.zeros((3, Total_Time_Steps_with_transfer))
-
-x_offset = 0.03 # [m] how much to move COM forward during transfer
-y_offset = 0.04 # [m] how much to move COM to the left during transfer
 
 # FL swing: x offset positive, y offset positive for all legs
 # HR swing: x offset negative, y offset negative for all legs
