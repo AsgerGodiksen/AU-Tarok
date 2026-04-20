@@ -1,0 +1,82 @@
+PID Parameters — read 2026-04-20 13:12:29
+====================================================
+
+Leg FL
+------------------------------
+  J1 (ID 0x141):
+    Position Loop : Kp=  120  Ki=   25
+    Speed Loop    : Kp=   60  Ki=   10
+    Torque Loop   : Kp=   60  Ki=   13
+  J2 (ID 0x142):
+    Position Loop : Kp=  120  Ki=   25
+    Speed Loop    : Kp=   60  Ki=   10
+    Torque Loop   : Kp=   60  Ki=   13
+  J3 (ID 0x143):
+    Position Loop : Kp=  120  Ki=   25
+    Speed Loop    : Kp=   60  Ki=   10
+    Torque Loop   : Kp=   60  Ki=   13
+
+Leg FR
+------------------------------
+  J1 (ID 0x141):
+    Position Loop : Kp=  120  Ki=   25
+    Speed Loop    : Kp=   60  Ki=   10
+    Torque Loop   : Kp=   60  Ki=   13
+  J2 (ID 0x142):
+    Position Loop : Kp=  120  Ki=   25
+    Speed Loop    : Kp=   60  Ki=   10
+    Torque Loop   : Kp=   60  Ki=   13
+  J3 (ID 0x143):
+    Position Loop : Kp=  120  Ki=   25
+    Speed Loop    : Kp=   60  Ki=   10
+    Torque Loop   : Kp=   60  Ki=   13
+
+Leg HL
+------------------------------
+  J1 (ID 0x141):
+    Position Loop : Kp=  120  Ki=   25
+    Speed Loop    : Kp=   60  Ki=   10
+    Torque Loop   : Kp=   60  Ki=   13
+  J2 (ID 0x142):
+    Position Loop : Kp=  120  Ki=   25
+    Speed Loop    : Kp=   60  Ki=   10
+    Torque Loop   : Kp=   60  Ki=   13
+  J3 (ID 0x143):
+    Position Loop : Kp=  120  Ki=   25
+    Speed Loop    : Kp=   60  Ki=   10
+    Torque Loop   : Kp=   60  Ki=   13
+
+Leg HR
+------------------------------
+  J1 (ID 0x141):
+    Position Loop : Kp=  120  Ki=   25
+    Speed Loop    : Kp=   60  Ki=   10
+    Torque Loop   : Kp=   60  Ki=   13
+  J2 (ID 0x142):
+    Position Loop : Kp=  120  Ki=   25
+    Speed Loop    : Kp=   60  Ki=   10
+    Torque Loop   : Kp=   60  Ki=   13
+  J3 (ID 0x143):
+    Position Loop : Kp=  120  Ki=   25
+    Speed Loop    : Kp=   60  Ki=   10
+    Torque Loop   : Kp=   60  Ki=   13
+
+
+
+STATISTICS — appended 2026-04-20 13:14:52
+====================================================
+Leg   Joint    RMS error (deg)   Max |error| (deg)
+────────────────────────────────────────────────────
+FL    J1                 0.001               0.009
+FL    J2                 1.401               2.573
+FL    J3                 3.266               6.199
+FR    J1                 0.001               0.004
+FR    J2                 0.803               1.818
+FR    J3                 2.459               4.911
+HL    J1                 0.001               0.008
+HL    J2                 2.214               3.626
+HL    J3                 1.077               1.747
+HR    J1                 0.001               0.009
+HR    J2                 2.050               3.498
+HR    J3                 0.907               1.711
+────────────────────────────────────────────────────

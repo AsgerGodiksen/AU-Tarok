@@ -180,11 +180,11 @@ for bus in [bus0, bus1, bus2, bus3]:
 # Data logging setup
 # ─────────────────────────────────────────────────────────────────────────────
 SCRIPT_DIR   = os.path.dirname(os.path.abspath(__file__))
-log_dir      = os.path.join(SCRIPT_DIR, "TEST_DATA_PID")
+log_dir      = os.path.join(SCRIPT_DIR, "TEST_DATA_PID_20_04")
 os.makedirs(log_dir, exist_ok=True)
 timestamp_str = time.strftime('%Y-%m-%d_%H-%M-%S')
-log_filename  = os.path.join(log_dir, f"Stand_Pose_TorquePos_Log_TEST_2_{timestamp_str}.csv")
-pid_filename  = os.path.join(log_dir, f"Stand_Pose_TorquePos_Log_TEST_2_{timestamp_str}_PID.txt")
+log_filename  = os.path.join(log_dir, f"Stand_Pose_TorquePos_Log_TEST_3_{timestamp_str}.csv")
+pid_filename  = os.path.join(log_dir, f"Stand_Pose_TorquePos_Log_TEST_3_{timestamp_str}_PID.txt")
 
 with open(log_filename, 'w', newline='') as csvfile:
     csv.writer(csvfile).writerow([
@@ -255,29 +255,38 @@ for bus, angles in [(bus0, Theta_FL), (bus1, Theta_FR),
     Position_Control(bus, ID_1, angles[0], 30)
     Position_Control(bus, ID_2, angles[1], 30)
     Position_Control(bus, ID_3, angles[2], 30)
-time.sleep(3)
+time.sleep(5)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Main loop — target 200 Hz
 # ─────────────────────────────────────────────────────────────────────────────
 LOOP_PERIOD = 1.0 / 200.0
 loop_times  = []
-time.sleep(5)
+print("SET IN POSITION")
+time.sleep(10)
 print("\nPre-loop sequence complete.")
 print(">>> STARTING in 0.5 seconds — remove your hands! <<<")
 time.sleep(0.5)
-print("LOGGING STARTED — Press Ctrl+C to stop.")
-start_time = time.monotonic()
+LOG_DURATION = 20.0  # seconds to log before stopping
+
+print("LOGGING STARTED — logging for 20 seconds. Press Ctrl+C to stop motors.")
+start_time    = time.monotonic()
+logging_active = True
 
 try:
     while True:
         loop_start    = time.monotonic()
         elapsed_total = loop_start - start_time
 
-        loop_elapsed = time.monotonic() - loop_start
-        loop_times.append(loop_elapsed)
-        sleep_time = LOOP_PERIOD - loop_elapsed
-        time.sleep(max(sleep_time, 0.001))
+        # ── Stop logging after LOG_DURATION, but keep motors running ───────
+        if logging_active and elapsed_total >= LOG_DURATION:
+            logging_active = False
+            print(f"\nLOGGING STOPPED after {elapsed_total:.1f} s — {data_count} rows recorded.")
+            print(f"Saving data to {os.path.basename(log_filename)}...")
+            with open(log_filename, "a") as file:
+                for i in range(data_count):
+                    file.write(",".join(f"{v:.4f}" for v in data[i, :]) + "\n")
+            print("Data saved. Actuators still running — press Ctrl+C to stop.")
 
         # ── Send + receive all 4 legs in parallel ──────────────────────────
         f_FL = executor.submit(send_leg, bus0, Theta_FL)
@@ -291,25 +300,26 @@ try:
         fb_HR = f_HR.result()
 
         # ── Log torque + position + command ────────────────────────────────
-        data[data_count, :] = [
-            elapsed_total,
-            # 12 read torques (Nm)
-            safe_torque(fb_FL, 0), safe_torque(fb_FL, 1), safe_torque(fb_FL, 2),
-            safe_torque(fb_FR, 0), safe_torque(fb_FR, 1), safe_torque(fb_FR, 2),
-            safe_torque(fb_HL, 0), safe_torque(fb_HL, 1), safe_torque(fb_HL, 2),
-            safe_torque(fb_HR, 0), safe_torque(fb_HR, 1), safe_torque(fb_HR, 2),
-            # 12 read positions (deg, output shaft, multi-turn)
-            safe_position(fb_FL, 0), safe_position(fb_FL, 1), safe_position(fb_FL, 2),
-            safe_position(fb_FR, 0), safe_position(fb_FR, 1), safe_position(fb_FR, 2),
-            safe_position(fb_HL, 0), safe_position(fb_HL, 1), safe_position(fb_HL, 2),
-            safe_position(fb_HR, 0), safe_position(fb_HR, 1), safe_position(fb_HR, 2),
-            # 12 position commands (deg, constant IK setpoints)
-            Theta_FL[0], Theta_FL[1], Theta_FL[2],
-            Theta_FR[0], Theta_FR[1], Theta_FR[2],
-            Theta_HL[0], Theta_HL[1], Theta_HL[2],
-            Theta_HR[0], Theta_HR[1], Theta_HR[2],
-        ]
-        data_count += 1
+        if logging_active:
+            data[data_count, :] = [
+                elapsed_total,
+                # 12 read torques (Nm)
+                safe_torque(fb_FL, 0), safe_torque(fb_FL, 1), safe_torque(fb_FL, 2),
+                safe_torque(fb_FR, 0), safe_torque(fb_FR, 1), safe_torque(fb_FR, 2),
+                safe_torque(fb_HL, 0), safe_torque(fb_HL, 1), safe_torque(fb_HL, 2),
+                safe_torque(fb_HR, 0), safe_torque(fb_HR, 1), safe_torque(fb_HR, 2),
+                # 12 read positions (deg, output shaft, multi-turn)
+                safe_position(fb_FL, 0), safe_position(fb_FL, 1), safe_position(fb_FL, 2),
+                safe_position(fb_FR, 0), safe_position(fb_FR, 1), safe_position(fb_FR, 2),
+                safe_position(fb_HL, 0), safe_position(fb_HL, 1), safe_position(fb_HL, 2),
+                safe_position(fb_HR, 0), safe_position(fb_HR, 1), safe_position(fb_HR, 2),
+                # 12 position commands (deg, constant IK setpoints)
+                Theta_FL[0], Theta_FL[1], Theta_FL[2],
+                Theta_FR[0], Theta_FR[1], Theta_FR[2],
+                Theta_HL[0], Theta_HL[1], Theta_HL[2],
+                Theta_HR[0], Theta_HR[1], Theta_HR[2],
+            ]
+            data_count += 1
 
         loop_elapsed = time.monotonic() - loop_start
         loop_times.append(loop_elapsed)
@@ -346,12 +356,14 @@ except KeyboardInterrupt:
     print("Shutting down CAN buses...")
     for bus in [bus0, bus1, bus2, bus3]:
         bus.shutdown()
+        time.sleep(0.01)
     print("CAN buses shut down.")
 
-    # ── Write logged data ────────────────────────────────────────────────────
-    print("Storing logged data to file...")
-    with open(log_filename, "a") as file:
-        for i in range(data_count):
-            file.write(",".join(f"{v:.4f}" for v in data[i, :]) + "\n")
-    print(f"Logged {data_count} rows to {log_filename}")
+    # ── Write logged data (only if logging was interrupted before 20 s) ─────
+    if logging_active and data_count > 0:
+        print("Storing logged data to file...")
+        with open(log_filename, "a") as file:
+            for i in range(data_count):
+                file.write(",".join(f"{v:.4f}" for v in data[i, :]) + "\n")
+        print(f"Logged {data_count} rows to {log_filename}")
     print("Shutdown complete.")

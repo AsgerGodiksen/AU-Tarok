@@ -1,0 +1,111 @@
+============================================================
+  PID Comparison Report
+  Generated : 2026-04-20 12:32:01
+  Tests     : 2
+============================================================
+
+PID PARAMETERS
+────────────────────────────────────────────────────────────
+
+  Test 2  —  Stand_Pose_TorquePos_Log_TEST_2_2026-04-16_12-55-47.csv
+  PID Parameters — read 2026-04-16 12:55:47
+  ====================================================
+  
+  Leg FL
+  ------------------------------
+    J1 (ID 0x141):
+      Position Loop : Kp=  100  Ki=  100
+      Speed Loop    : Kp=   50  Ki=   40
+      Torque Loop   : Kp=   50  Ki=   50
+    J2 (ID 0x142):
+      Position Loop : Kp=  100  Ki=  100
+      Speed Loop    : Kp=   50  Ki=   40
+      Torque Loop   : Kp=   50  Ki=   50
+    J3 (ID 0x143):
+      Position Loop : Kp=  100  Ki=  100
+      Speed Loop    : Kp=   50  Ki=   40
+      Torque Loop   : Kp=   50  Ki=   50
+  
+  Leg FR
+  ------------------------------
+    J1 (ID 0x141):
+      Position Loop : Kp=  100  Ki=  100
+      Speed Loop    : Kp=   50  Ki=   40
+      Torque Loop   : Kp=   50  Ki=   50
+    J2 (ID 0x142):
+      Position Loop : Kp=  100  Ki=  100
+      Speed Loop    : Kp=   50  Ki=   40
+      Torque Loop   : Kp=   50  Ki=   50
+    J3 (ID 0x143):
+      Position Loop : Kp=  100  Ki=  100
+      Speed Loop    : Kp=   50  Ki=   40
+      Torque Loop   : Kp=   50  Ki=   50
+  
+  Leg HL
+  ------------------------------
+    J1 (ID 0x141):
+      Position Loop : Kp=  100  Ki=  100
+      Speed Loop    : Kp=   50  Ki=   40
+      Torque Loop   : Kp=   50  Ki=   50
+    J2 (ID 0x142):
+      Position Loop : Kp=  100  Ki=  100
+      Speed Loop    : Kp=   50  Ki=   40
+      Torque Loop   : Kp=   50  Ki=   50
+    J3 (ID 0x143):
+      Position Loop : Kp=  100  Ki=  100
+      Speed Loop    : Kp=   50  Ki=   40
+      Torque Loop   : Kp=   50  Ki=   50
+  
+  Leg HR
+  ------------------------------
+    J1 (ID 0x141):
+      Position Loop : Kp=  100  Ki=  100
+      Speed Loop    : Kp=   50  Ki=   40
+      Torque Loop   : Kp=   50  Ki=   50
+    J2 (ID 0x142):
+      Position Loop : Kp=  100  Ki=  100
+      Speed Loop    : Kp=   50  Ki=   40
+      Torque Loop   : Kp=   50  Ki=   50
+    J3 (ID 0x143):
+      Position Loop : Kp=  100  Ki=  100
+      Speed Loop    : Kp=   50  Ki=   40
+      Torque Loop   : Kp=   50  Ki=   50
+  
+  
+  
+  STATISTICS — appended 2026-04-20 09:45:40
+  ====================================================
+  Leg   Joint    RMS error (deg)   Max |error| (deg)
+  ────────────────────────────────────────────────────
+  FL    J1                 0.003               0.023
+  FL    J2                 0.018               0.070
+  FL    J3                 0.006               0.034
+  FR    J1                 0.002               0.039
+  FR    J2                 0.018               0.061
+  FR    J3                 0.004               0.037
+  HL    J1                 0.004               0.017
+  HL    J2                 0.020               0.067
+  HL    J3                 0.007               0.060
+  HR    J1                 0.003               0.021
+  HR    J2                 0.020               0.063
+  HR    J3                 0.008               0.060
+  ────────────────────────────────────────────────────
+
+
+STATISTICS
+────────────────────────────────────────────────────────────
+Test    Leg   Joint    RMS error (deg)   Max |error| (deg)
+────────────────────────────────────────────────────────────
+2       FL    J1                 0.003               0.023
+2       FL    J2                 0.018               0.070
+2       FL    J3                 0.006               0.034
+2       FR    J1                 0.002               0.039
+2       FR    J2                 0.018               0.061
+2       FR    J3                 0.004               0.037
+2       HL    J1                 0.004               0.017
+2       HL    J2                 0.020               0.067
+2       HL    J3                 0.007               0.060
+2       HR    J1                 0.003               0.021
+2       HR    J2                 0.020               0.063
+2       HR    J3                 0.008               0.060
+────────────────────────────────────────────────────────────

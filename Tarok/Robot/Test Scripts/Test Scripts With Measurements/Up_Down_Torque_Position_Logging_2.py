@@ -241,8 +241,8 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 log_dir = os.path.join(SCRIPT_DIR, "TEST_DATA_PID_UP_DOWN")
 os.makedirs(log_dir, exist_ok=True)
 timestamp_str = time.strftime('%Y-%m-%d_%H-%M-%S')
-log_filename = os.path.join(log_dir, f"Up_Down_TorquePos_Log_Test_1_{timestamp_str}.csv")
-pid_filename = os.path.join(log_dir, f"Up_Down_TorquePos_Log_Test_1_{timestamp_str}_PID.txt")
+log_filename = os.path.join(log_dir, f"Up_Down_TorquePos_Log_Test_16_{timestamp_str}.csv")
+pid_filename = os.path.join(log_dir, f"Up_Down_TorquePos_Log_Test_16_{timestamp_str}_PID.txt")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Read and save PID parameters from all 12 motors
@@ -313,7 +313,7 @@ for bus, angles in [(bus0, Theta_FL[0]), (bus1, Theta_FR[0]),
     Position_Control(bus, ID_1, angles[0], 30)
     Position_Control(bus, ID_2, angles[1], 30)
     Position_Control(bus, ID_3, angles[2], 30)
-time.sleep(6)
+time.sleep(3)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Main loop — cyclic up/down trajectory with torque + position + command logging
@@ -322,11 +322,16 @@ LOOP_PERIOD = 1.0 / 200.0
 NUM_CYCLES  = 3          # robot performs this many up/down cycles then holds still
 loop_times  = []
 cycle_count = 0
+print("SET IN POSITION")
+time.sleep(10)
+print("\nPre-loop sequence complete.")
+print(">>> STARTING in 0.5 seconds — remove your hands! <<<")
+time.sleep(0.5)
 
 print("Pre-loop sequence complete, starting loop...")
 print(f"Loop started — robot will complete {NUM_CYCLES} cycles then hold still.")
 print("Press Ctrl+C at any time to shut down.")
-time.sleep(5)
+#time.sleep(5)
 start_time = cycle_start = time.monotonic()
 
 try:

@@ -1,0 +1,158 @@
+PID Parameters — read 2026-04-20 11:29:06
+====================================================
+
+Leg FL
+------------------------------
+  J1 (ID 0x141):
+    Position Loop : Kp=  110  Ki=   33
+    Speed Loop    : Kp=   55  Ki=   13
+    Torque Loop   : Kp=   55  Ki=   17
+  J2 (ID 0x142):
+    Position Loop : Kp=  110  Ki=   33
+    Speed Loop    : Kp=   55  Ki=   13
+    Torque Loop   : Kp=   55  Ki=   17
+  J3 (ID 0x143):
+    Position Loop : Kp=  110  Ki=   33
+    Speed Loop    : Kp=   55  Ki=   13
+    Torque Loop   : Kp=   55  Ki=   17
+
+Leg FR
+------------------------------
+  J1 (ID 0x141):
+    Position Loop : Kp=  110  Ki=   33
+    Speed Loop    : Kp=   55  Ki=   13
+    Torque Loop   : Kp=   55  Ki=   17
+  J2 (ID 0x142):
+    Position Loop : Kp=  110  Ki=   33
+    Speed Loop    : Kp=   55  Ki=   13
+    Torque Loop   : Kp=   55  Ki=   17
+  J3 (ID 0x143):
+    Position Loop : Kp=  110  Ki=   33
+    Speed Loop    : Kp=   55  Ki=   13
+    Torque Loop   : Kp=   55  Ki=   17
+
+Leg HL
+------------------------------
+  J1 (ID 0x141):
+    Position Loop : Kp=  110  Ki=   33
+    Speed Loop    : Kp=   55  Ki=   13
+    Torque Loop   : Kp=   55  Ki=   17
+  J2 (ID 0x142):
+    Position Loop : Kp=  110  Ki=   33
+    Speed Loop    : Kp=   55  Ki=   13
+    Torque Loop   : Kp=   55  Ki=   17
+  J3 (ID 0x143):
+    Position Loop : Kp=  110  Ki=   33
+    Speed Loop    : Kp=   55  Ki=   13
+    Torque Loop   : Kp=   55  Ki=   17
+
+Leg HR
+------------------------------
+  J1 (ID 0x141):
+    Position Loop : Kp=  110  Ki=   33
+    Speed Loop    : Kp=   55  Ki=   13
+    Torque Loop   : Kp=   55  Ki=   17
+  J2 (ID 0x142):
+    Position Loop : Kp=  110  Ki=   33
+    Speed Loop    : Kp=   55  Ki=   13
+    Torque Loop   : Kp=   55  Ki=   17
+  J3 (ID 0x143):
+    Position Loop : Kp=  110  Ki=   33
+    Speed Loop    : Kp=   55  Ki=   13
+    Torque Loop   : Kp=   55  Ki=   17
+
+
+
+STATISTICS — appended 2026-04-20 11:30:11
+====================================================
+Leg   Joint    RMS error (deg)   Max |error| (deg)
+────────────────────────────────────────────────────
+FL    J1                 0.000               0.002
+FL    J2                 0.002               0.004
+FL    J3                 0.001               0.003
+FR    J1                 0.000               0.000
+FR    J2                 0.002               0.005
+FR    J3                 0.001               0.003
+HL    J1                 0.000               0.001
+HL    J2                 0.002               0.005
+HL    J3                 0.001               0.002
+HR    J1                 0.000               0.003
+HR    J2                 0.002               0.005
+HR    J3                 0.001               0.003
+────────────────────────────────────────────────────
+
+
+STATISTICS — appended 2026-04-20 12:14:55
+====================================================
+Leg   Joint    RMS error (deg)   Max |error| (deg)
+────────────────────────────────────────────────────
+FL    J1                 0.000               0.002
+FL    J2                 0.002               0.004
+FL    J3                 0.001               0.003
+FR    J1                 0.000               0.000
+FR    J2                 0.002               0.005
+FR    J3                 0.001               0.003
+HL    J1                 0.000               0.001
+HL    J2                 0.002               0.005
+HL    J3                 0.001               0.002
+HR    J1                 0.000               0.003
+HR    J2                 0.002               0.005
+HR    J3                 0.001               0.003
+────────────────────────────────────────────────────
+
+
+STATISTICS — appended 2026-04-20 14:58:37
+====================================================
+Leg   Joint    RMS error (deg)   Max |error| (deg)
+────────────────────────────────────────────────────
+FL    J1                 0.000               0.002
+FL    J2                 0.002               0.004
+FL    J3                 0.001               0.003
+FR    J1                 0.000               0.000
+FR    J2                 0.002               0.005
+FR    J3                 0.001               0.003
+HL    J1                 0.000               0.001
+HL    J2                 0.002               0.005
+HL    J3                 0.001               0.002
+HR    J1                 0.000               0.003
+HR    J2                 0.002               0.005
+HR    J3                 0.001               0.003
+────────────────────────────────────────────────────
+
+
+STATISTICS — appended 2026-04-20 15:02:36
+====================================================
+Leg   Joint    RMS error (deg)   Max |error| (deg)
+────────────────────────────────────────────────────
+FL    J1                 0.000               0.002
+FL    J2                 0.002               0.004
+FL    J3                 0.001               0.003
+FR    J1                 0.000               0.000
+FR    J2                 0.002               0.005
+FR    J3                 0.001               0.003
+HL    J1                 0.000               0.001
+HL    J2                 0.002               0.005
+HL    J3                 0.001               0.002
+HR    J1                 0.000               0.003
+HR    J2                 0.002               0.005
+HR    J3                 0.001               0.003
+────────────────────────────────────────────────────
+
+
+STATISTICS — appended 2026-04-20 15:06:19
+====================================================
+Leg   Joint    RMS error (deg)   Max |error| (deg)
+────────────────────────────────────────────────────
+FL    J1                 0.000               0.002
+FL    J2                 0.002               0.004
+FL    J3                 0.001               0.003
+FR    J1                 0.000               0.000
+FR    J2                 0.002               0.005
+FR    J3                 0.001               0.003
+HL    J1                 0.000               0.001
+HL    J2                 0.002               0.005
+HL    J3                 0.001               0.002
+HR    J1                 0.000               0.003
+HR    J2                 0.002               0.005
+HR    J3                 0.001               0.003
+────────────────────────────────────────────────────
