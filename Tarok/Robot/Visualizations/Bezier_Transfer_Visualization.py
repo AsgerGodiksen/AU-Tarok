@@ -27,7 +27,7 @@ COLORS = Tarok.COLORS
 PHASE_OFFSET = Tarok.CRAWL_OFFSETS_Mixed
 
 # Offsets for COM transfer during stand phase
-x_offset = 0.03 # [m] how much to move COM forward during transfer
+x_offset = 0.025 # [m] how much to move COM forward during transfer
 y_offset = 0.04 # [m] how much to move COM to the left during transfer
 
 # Time parameters
@@ -76,161 +76,41 @@ FR_Bezier_Trajectory, FR_Bezier_Velocities = Apply_Phase_Offset(FR_Bezier_Trajec
 HL_Bezier_Trajectory, HL_Bezier_Velocities = Apply_Phase_Offset(HL_Bezier_Trajectory, Bezier_Velocities, PHASE_OFFSET['HL'])
 HR_Bezier_Trajectory, HR_Bezier_Velocities = Apply_Phase_Offset(HR_Bezier_Trajectory, Bezier_Velocities, PHASE_OFFSET['HR'])
 
-###### Introduce transfer phase ######
-
-# Preallocate new trajectory arrays with transfer
-FL_Bezier_Trajectory_with_transfer = np.zeros((3, Total_Time_Steps_with_transfer))
-FR_Bezier_Trajectory_with_transfer = np.zeros((3, Total_Time_Steps_with_transfer))
-HL_Bezier_Trajectory_with_transfer = np.zeros((3, Total_Time_Steps_with_transfer))
-HR_Bezier_Trajectory_with_transfer = np.zeros((3, Total_Time_Steps_with_transfer))
-
-# Preallocate new velocity arrays with transfer
-FL_Bezier_Velocities_with_transfer = np.zeros((3, Total_Time_Steps_with_transfer))
-FR_Bezier_Velocities_with_transfer = np.zeros((3, Total_Time_Steps_with_transfer))
-HL_Bezier_Velocities_with_transfer = np.zeros((3, Total_Time_Steps_with_transfer))
-HR_Bezier_Velocities_with_transfer = np.zeros((3, Total_Time_Steps_with_transfer))
-
-# FL swing: x offset positive, y offset positive for all legs
-# HR swing: x offset negative, y offset negative for all legs
-# FR swing: x offset positive, y offset negative for all legs
-# HL swing: x offset negative, y offset positive for all legs
-
-# Swing phase start — first discrete step where each leg enters swing
-SWING_SEQUENCE_Mixed = ['FL', 'HR', 'FR', 'HL']
-
-Swing_Start_Index = {leg: int(round(PHASE_OFFSET[leg] * Total_Time_Steps))
-                     for leg in SWING_SEQUENCE_Mixed}
-Swing_Start_Time  = {leg: t[Swing_Start_Index[leg]]
-                     for leg in SWING_SEQUENCE_Mixed}
-
-print("Swing start indexes:", Swing_Start_Index)
-print("Swing start times:  ", Swing_Start_Time)
-
-# Create mew swing start index variable with Transfer_Time_Steps added to FL, 2*Transfer_Time_Steps added to HR, 3*Transfer_Time_Steps added to FR and 4*Transfer_Time_Steps added to HL
-Swing_Start_Index_with_transfer = {leg: Swing_Start_Index[leg] + (i + 1) * Transfer_Time_Steps
-                                 for i, leg in enumerate(SWING_SEQUENCE_Mixed)}
-Swing_Start_Time_with_transfer  = {leg: t_with_transfer[Swing_Start_Index_with_transfer[leg]]
-                                 for leg in SWING_SEQUENCE_Mixed}
-
-print("Swing start indexes with transfer:", Swing_Start_Index_with_transfer)
-print("Swing start times with transfer:  ", Swing_Start_Time_with_transfer)
-
-#### TRAJECTORIES - SWING AND STAND PHASES ####
-
-# Take swing and stand phases of FL_Bezier_Trajectory and add x and y offset and allocate in new trajectory array
-FL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['FL'] : Swing_Start_Index_with_transfer['FL'] + Swing_Time_Steps] = FL_Bezier_Trajectory[:, :Swing_Start_Index['FL'] + Swing_Time_Steps] + np.array([[x_offset], [y_offset], [0]])
-FL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HR'] : Swing_Start_Index_with_transfer['HR'] + Swing_Time_Steps] = FL_Bezier_Trajectory[:, Swing_Start_Index['HR'] : Swing_Start_Index['HR'] + Swing_Time_Steps] + np.array([[-x_offset], [-y_offset], [0]])
-FL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['FR'] : Swing_Start_Index_with_transfer['FR'] + Swing_Time_Steps] = FL_Bezier_Trajectory[:, Swing_Start_Index['FR'] : Swing_Start_Index['FR'] + Swing_Time_Steps] + np.array([[x_offset], [-y_offset], [0]])
-FL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HL'] : Swing_Start_Index_with_transfer['HL'] + Swing_Time_Steps] = FL_Bezier_Trajectory[:, Swing_Start_Index['HL'] : Swing_Start_Index['HL'] + Swing_Time_Steps] + np.array([[-x_offset], [y_offset], [0]])
-
-# Take swing and stand phases of HR_Bezier_Trajectory and add x and y offset and allocate in new trajectory array
-HR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['FL'] : Swing_Start_Index_with_transfer['FL'] + Swing_Time_Steps] = HR_Bezier_Trajectory[:, :Swing_Start_Index['FL'] + Swing_Time_Steps] + np.array([[x_offset], [y_offset], [0]])
-HR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HR'] : Swing_Start_Index_with_transfer['HR'] + Swing_Time_Steps] = HR_Bezier_Trajectory[:, Swing_Start_Index['HR'] : Swing_Start_Index['HR'] + Swing_Time_Steps] + np.array([[-x_offset], [-y_offset], [0]])
-HR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['FR'] : Swing_Start_Index_with_transfer['FR'] + Swing_Time_Steps] = HR_Bezier_Trajectory[:, Swing_Start_Index['FR'] : Swing_Start_Index['FR'] + Swing_Time_Steps] + np.array([[x_offset], [-y_offset], [0]])
-HR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HL'] : Swing_Start_Index_with_transfer['HL'] + Swing_Time_Steps] = HR_Bezier_Trajectory[:, Swing_Start_Index['HL'] : Swing_Start_Index['HL'] + Swing_Time_Steps] + np.array([[-x_offset], [y_offset], [0]])
-
-# Take swing and stand phases of FR_Bezier_Trajectory and add x and y offset and allocate in new trajectory array
-FR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['FL'] : Swing_Start_Index_with_transfer['FL'] + Swing_Time_Steps] = FR_Bezier_Trajectory[:, :Swing_Start_Index['FL'] + Swing_Time_Steps] + np.array([[x_offset], [y_offset], [0]])
-FR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HR'] : Swing_Start_Index_with_transfer['HR'] + Swing_Time_Steps] = FR_Bezier_Trajectory[:, Swing_Start_Index['HR'] : Swing_Start_Index['HR'] + Swing_Time_Steps] + np.array([[-x_offset], [-y_offset], [0]])
-FR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['FR'] : Swing_Start_Index_with_transfer['FR'] + Swing_Time_Steps] = FR_Bezier_Trajectory[:, Swing_Start_Index['FR'] : Swing_Start_Index['FR'] + Swing_Time_Steps] + np.array([[x_offset], [-y_offset], [0]])
-FR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HL'] : Swing_Start_Index_with_transfer['HL'] + Swing_Time_Steps] = FR_Bezier_Trajectory[:, Swing_Start_Index['HL'] : Swing_Start_Index['HL'] + Swing_Time_Steps] + np.array([[-x_offset], [y_offset], [0]])
-
-# Take swing and stand phases of HL_Bezier_Trajectory and add x and y offset and allocate in new trajectory array
-HL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['FL'] : Swing_Start_Index_with_transfer['FL'] + Swing_Time_Steps] = HL_Bezier_Trajectory[:, :Swing_Start_Index['FL'] + Swing_Time_Steps] + np.array([[x_offset], [y_offset], [0]])
-HL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HR'] : Swing_Start_Index_with_transfer['HR'] + Swing_Time_Steps] = HL_Bezier_Trajectory[:, Swing_Start_Index['HR'] : Swing_Start_Index['HR'] + Swing_Time_Steps] + np.array([[-x_offset], [-y_offset], [0]])
-HL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['FR'] : Swing_Start_Index_with_transfer['FR'] + Swing_Time_Steps] = HL_Bezier_Trajectory[:, Swing_Start_Index['FR'] : Swing_Start_Index['FR'] + Swing_Time_Steps] + np.array([[x_offset], [-y_offset], [0]])
-HL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HL'] : Swing_Start_Index_with_transfer['HL'] + Swing_Time_Steps] = HL_Bezier_Trajectory[:, Swing_Start_Index['HL'] : Swing_Start_Index['HL'] + Swing_Time_Steps] + np.array([[-x_offset], [y_offset], [0]])
-
-#### TRAJECTORIES - TRANSFER PHASES ####
-
-# Compute cos interpolation from previous position to next position for all transfer phases for FL leg and allocate in new trajectory array
-FL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['FL'] - Transfer_Time_Steps : Swing_Start_Index_with_transfer['FL']] = cos_interp(t_transfer, FL_Bezier_Trajectory_with_transfer[:, -1].reshape((3, 1)), FL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['FL']].reshape((3, 1)), 0, Transfer_Time_Scalar)
-FL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HR'] - Transfer_Time_Steps : Swing_Start_Index_with_transfer['HR']] = cos_interp(t_transfer, FL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HR'] - Transfer_Time_Steps - 1].reshape((3, 1)), FL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HR']].reshape((3, 1)), 0, Transfer_Time_Scalar)
-FL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['FR'] - Transfer_Time_Steps : Swing_Start_Index_with_transfer['FR']] = cos_interp(t_transfer, FL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['FR'] - Transfer_Time_Steps - 1].reshape((3, 1)), FL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['FR']].reshape((3, 1)), 0, Transfer_Time_Scalar)
-FL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HL'] - Transfer_Time_Steps : Swing_Start_Index_with_transfer['HL']] = cos_interp(t_transfer, FL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HL'] - Transfer_Time_Steps - 1].reshape((3, 1)), FL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HL']].reshape((3, 1)), 0, Transfer_Time_Scalar)
-
-# Compute cos interpolation from previous position to next position for all transfer phases for HR leg and allocate in new trajectory array
-HR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['FL'] - Transfer_Time_Steps : Swing_Start_Index_with_transfer['FL']] = cos_interp(t_transfer, HR_Bezier_Trajectory_with_transfer[:, -1].reshape((3, 1)), HR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['FL']].reshape((3, 1)), 0, Transfer_Time_Scalar)
-HR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HR'] - Transfer_Time_Steps : Swing_Start_Index_with_transfer['HR']] = cos_interp(t_transfer, HR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HR'] - Transfer_Time_Steps - 1].reshape((3, 1)), HR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HR']].reshape((3, 1)), 0, Transfer_Time_Scalar)
-HR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['FR'] - Transfer_Time_Steps : Swing_Start_Index_with_transfer['FR']] = cos_interp(t_transfer, HR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['FR'] - Transfer_Time_Steps - 1].reshape((3, 1)), HR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['FR']].reshape((3, 1)), 0, Transfer_Time_Scalar)
-HR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HL'] - Transfer_Time_Steps : Swing_Start_Index_with_transfer['HL']] = cos_interp(t_transfer, HR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HL'] - Transfer_Time_Steps - 1].reshape((3, 1)), HR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HL']].reshape((3, 1)), 0, Transfer_Time_Scalar)
-
-# Compute cos interpolation from previous position to next position for all transfer phases for FR leg and allocate in new trajectory array
-FR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['FL'] - Transfer_Time_Steps : Swing_Start_Index_with_transfer['FL']] = cos_interp(t_transfer, FR_Bezier_Trajectory_with_transfer[:, -1].reshape((3, 1)), FR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['FL']].reshape((3, 1)), 0, Transfer_Time_Scalar)
-FR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HR'] - Transfer_Time_Steps : Swing_Start_Index_with_transfer['HR']] = cos_interp(t_transfer, FR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HR'] - Transfer_Time_Steps - 1].reshape((3, 1)), FR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HR']].reshape((3, 1)), 0, Transfer_Time_Scalar)
-FR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['FR'] - Transfer_Time_Steps : Swing_Start_Index_with_transfer['FR']] = cos_interp(t_transfer, FR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['FR'] - Transfer_Time_Steps - 1].reshape((3, 1)), FR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['FR']].reshape((3, 1)), 0, Transfer_Time_Scalar)
-FR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HL'] - Transfer_Time_Steps : Swing_Start_Index_with_transfer['HL']] = cos_interp(t_transfer, FR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HL'] - Transfer_Time_Steps - 1].reshape((3, 1)), FR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HL']].reshape((3, 1)), 0, Transfer_Time_Scalar)
-
-# Compute cos interpolation from previous position to next position for all transfer phases for HL leg and allocate in new trajectory array
-HL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['FL'] - Transfer_Time_Steps : Swing_Start_Index_with_transfer['FL']] = cos_interp(t_transfer, HL_Bezier_Trajectory_with_transfer[:, -1].reshape((3, 1)), HL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['FL']].reshape((3, 1)), 0, Transfer_Time_Scalar)
-HL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HR'] - Transfer_Time_Steps : Swing_Start_Index_with_transfer['HR']] = cos_interp(t_transfer, HL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HR'] - Transfer_Time_Steps - 1].reshape((3, 1)), HL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HR']].reshape((3, 1)), 0, Transfer_Time_Scalar)
-HL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['FR'] - Transfer_Time_Steps : Swing_Start_Index_with_transfer['FR']] = cos_interp(t_transfer, HL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['FR'] - Transfer_Time_Steps - 1].reshape((3, 1)), HL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['FR']].reshape((3, 1)), 0, Transfer_Time_Scalar)
-HL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HL'] - Transfer_Time_Steps : Swing_Start_Index_with_transfer['HL']] = cos_interp(t_transfer, HL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HL'] - Transfer_Time_Steps - 1].reshape((3, 1)), HL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HL']].reshape((3, 1)), 0, Transfer_Time_Scalar)
-
-#### VELOCITITES - SWING AND STAND PHASES ####
-
-# Take swing and stand phases of FL_Bezier_Velocities and allocate in new trajectory array (no offset for velocities)
-FL_Bezier_Velocities_with_transfer[:, Swing_Start_Index_with_transfer['FL'] : Swing_Start_Index_with_transfer['FL'] + Swing_Time_Steps] = FL_Bezier_Velocities[:, :Swing_Start_Index['FL'] + Swing_Time_Steps]
-FL_Bezier_Velocities_with_transfer[:, Swing_Start_Index_with_transfer['HR'] : Swing_Start_Index_with_transfer['HR'] + Swing_Time_Steps] = FL_Bezier_Velocities[:, Swing_Start_Index['HR'] : Swing_Start_Index['HR'] + Swing_Time_Steps]
-FL_Bezier_Velocities_with_transfer[:, Swing_Start_Index_with_transfer['FR'] : Swing_Start_Index_with_transfer['FR'] + Swing_Time_Steps] = FL_Bezier_Velocities[:, Swing_Start_Index['FR'] : Swing_Start_Index['FR'] + Swing_Time_Steps]
-FL_Bezier_Velocities_with_transfer[:, Swing_Start_Index_with_transfer['HL'] : Swing_Start_Index_with_transfer['HL'] + Swing_Time_Steps] = FL_Bezier_Velocities[:, Swing_Start_Index['HL'] : Swing_Start_Index['HL'] + Swing_Time_Steps]
-
-# Take swing and stand phases of HR_Bezier_Velocities and add x and y offset and allocate in new trajectory array
-HR_Bezier_Velocities_with_transfer[:, Swing_Start_Index_with_transfer['FL'] : Swing_Start_Index_with_transfer['FL'] + Swing_Time_Steps] = HR_Bezier_Velocities[:, :Swing_Start_Index['FL'] + Swing_Time_Steps]
-HR_Bezier_Velocities_with_transfer[:, Swing_Start_Index_with_transfer['HR'] : Swing_Start_Index_with_transfer['HR'] + Swing_Time_Steps] = HR_Bezier_Velocities[:, Swing_Start_Index['HR'] : Swing_Start_Index['HR'] + Swing_Time_Steps]
-HR_Bezier_Velocities_with_transfer[:, Swing_Start_Index_with_transfer['FR'] : Swing_Start_Index_with_transfer['FR'] + Swing_Time_Steps] = HR_Bezier_Velocities[:, Swing_Start_Index['FR'] : Swing_Start_Index['FR'] + Swing_Time_Steps]
-HR_Bezier_Velocities_with_transfer[:, Swing_Start_Index_with_transfer['HL'] : Swing_Start_Index_with_transfer['HL'] + Swing_Time_Steps] = HR_Bezier_Velocities[:, Swing_Start_Index['HL'] : Swing_Start_Index['HL'] + Swing_Time_Steps]
-
-# Take swing and stand phases of FR_Bezier_Velocities and add x and y offset and allocate in new trajectory array
-FR_Bezier_Velocities_with_transfer[:, Swing_Start_Index_with_transfer['FL'] : Swing_Start_Index_with_transfer['FL'] + Swing_Time_Steps] = FR_Bezier_Velocities[:, :Swing_Start_Index['FL'] + Swing_Time_Steps]
-FR_Bezier_Velocities_with_transfer[:, Swing_Start_Index_with_transfer['HR'] : Swing_Start_Index_with_transfer['HR'] + Swing_Time_Steps] = FR_Bezier_Velocities[:, Swing_Start_Index['HR'] : Swing_Start_Index['HR'] + Swing_Time_Steps]
-FR_Bezier_Velocities_with_transfer[:, Swing_Start_Index_with_transfer['FR'] : Swing_Start_Index_with_transfer['FR'] + Swing_Time_Steps] = FR_Bezier_Velocities[:, Swing_Start_Index['FR'] : Swing_Start_Index['FR'] + Swing_Time_Steps]
-FR_Bezier_Velocities_with_transfer[:, Swing_Start_Index_with_transfer['HL'] : Swing_Start_Index_with_transfer['HL'] + Swing_Time_Steps] = FR_Bezier_Velocities[:, Swing_Start_Index['HL'] : Swing_Start_Index['HL'] + Swing_Time_Steps]
-
-# Take swing and stand phases of HL_Bezier_Velocities and add x and y offset and allocate in new trajectory array
-HL_Bezier_Velocities_with_transfer[:, Swing_Start_Index_with_transfer['FL'] : Swing_Start_Index_with_transfer['FL'] + Swing_Time_Steps] = HL_Bezier_Velocities[:, :Swing_Start_Index['FL'] + Swing_Time_Steps]
-HL_Bezier_Velocities_with_transfer[:, Swing_Start_Index_with_transfer['HR'] : Swing_Start_Index_with_transfer['HR'] + Swing_Time_Steps] = HL_Bezier_Velocities[:, Swing_Start_Index['HR'] : Swing_Start_Index['HR'] + Swing_Time_Steps]
-HL_Bezier_Velocities_with_transfer[:, Swing_Start_Index_with_transfer['FR'] : Swing_Start_Index_with_transfer['FR'] + Swing_Time_Steps] = HL_Bezier_Velocities[:, Swing_Start_Index['FR'] : Swing_Start_Index['FR'] + Swing_Time_Steps]
-HL_Bezier_Velocities_with_transfer[:, Swing_Start_Index_with_transfer['HL'] : Swing_Start_Index_with_transfer['HL'] + Swing_Time_Steps] = HL_Bezier_Velocities[:, Swing_Start_Index['HL'] : Swing_Start_Index['HL'] + Swing_Time_Steps] 
-
-#### VELOCITITES - TRANSFER PHASES ####
-
-# Compute cos interpolation derivatives from previous position to next position for all transfer phases for FL leg and allocate in new trajectory array
-FL_Bezier_Velocities_with_transfer[:, Swing_Start_Index_with_transfer['FL'] - Transfer_Time_Steps : Swing_Start_Index_with_transfer['FL']] = cos_interp_dot(t_transfer, FL_Bezier_Trajectory_with_transfer[:, -1].reshape((3, 1)), FL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['FL']].reshape((3, 1)), 0, Transfer_Time_Scalar)
-FL_Bezier_Velocities_with_transfer[:, Swing_Start_Index_with_transfer['HR'] - Transfer_Time_Steps : Swing_Start_Index_with_transfer['HR']] = cos_interp_dot(t_transfer, FL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HR'] - Transfer_Time_Steps - 1].reshape((3, 1)), FL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HR']].reshape((3, 1)), 0, Transfer_Time_Scalar)
-FL_Bezier_Velocities_with_transfer[:, Swing_Start_Index_with_transfer['FR'] - Transfer_Time_Steps : Swing_Start_Index_with_transfer['FR']] = cos_interp_dot(t_transfer, FL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['FR'] - Transfer_Time_Steps - 1].reshape((3, 1)), FL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['FR']].reshape((3, 1)), 0, Transfer_Time_Scalar)
-FL_Bezier_Velocities_with_transfer[:, Swing_Start_Index_with_transfer['HL'] - Transfer_Time_Steps : Swing_Start_Index_with_transfer['HL']] = cos_interp_dot(t_transfer, FL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HL'] - Transfer_Time_Steps - 1].reshape((3, 1)), FL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HL']].reshape((3, 1)), 0, Transfer_Time_Scalar)
-
-# Compute cos interpolation derivatives from previous position to next position for all transfer phases for HR leg and allocate in new trajectory array
-HR_Bezier_Velocities_with_transfer[:, Swing_Start_Index_with_transfer['FL'] - Transfer_Time_Steps : Swing_Start_Index_with_transfer['FL']] = cos_interp_dot(t_transfer, HR_Bezier_Trajectory_with_transfer[:, -1].reshape((3, 1)), HR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['FL']].reshape((3, 1)), 0, Transfer_Time_Scalar)
-HR_Bezier_Velocities_with_transfer[:, Swing_Start_Index_with_transfer['HR'] - Transfer_Time_Steps : Swing_Start_Index_with_transfer['HR']] = cos_interp_dot(t_transfer, HR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HR'] - Transfer_Time_Steps - 1].reshape((3, 1)), HR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HR']].reshape((3, 1)), 0, Transfer_Time_Scalar)
-HR_Bezier_Velocities_with_transfer[:, Swing_Start_Index_with_transfer['FR'] - Transfer_Time_Steps : Swing_Start_Index_with_transfer['FR']] = cos_interp_dot(t_transfer, HR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['FR'] - Transfer_Time_Steps - 1].reshape((3, 1)), HR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['FR']].reshape((3, 1)), 0, Transfer_Time_Scalar)
-HR_Bezier_Velocities_with_transfer[:, Swing_Start_Index_with_transfer['HL'] - Transfer_Time_Steps : Swing_Start_Index_with_transfer['HL']] = cos_interp_dot(t_transfer, HR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HL'] - Transfer_Time_Steps - 1].reshape((3, 1)), HR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HL']].reshape((3, 1)), 0, Transfer_Time_Scalar)
-
-# Compute cos interpolation derivatives from previous position to next position for all transfer phases for FR leg and allocate in new trajectory array
-FR_Bezier_Velocities_with_transfer[:, Swing_Start_Index_with_transfer['FL'] - Transfer_Time_Steps : Swing_Start_Index_with_transfer['FL']] = cos_interp_dot(t_transfer, FR_Bezier_Trajectory_with_transfer[:, -1].reshape((3, 1)), FR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['FL']].reshape((3, 1)), 0, Transfer_Time_Scalar)
-FR_Bezier_Velocities_with_transfer[:, Swing_Start_Index_with_transfer['HR'] - Transfer_Time_Steps : Swing_Start_Index_with_transfer['HR']] = cos_interp_dot(t_transfer, FR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HR'] - Transfer_Time_Steps - 1].reshape((3, 1)), FR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HR']].reshape((3, 1)), 0, Transfer_Time_Scalar)
-FR_Bezier_Velocities_with_transfer[:, Swing_Start_Index_with_transfer['FR'] - Transfer_Time_Steps : Swing_Start_Index_with_transfer['FR']] = cos_interp_dot(t_transfer, FR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['FR'] - Transfer_Time_Steps - 1].reshape((3, 1)), FR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['FR']].reshape((3, 1)), 0, Transfer_Time_Scalar)
-FR_Bezier_Velocities_with_transfer[:, Swing_Start_Index_with_transfer['HL'] - Transfer_Time_Steps : Swing_Start_Index_with_transfer['HL']] = cos_interp_dot(t_transfer, FR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HL'] - Transfer_Time_Steps - 1].reshape((3, 1)), FR_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HL']].reshape((3, 1)), 0, Transfer_Time_Scalar)
-
-# Compute cos interpolation derivatives from previous position to next position for all transfer phases for HL leg and allocate in new trajectory array
-HL_Bezier_Velocities_with_transfer[:, Swing_Start_Index_with_transfer['FL'] - Transfer_Time_Steps : Swing_Start_Index_with_transfer['FL']] = cos_interp_dot(t_transfer, HL_Bezier_Trajectory_with_transfer[:, -1].reshape((3, 1)), HL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['FL']].reshape((3, 1)), 0, Transfer_Time_Scalar)
-HL_Bezier_Velocities_with_transfer[:, Swing_Start_Index_with_transfer['HR'] - Transfer_Time_Steps : Swing_Start_Index_with_transfer['HR']] = cos_interp_dot(t_transfer, HL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HR'] - Transfer_Time_Steps - 1].reshape((3, 1)), HL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HR']].reshape((3, 1)), 0, Transfer_Time_Scalar)
-HL_Bezier_Velocities_with_transfer[:, Swing_Start_Index_with_transfer['FR'] - Transfer_Time_Steps : Swing_Start_Index_with_transfer['FR']] = cos_interp_dot(t_transfer, HL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['FR'] - Transfer_Time_Steps - 1].reshape((3, 1)), HL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['FR']].reshape((3, 1)), 0, Transfer_Time_Scalar)
-HL_Bezier_Velocities_with_transfer[:, Swing_Start_Index_with_transfer['HL'] - Transfer_Time_Steps : Swing_Start_Index_with_transfer['HL']] = cos_interp_dot(t_transfer, HL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HL'] - Transfer_Time_Steps - 1].reshape((3, 1)), HL_Bezier_Trajectory_with_transfer[:, Swing_Start_Index_with_transfer['HL']].reshape((3, 1)), 0, Transfer_Time_Scalar)
+### ADD TRANSFER PHASE TO TRAJECTORY ###
+FL_Bezier_Trajectory_With_Transfer, FR_Bezier_Trajectory_With_Transfer, HL_Bezier_Trajectory_With_Transfer, HR_Bezier_Trajectory_With_Transfer, FL_Bezier_Velocities_With_Transfer, FR_Bezier_Velocities_With_Transfer, HL_Bezier_Velocities_With_Transfer, HR_Bezier_Velocities_With_Transfer = Bezier_Add_Transfer_Phase(
+            t,
+            t_transfer,
+            t_with_transfer,
+            Total_Time_Steps,
+            Total_Time_Steps_with_transfer,
+            Transfer_Time_Steps,
+            Swing_Time_Steps,
+            Transfer_Time_Scalar,
+            PHASE_OFFSET,
+            x_offset,
+            y_offset,
+            FL_Bezier_Trajectory,
+            FR_Bezier_Trajectory,
+            HL_Bezier_Trajectory,
+            HR_Bezier_Trajectory,
+            FL_Bezier_Velocities,
+            FR_Bezier_Velocities,
+            HL_Bezier_Velocities,
+            HR_Bezier_Velocities
+)
 
 ### TRANSFORMATIONS ###
 # Transform the Bezier trajectory from Body Frame to Leg Base Frames
-P_FL_Base = np.array([T0_B(FL_Bezier_Trajectory_with_transfer[:, i].reshape((3, 1)), 'FL') for i in range((len(t_with_transfer)))])
-P_FR_Base = np.array([T0_B(FR_Bezier_Trajectory_with_transfer[:, i].reshape((3, 1)), 'FR') for i in range((len(t_with_transfer)))])
-P_HL_Base = np.array([T0_B(HL_Bezier_Trajectory_with_transfer[:, i].reshape((3, 1)), 'HL') for i in range((len(t_with_transfer)))])
-P_HR_Base = np.array([T0_B(HR_Bezier_Trajectory_with_transfer[:, i].reshape((3, 1)), 'HR') for i in range((len(t_with_transfer)))])
+P_FL_Base = np.array([T0_B(FL_Bezier_Trajectory_With_Transfer[:, i].reshape((3, 1)), 'FL') for i in range((len(t_with_transfer)))])
+P_FR_Base = np.array([T0_B(FR_Bezier_Trajectory_With_Transfer[:, i].reshape((3, 1)), 'FR') for i in range((len(t_with_transfer)))])
+P_HL_Base = np.array([T0_B(HL_Bezier_Trajectory_With_Transfer[:, i].reshape((3, 1)), 'HL') for i in range((len(t_with_transfer)))])
+P_HR_Base = np.array([T0_B(HR_Bezier_Trajectory_With_Transfer[:, i].reshape((3, 1)), 'HR') for i in range((len(t_with_transfer)))])
 
 # Transform desired end-effector velocity from body frame to leg base frames
-V_FL_base = np.array([R0_B(FL_Bezier_Velocities_with_transfer[:, i].reshape((3, 1)), 'FL') for i in range((len(t_with_transfer)))])
-V_FR_base = np.array([R0_B(FR_Bezier_Velocities_with_transfer[:, i].reshape((3, 1)), 'FR') for i in range((len(t_with_transfer)))])
-V_HL_base = np.array([R0_B(HL_Bezier_Velocities_with_transfer[:, i].reshape((3, 1)), 'HL') for i in range((len(t_with_transfer)))])
-V_HR_base = np.array([R0_B(HR_Bezier_Velocities_with_transfer[:, i].reshape((3, 1)), 'HR') for i in range((len(t_with_transfer)))])
+V_FL_base = np.array([R0_B(FL_Bezier_Velocities_With_Transfer[:, i].reshape((3, 1)), 'FL') for i in range((len(t_with_transfer)))])
+V_FR_base = np.array([R0_B(FR_Bezier_Velocities_With_Transfer[:, i].reshape((3, 1)), 'FR') for i in range((len(t_with_transfer)))])
+V_HL_base = np.array([R0_B(HL_Bezier_Velocities_With_Transfer[:, i].reshape((3, 1)), 'HL') for i in range((len(t_with_transfer)))])
+V_HR_base = np.array([R0_B(HR_Bezier_Velocities_With_Transfer[:, i].reshape((3, 1)), 'HR') for i in range((len(t_with_transfer)))])
 
 ### Kinematics ###
 # Determine joint angles for all 4 legs using inverse kinematics
@@ -287,19 +167,19 @@ Theta_dot_HR = np.abs(np.rad2deg(Theta_dot_HR))
 
 # plot FL_Bezier_Trajectory_with_transfer[{0, 1, 2}, :] vs t_with_transfer
 plt.subplot(3, 1, 1)
-plt.plot(t_with_transfer, FL_Bezier_Trajectory_with_transfer[0, :], label='FL X with transfer')
+plt.plot(t_with_transfer, FL_Bezier_Trajectory_With_Transfer[0, :], label='FL X with transfer')
 plt.title('FL Bezier Trajectory X Coordinate with Transfer')
 plt.xlabel('Time (s)')
 plt.ylabel('X Position (m)')
 plt.legend()
 plt.subplot(3, 1, 2)
-plt.plot(t_with_transfer, FL_Bezier_Trajectory_with_transfer[1, :], label='FL Y with transfer')
+plt.plot(t_with_transfer, FL_Bezier_Trajectory_With_Transfer[1, :], label='FL Y with transfer')
 plt.title('FL Bezier Trajectory Y Coordinate with Transfer')
 plt.xlabel('Time (s)')
 plt.ylabel('Y Position (m)')
 plt.legend()
 plt.subplot(3, 1, 3)
-plt.plot(t_with_transfer, FL_Bezier_Trajectory_with_transfer[2, :], label='FL Z with transfer')
+plt.plot(t_with_transfer, FL_Bezier_Trajectory_With_Transfer[2, :], label='FL Z with transfer')
 plt.title('FL Bezier Trajectory Z Coordinate with Transfer')
 plt.xlabel('Time (s)')
 plt.ylabel('Z Position (m)')
