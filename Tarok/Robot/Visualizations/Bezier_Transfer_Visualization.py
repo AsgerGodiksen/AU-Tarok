@@ -1,5 +1,5 @@
-# Test script for bezier trajectory with modified stand phase trajectory based on our own idea
-# The idea of modifying stand phase height individually for each leg to force COM movement
+# Test script for bezier trajectory with transfer phase before each swing phase
+# Moving COM away from upcoming swing leg
 
 # Imports
 import sys

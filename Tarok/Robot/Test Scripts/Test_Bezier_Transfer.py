@@ -1,5 +1,5 @@
-# Test script for bezier trajectory with modified stand phase trajectory based on our own idea
-# The idea of modifying stand phase height individually for each leg to force COM movement
+# Test script for bezier trajectory with transfer phase before each swing phase
+# Moving COM away from upcoming swing leg
 
 # Imports
 import sys
@@ -10,8 +10,7 @@ import time
 import numpy as np
 from Robot import*
 
-# Old: CAN initialization in terminal: "sudo ip link set dev canX up type can bitrate 1000000" - with "X" being 0, 1, 2 and 3 for each bus
-# New: CAN initialization in terminal: "for i in 0 1 2 3; do sudo ip link set dev can$i up type can bitrate 1000000 && sudo ip link set can$i txqueuelen 1000; done"
+# CAN initialization in terminal: "for i in 0 1 2 3; do sudo ip link set dev can$i up type can bitrate 1000000 && sudo ip link set can$i txqueuelen 1000; done"
 
 ### SCRIPT START ###
 ## PRECOMPUTATIONS ##
@@ -24,7 +23,7 @@ COLORS = Tarok.COLORS
 PHASE_OFFSET = Tarok.CRAWL_OFFSETS_Mixed
 
 # Offsets for COM transfer during stand phase
-x_offset = 0.025 # [m] how much to move COM forward during transfer
+x_offset = 0.03 # [m] how much to move COM forward during transfer
 y_offset = 0.04 # [m] how much to move COM to the left during transfer
 
 # Time parameters
