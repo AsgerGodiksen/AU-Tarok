@@ -1,14 +1,11 @@
 """
 Plot_Bezier_Walk.py
 
-Plots logged Bezier walk data with four vertically-stacked subplots per leg:
-  1. Desired (commanded) joint positions
-  2. Measured joint positions
-  3. Position error  (Measured − Desired)
-  4. Measured joint torques
-
-One figure is created per leg (FL, FR, HL, HR).
-Cycle boundaries are marked with vertical dashed lines.
+Plots logged Bezier walk data across four 2×2 figures (one subplot per leg):
+  Figure 1 — Desired (commanded) joint positions
+  Figure 2 — Measured joint positions
+  Figure 3 — Position error  (Measured − Desired)
+  Figure 4 — Measured joint torques
 
 Usage:
     python Plot_Bezier_Walk.py                        # interactive prompt
@@ -33,29 +30,25 @@ DATA_DIR = os.path.dirname(os.path.abspath(__file__))
 
 LEGS   = ["FL", "FR", "HL", "HR"]
 JOINTS = ["J1", "J2", "J3"]
-JOINT_COLORS  = ["tab:blue", "tab:orange", "tab:green"]
-JOINT_LABELS  = [r"$\theta_1$ (Hip)",  r"$\theta_2$ (Upper)",  r"$\theta_3$ (Lower)"]
+JOINT_COLORS = ["tab:blue", "tab:orange", "tab:green"]
+JOINT_LABELS = [r"$\theta_1$ (Hip)", r"$\theta_2$ (Upper)", r"$\theta_3$ (Lower)"]
 
-# Bezier gait cycle time (must match your Bezier_TorquePos_Log.py settings)
-SWING_TIME    = 1.0          # s
-STAND_TIME    = 3.0          # s
-TRANSFER_TIME = 1.0          # s
-CYCLE_TIME    = SWING_TIME + STAND_TIME + 4 * TRANSFER_TIME   # 8 s
+# Bezier gait cycle time (must match Bezier_TorquePos_Log.py)
+SWING_TIME    = 1.0
+STAND_TIME    = 3.0
+TRANSFER_TIME = 1.0
+CYCLE_TIME    = SWING_TIME + STAND_TIME + 4 * TRANSFER_TIME  # 8 s
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 1. Load CSV
 # ─────────────────────────────────────────────────────────────────────────────
 def load_csv(arg: str | None = None) -> tuple[pd.DataFrame, str]:
-    """Load a Bezier walk log CSV — by test number, path, or interactive prompt."""
-
-    # Direct path
     if arg and os.path.isfile(arg):
         df = pd.read_csv(arg)
         print(f"  Loaded: {os.path.basename(arg)}  ({len(df)} rows)")
         return df, arg
 
-    # Test number
     if arg and arg.isdigit():
         test_num = int(arg)
     else:
@@ -89,88 +82,168 @@ print("\nLoading Bezier walk log …")
 arg = sys.argv[1] if len(sys.argv) > 1 else None
 df, csv_path = load_csv(arg)
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# 2. Extract arrays
-# ─────────────────────────────────────────────────────────────────────────────
 t = df["Timestamp (s)"].values
 t_duration = t[-1] - t[0]
 num_cycles = max(1, int(round(t_duration / CYCLE_TIME)))
 
-# Build cycle-boundary times for vertical markers
 cycle_boundaries = [i * CYCLE_TIME for i in range(1, num_cycles + 1)
                     if i * CYCLE_TIME < t_duration]
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# 3. Plot — one figure per leg, 4 subplots each
-# ─────────────────────────────────────────────────────────────────────────────
-figures = {}
-
-for leg in LEGS:
-    fig, axes = plt.subplots(4, 1, figsize=(14, 11), sharex=True)
-    fig.suptitle(f"{leg} Leg — Bezier Walk  ({num_cycles} cycles)",
-                 fontsize=14, fontweight="bold", y=0.97)
-
-    ax_cmd, ax_meas, ax_err, ax_torq = axes
-
-    # ── Subplot 1: Desired (commanded) positions ─────────────────────────
-    for j, (jname, jcol, jlabel) in enumerate(zip(JOINTS, JOINT_COLORS, JOINT_LABELS)):
-        cmd = df[f"{leg}_{jname}_Cmd (deg)"].values
-        ax_cmd.plot(t, cmd, color=jcol, linewidth=1.2, label=jlabel)
-
-    ax_cmd.set_ylabel("Position (deg)")
-    ax_cmd.set_title("Desired (Commanded) Joint Positions", fontsize=10, loc="left")
-    ax_cmd.legend(loc="upper right", fontsize=8, ncol=3, framealpha=0.85)
-    ax_cmd.grid(True, alpha=0.3)
-
-    # ── Subplot 2: Measured positions ────────────────────────────────────
-    for j, (jname, jcol, jlabel) in enumerate(zip(JOINTS, JOINT_COLORS, JOINT_LABELS)):
-        meas = df[f"{leg}_{jname}_Pos (deg)"].values
-        ax_meas.plot(t, meas, color=jcol, linewidth=1.2, label=jlabel)
-
-    ax_meas.set_ylabel("Position (deg)")
-    ax_meas.set_title("Measured Joint Positions", fontsize=10, loc="left")
-    ax_meas.legend(loc="upper right", fontsize=8, ncol=3, framealpha=0.85)
-    ax_meas.grid(True, alpha=0.3)
-
-    # ── Subplot 3: Position error ────────────────────────────────────────
-    for j, (jname, jcol, jlabel) in enumerate(zip(JOINTS, JOINT_COLORS, JOINT_LABELS)):
-        cmd  = df[f"{leg}_{jname}_Cmd (deg)"].values
-        meas = df[f"{leg}_{jname}_Pos (deg)"].values
-        error = meas - cmd
-        ax_err.plot(t, error, color=jcol, linewidth=1.2, label=jlabel)
-
-    ax_err.axhline(0, color="black", linewidth=0.8, linestyle=":", zorder=1)
-    ax_err.set_ylabel("Error (deg)")
-    ax_err.set_title("Position Error (Measured − Desired)", fontsize=10, loc="left")
-    ax_err.legend(loc="upper right", fontsize=8, ncol=3, framealpha=0.85)
-    ax_err.grid(True, alpha=0.3)
-
-    # ── Subplot 4: Measured torques ──────────────────────────────────────
-    for j, (jname, jcol, jlabel) in enumerate(zip(JOINTS, JOINT_COLORS, JOINT_LABELS)):
-        torque = df[f"{leg}_{jname}_Torque"].values
-        ax_torq.plot(t, torque, color=jcol, linewidth=1.0, alpha=0.85, label=jlabel)
-
-    ax_torq.axhline(0, color="black", linewidth=0.8, linestyle=":", zorder=1)
-    ax_torq.set_ylabel("Torque (Nm)")
-    ax_torq.set_xlabel("Time (s)")
-    ax_torq.set_title("Measured Joint Torques", fontsize=10, loc="left")
-    ax_torq.legend(loc="upper right", fontsize=8, ncol=3, framealpha=0.85)
-    ax_torq.grid(True, alpha=0.3)
-
-    # ── Cycle boundary markers on all subplots ───────────────────────────
-    for ax in axes:
-        for tb in cycle_boundaries:
-            ax.axvline(tb, color="grey", linewidth=0.9, linestyle="--", alpha=0.5)
-        ax.set_xlim(t[0], t[-1])
-
-    fig.tight_layout(rect=[0, 0, 1, 0.95])
-    figures[leg] = fig
+LEG_POS = {"FL": (0, 0), "FR": (0, 1), "HL": (1, 0), "HR": (1, 1)}
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 4. Statistics report
+# Helper: add cycle markers + formatting to every subplot
+# ─────────────────────────────────────────────────────────────────────────────
+def format_ax(ax, leg, ylabel):
+    for tb in cycle_boundaries:
+        ax.axvline(tb, color="grey", linewidth=0.9, linestyle="--", alpha=0.5)
+    ax.set_title(f"{leg} Leg", fontsize=11)
+    ax.set_ylabel(ylabel)
+    ax.set_xlim(t[0], t[-1])
+    ax.grid(True, alpha=0.3)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Shared legend handles
+# ─────────────────────────────────────────────────────────────────────────────
+joint_handles = [
+    mlines.Line2D([], [], color=c, linewidth=2, label=lbl)
+    for c, lbl in zip(JOINT_COLORS, JOINT_LABELS)
+]
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Figure 1 — Desired (Commanded) Joint Positions
+# ══════════════════════════════════════════════════════════════════════════════
+fig1, axes1 = plt.subplots(2, 2, figsize=(15, 9))
+fig1.suptitle("Desired (Commanded) Joint Positions — Bezier Walk",
+              fontsize=13, fontweight="bold")
+
+for leg, (r, c) in LEG_POS.items():
+    ax = axes1[r, c]
+    for j, (jname, jcol) in enumerate(zip(JOINTS, JOINT_COLORS)):
+        ax.plot(t, df[f"{leg}_{jname}_Cmd (deg)"].values,
+                color=jcol, linewidth=1.3)
+        ax.set_ylim(-80, 80)
+    format_ax(ax, leg, "Position (deg)")
+
+axes1[1, 0].set_xlabel("Time (s)")
+axes1[1, 1].set_xlabel("Time (s)")
+axes1[0, 0].set_ylabel("Position (deg)")
+axes1[1, 0].set_ylabel("Position (deg)")
+fig1.legend(handles=joint_handles, loc="lower center",
+            ncol=3, fontsize=9, framealpha=0.9, bbox_to_anchor=(0.5, -0.01))
+fig1.tight_layout(rect=[0, 0.04, 1, 1])
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Figure 2 — Measured Joint Positions
+# ══════════════════════════════════════════════════════════════════════════════
+fig2, axes2 = plt.subplots(2, 2, figsize=(15, 9))
+fig2.suptitle("Measured Joint Positions — Bezier Walk",
+              fontsize=13, fontweight="bold")
+
+for leg, (r, c) in LEG_POS.items():
+    ax = axes2[r, c]
+    for j, (jname, jcol) in enumerate(zip(JOINTS, JOINT_COLORS)):
+        ax.plot(t, df[f"{leg}_{jname}_Pos (deg)"].values,
+                color=jcol, linewidth=1.3)
+    format_ax(ax, leg, "Position (deg)")
+
+axes2[1, 0].set_xlabel("Time (s)")
+axes2[1, 1].set_xlabel("Time (s)")
+fig2.legend(handles=joint_handles, loc="lower center",
+            ncol=3, fontsize=9, framealpha=0.9, bbox_to_anchor=(0.5, -0.01))
+fig2.tight_layout(rect=[0, 0.04, 1, 1])
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Figure 3 — Position Error (Measured − Desired)
+# ══════════════════════════════════════════════════════════════════════════════
+error_max = int(np.ceil(max(
+    np.abs(df[f"{leg}_{jname}_Pos (deg)"].values - df[f"{leg}_{jname}_Cmd (deg)"].values).max()
+    for leg in LEGS for jname in JOINTS
+)))
+
+fig3, axes3 = plt.subplots(2, 2, figsize=(15, 9))
+fig3.suptitle("Position Error (Measured − Desired) — Bezier Walk",
+              fontsize=13, fontweight="bold")
+
+for leg, (r, c) in LEG_POS.items():
+    ax = axes3[r, c]
+    for j, (jname, jcol) in enumerate(zip(JOINTS, JOINT_COLORS)):
+        error = df[f"{leg}_{jname}_Pos (deg)"].values - df[f"{leg}_{jname}_Cmd (deg)"].values
+        ax.plot(t[::2], error[::2], color=jcol, linewidth=1.3)
+    ax.axhline(0, color="black", linewidth=0.8, linestyle=":", zorder=1)
+    #ax.set_ylim(-error_max, error_max)
+    ax.set_ylim(-5 , 5)
+    format_ax(ax, leg, "Error (deg)")
+
+axes3[1, 0].set_xlabel("Time (s)")
+axes3[1, 1].set_xlabel("Time (s)")
+fig3.legend(handles=joint_handles, loc="lower center",
+            ncol=3, fontsize=9, framealpha=0.9, bbox_to_anchor=(0.5, -0.01))
+fig3.tight_layout(rect=[0, 0.04, 1, 1])
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Figure 4 — Measured Joint Torques
+# ══════════════════════════════════════════════════════════════════════════════
+torque_cols = [f"{leg}_{jname}_Torque" for leg in LEGS for jname in JOINTS]
+torque_ylim = int(np.ceil(df[torque_cols].abs().values.max()))
+
+fig4, axes4 = plt.subplots(2, 2, figsize=(15, 9))
+fig4.suptitle("Measured Joint Torques — Bezier Walk",
+              fontsize=13, fontweight="bold")
+
+t_ds  = t[::2]
+for leg, (r, c) in LEG_POS.items():
+    ax = axes4[r, c]
+    for j, (jname, jcol) in enumerate(zip(JOINTS, JOINT_COLORS)):
+        ax.plot(t_ds, df[f"{leg}_{jname}_Torque"].values[::2],
+                color=jcol, linewidth=1.0, alpha=0.85)
+    ax.axhline(0, color="black", linewidth=0.8, linestyle=":", zorder=1)
+    ax.set_ylim(-torque_ylim, torque_ylim)
+    format_ax(ax, leg, "Torque (Nm)")
+
+axes4[1, 0].set_xlabel("Time (s)")
+axes4[1, 1].set_xlabel("Time (s)")
+fig4.legend(handles=joint_handles, loc="lower center",
+            ncol=3, fontsize=9, framealpha=0.9, bbox_to_anchor=(0.5, -0.01))
+fig4.tight_layout(rect=[0, 0.04, 1, 1])
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Figure 5 — Zoomed Position Error (Measured − Desired)
+# ══════════════════════════════════════════════════════════════════════════════
+error_max = int(np.ceil(max(
+    np.abs(df[f"{leg}_{jname}_Pos (deg)"].values - df[f"{leg}_{jname}_Cmd (deg)"].values).max()
+    for leg in LEGS for jname in JOINTS
+)))
+
+fig5, axes5 = plt.subplots(2, 2, figsize=(15, 9))
+fig5.suptitle("Zoomed Position Error (Measured − Desired) — Bezier Walk",
+              fontsize=13, fontweight="bold")
+
+for leg, (r, c) in LEG_POS.items():
+    ax = axes5[r, c]
+    for j, (jname, jcol) in enumerate(zip(JOINTS, JOINT_COLORS)):
+        error = df[f"{leg}_{jname}_Pos (deg)"].values - df[f"{leg}_{jname}_Cmd (deg)"].values
+        ax.plot(t[::2], error[::2], color=jcol, linewidth=1.3)
+    ax.axhline(0, color="black", linewidth=0.8, linestyle=":", zorder=1)
+    #ax.set_ylim(-error_max, error_max)
+    ax.set_ylim(-0.5 , 0.5)
+    format_ax(ax, leg, "Error (deg)")
+
+axes5[1, 0].set_xlabel("Time (s)")
+axes5[1, 1].set_xlabel("Time (s)")
+fig5.legend(handles=joint_handles, loc="lower center",
+            ncol=3, fontsize=9, framealpha=0.9, bbox_to_anchor=(0.5, -0.01))
+fig5.tight_layout(rect=[0, 0.04, 1, 1])
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Statistics report
 # ─────────────────────────────────────────────────────────────────────────────
 lines: list[str] = []
 
@@ -190,57 +263,74 @@ emit("─" * 68)
 total_rms = 0.0
 for leg in LEGS:
     for j, jname in enumerate(JOINTS):
-        cmd   = df[f"{leg}_{jname}_Cmd (deg)"].values
-        meas  = df[f"{leg}_{jname}_Pos (deg)"].values
+        cmd    = df[f"{leg}_{jname}_Cmd (deg)"].values
+        meas   = df[f"{leg}_{jname}_Pos (deg)"].values
         torque = df[f"{leg}_{jname}_Torque"].values
-        error = meas - cmd
-        rms_e = np.sqrt(np.mean(error ** 2))
-        max_e = np.max(np.abs(error))
-        rms_t = np.sqrt(np.mean(torque ** 2))
+        error  = meas - cmd
+        rms_e  = np.sqrt(np.mean(error ** 2))
+        max_e  = np.max(np.abs(error))
         total_rms += rms_e
-        emit(f"{leg:<6}{jname:<8}{rms_e:>16.3f}{max_e:>20.3f}{rms_t:>18.3f}")
+        emit(f"{leg:<6}{jname:<8}{rms_e:>16.3f}{max_e:>20.3f}")
 
 emit("─" * 68)
 emit(f"Sum of 12 RMS position errors: {total_rms:.3f} deg")
 emit("─" * 68)
 
+# Append FL leg PI parameters from the matching PID.txt
+pid_path = os.path.splitext(csv_path)[0] + "_PID.txt"
+if os.path.isfile(pid_path):
+    with open(pid_path) as pf:
+        pid_lines = pf.readlines()
+    # Extract header line and the FL leg block
+    fl_block = []
+    in_fl = False
+    for line in pid_lines:
+        if line.startswith("PID Parameters"):
+            fl_block.append(line.rstrip())
+        elif line.startswith("Leg FL"):
+            in_fl = True
+            fl_block.append(line.rstrip())
+        elif in_fl and line.startswith("Leg "):
+            break
+        elif in_fl:
+            fl_block.append(line.rstrip())
+    emit("")
+    emit("PI Parameters (FL leg)")
+    emit("─" * 68)
+    for ln in fl_block:
+        emit(ln)
+else:
+    emit(f"\n[WARNING] PID file not found: {os.path.basename(pid_path)}")
+
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 5. Save outputs
+# Save outputs
 # ─────────────────────────────────────────────────────────────────────────────
 timestamp = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
 base_name = os.path.splitext(os.path.basename(csv_path))[0]
 
-# Save figures
-for leg, fig in figures.items():
-    fig_path = os.path.join(DATA_DIR, f"{base_name}_{leg}_{timestamp}.png")
-    fig.savefig(fig_path, dpi=150, bbox_inches="tight")
-    print(f"Saved: {os.path.basename(fig_path)}")
+# Extract test number from filename (e.g. Bezier_TorquePos_Log_Test_3_...)
+import re
+_m = re.search(r"_Test_(\d+)_", base_name)
+test_num_str = _m.group(1).zfill(2) if _m else "00"
 
-# Save report
-report_path = os.path.join(DATA_DIR, f"{base_name}_Report_{timestamp}.txt")
+output_dir = os.path.join(DATA_DIR, f"Plots_For_Tests_{test_num_str}")
+os.makedirs(output_dir, exist_ok=True)
+
+fig_names = {
+    fig1: "Desired_Positions",
+    fig2: "Measured_Positions",
+    fig3: "Position_Error",
+    fig4: "Torques",
+    fig5: "Zoomed_Position_Error"
+}
+for fig, label in fig_names.items():
+    fig_path = os.path.join(output_dir, f"{base_name}_{label}_{timestamp}.png")
+    fig.savefig(fig_path, dpi=150, bbox_inches="tight")
+    print(f"Saved: {os.path.relpath(fig_path, DATA_DIR)}")
+
+report_path = os.path.join(output_dir, f"{base_name}_Report_{timestamp}.txt")
 with open(report_path, "w") as f:
     f.write("\n".join(lines) + "\n")
-print(f"Report saved: {os.path.basename(report_path)}")
+print(f"Report saved: {os.path.relpath(report_path, DATA_DIR)}")
 
-# Append stats to companion PID file if it exists
-pid_path = csv_path.replace(".csv", "_PID.txt")
-if os.path.isfile(pid_path):
-    with open(pid_path, "a") as f:
-        f.write(f"\n\nBEZIER WALK STATISTICS — appended {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-        f.write("=" * 52 + "\n")
-        f.write(f"{'Leg':<6}{'Joint':<8}{'RMS error (deg)':>16}{'Max |error| (deg)':>20}\n")
-        f.write("─" * 52 + "\n")
-        for leg in LEGS:
-            for j, jname in enumerate(JOINTS):
-                cmd  = df[f"{leg}_{jname}_Cmd (deg)"].values
-                meas = df[f"{leg}_{jname}_Pos (deg)"].values
-                error = meas - cmd
-                rms_e = np.sqrt(np.mean(error ** 2))
-                max_e = np.max(np.abs(error))
-                f.write(f"{leg:<6}{jname:<8}{rms_e:>16.3f}{max_e:>20.3f}\n")
-        f.write("─" * 52 + "\n")
-        f.write(f"Sum of 12 RMS errors: {total_rms:.3f} deg\n")
-    print(f"Statistics appended to {os.path.basename(pid_path)}")
-
-plt.show()

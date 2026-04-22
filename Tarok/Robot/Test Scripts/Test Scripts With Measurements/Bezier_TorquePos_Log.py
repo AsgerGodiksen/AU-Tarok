@@ -12,14 +12,13 @@ import csv
 import concurrent.futures
 
 from Robot import *
-from Logger_Functions import*
+#from Logger_Functions import *
 
 # Parameters From Tarok Dimensions
 Tarok = TarokDymensions()
 LEGS = Tarok.LEGS
 COLORS = Tarok.COLORS
 PHASE_OFFSET = Tarok.CRAWL_OFFSETS_Mixed
-
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Pre-computations  
@@ -196,12 +195,12 @@ print("Initialization complete, starting pre-loop sequence...")
 
 # Manufacturing parameters
 PI_Params = {
-    'angle_kp':  100,
-    'angle_ki':  100,
-    'speed_kp':  50,
-    'speed_ki':  40,
-    'torque_kp': 50,
-    'torque_ki': 50
+    #'angle_kp':  120,
+    #'angle_ki':  50,
+    #'speed_kp':  60,
+    #'speed_ki':  80,
+    #'torque_kp': 60,
+    #'torque_ki': 40
 }
 print("Writing PI parameters to motors...")
 PID_RAM_Control(bus0,ID_1, PI_Params)
@@ -228,8 +227,8 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 log_dir = os.path.join(SCRIPT_DIR, "TEST_DATA_PID_Bezier")
 os.makedirs(log_dir, exist_ok=True)
 timestamp_str = time.strftime('%Y-%m-%d_%H-%M-%S')
-log_filename = os.path.join(log_dir, f"Bezier_TorquePos_Log_Test_1_{timestamp_str}.csv")
-pid_filename = os.path.join(log_dir, f"Bezier_TorquePos_Log_Test_1_{timestamp_str}_PID.txt")
+log_filename = os.path.join(log_dir, f"Bezier_TorquePos_Log_Test_2_{timestamp_str}.csv")
+pid_filename = os.path.join(log_dir, f"Bezier_TorquePos_Log_Test_2_{timestamp_str}_PID.txt")
 
 
 
@@ -280,7 +279,7 @@ with open(log_filename, 'w', newline='') as csvfile:
         "HR_J1_Cmd (deg)", "HR_J2_Cmd (deg)", "HR_J3_Cmd (deg)",
     ])
 
-# Preallocate: timestamp + index + 12 torques + 12 positions + 12 commands = 38 columns
+# Preallocate: timestamp + index  + 12 torques + 12 positions + 12 commands = 38 columns
 data = np.zeros((1500000, 38))
 data_count = 0
 
