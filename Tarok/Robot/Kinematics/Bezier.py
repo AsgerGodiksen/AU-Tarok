@@ -1,8 +1,5 @@
 import numpy as np
 from scipy.special import comb
-
-
-
 from Robot.Kinematics import Inverse_Kinematics
 from Robot.Kinematics.Interpolation import cos_interp, cos_interp_dot
 
@@ -55,7 +52,7 @@ def Bezier_Control_Points():
         
         c_kY Control Points in y
     """
-    # Listed Values is taken from 
+    # Listed Values are taken from 
     # High speed trot-running: Implementation of a hierarchical controller using proprioceptive impedance control on the MIT Cheetah
     # By Dong Jin Hyun, et al. 2014
     X = np.array([-0.200, -0.2805, -0.300, -0.300, -0.300, 0, 0, 0, 0.3032, 0.3032, 0.2826, 0.200]) # [m]
@@ -67,6 +64,9 @@ def Bezier_Control_Points():
     # For example, Scaling_factor_Y = 0.6 and Offset = 0.16 gives transition at H = 0.46 m
     # This should always be below 0.48 m 
     
+    # IMPORTANT NOTE: IF OFFSET + SCALING_FACTOR_Y * Y[0] IS CHANGED FROM H=44 cm -> 
+    # MANUALLY CHANGE IN Building_Stand_To_Walk_Transition_Trajectory
+
     # Scaling and Offsetting the Control points
     c_kX = Scaling_Factor_X * X
     c_kY = Offset + Scaling_Factor_Y * Y
@@ -565,4 +565,140 @@ def Bezier_Add_Transfer_Phase(t, t_transfer, t_with_transfer, Total_Time_Steps, 
     HL_Bezier_Velocities_With_Transfer[:, Swing_Start_Index_with_transfer['HR'] - Transfer_Time_Steps : Swing_Start_Index_with_transfer['HR']] = cos_interp_dot(t_transfer, HL_Bezier_Trajectory_With_Transfer[:, Swing_Start_Index_with_transfer['HR'] - Transfer_Time_Steps - 1].reshape((3, 1)), HL_Bezier_Trajectory_With_Transfer[:, Swing_Start_Index_with_transfer['HR']].reshape((3, 1)), 0, Transfer_Time_Scalar)
     HL_Bezier_Velocities_With_Transfer[:, Swing_Start_Index_with_transfer['FR'] - Transfer_Time_Steps : Swing_Start_Index_with_transfer['FR']] = cos_interp_dot(t_transfer, HL_Bezier_Trajectory_With_Transfer[:, Swing_Start_Index_with_transfer['FR'] - Transfer_Time_Steps - 1].reshape((3, 1)), HL_Bezier_Trajectory_With_Transfer[:, Swing_Start_Index_with_transfer['FR']].reshape((3, 1)), 0, Transfer_Time_Scalar)
     HL_Bezier_Velocities_With_Transfer[:, Swing_Start_Index_with_transfer['HL'] - Transfer_Time_Steps : Swing_Start_Index_with_transfer['HL']] = cos_interp_dot(t_transfer, HL_Bezier_Trajectory_With_Transfer[:, Swing_Start_Index_with_transfer['HL'] - Transfer_Time_Steps - 1].reshape((3, 1)), HL_Bezier_Trajectory_With_Transfer[:, Swing_Start_Index_with_transfer['HL']].reshape((3, 1)), 0, Transfer_Time_Scalar)
+    
+    # Roll everything by one swing phase and one half transfer phase to ensure start with COM centered
+    Roll_amount = (Swing_Time_Steps + 0.5 * Transfer_Time_Steps) / Total_Time_Steps_With_Transfer
+    FL_Bezier_Trajectory_With_Transfer, FL_Bezier_Velocities_With_Transfer = Apply_Phase_Offset(FL_Bezier_Trajectory_With_Transfer, FL_Bezier_Velocities_With_Transfer, Roll_amount)
+    FR_Bezier_Trajectory_With_Transfer, FR_Bezier_Velocities_With_Transfer = Apply_Phase_Offset(FR_Bezier_Trajectory_With_Transfer, FR_Bezier_Velocities_With_Transfer, Roll_amount)
+    HL_Bezier_Trajectory_With_Transfer, HL_Bezier_Velocities_With_Transfer = Apply_Phase_Offset(HL_Bezier_Trajectory_With_Transfer, HL_Bezier_Velocities_With_Transfer, Roll_amount)
+    HR_Bezier_Trajectory_With_Transfer, HR_Bezier_Velocities_With_Transfer = Apply_Phase_Offset(HR_Bezier_Trajectory_With_Transfer, HR_Bezier_Velocities_With_Transfer, Roll_amount)
+
     return FL_Bezier_Trajectory_With_Transfer, FR_Bezier_Trajectory_With_Transfer, HL_Bezier_Trajectory_With_Transfer, HR_Bezier_Trajectory_With_Transfer, FL_Bezier_Velocities_With_Transfer, FR_Bezier_Velocities_With_Transfer, HL_Bezier_Velocities_With_Transfer, HR_Bezier_Velocities_With_Transfer
+
+def Building_Stand_To_Walk_Trajectories(Swing_Time_Scalar, Swing_Time_Steps, FL_walk_start_x, FR_walk_start_x, HL_walk_start_x, HR_walk_start_x):
+    """
+    Building the trajectories for the transition from stand to walk.
+    Specific for each leg.
+    All trajectories represented in the body frame.
+    Does not include the transfer phase - add it using the Bezier_Add_Transfer_Phase function
+    
+    Args:
+        Swing_Time_Scalar (float): The Swing Time
+        Swing_Time_Steps (int): Swing Time Steps
+        FL_walk_start_x: x position of the front left foot at the start of the walk cycle (in body frame) [m]
+        FR_walk_start_x: x position of the front right foot at the start of the walk cycle (in body frame) [m]
+        HL_walk_start_x: x position of the hind left foot at the start of the walk cycle (in body frame) [m]
+        HR_walk_start_x: x position of the hind right foot at the start of the walk cycle (in body frame) [m]
+
+    Returns: (All represented in the body frame)
+        FL_Stand_To_Walk:               FL leg Bezier curve trajectory from standing position to walk start position
+        FR_Stand_To_Walk:               FR leg Bezier curve trajectory from standing position to walk start position
+        HL_Stand_To_Walk:               HL leg Bezier curve trajectory from standing position to walk start position
+        HR_Stand_To_Walk:               HR leg Bezier curve trajectory from standing position to walk start position
+        FL_Stand_To_Walk_Velocities:    FL leg Bezier curve velocities from standing position to walk start position
+        FR_Stand_To_Walk_Velocities:    FR leg Bezier curve velocities from standing position to walk start position
+        HL_Stand_To_Walk_Velocities:    HL leg Bezier curve velocities from standing position to walk start position
+        HR_Stand_To_Walk_Velocities:    HR leg Bezier curve velocities from standing position to walk start position
+    """
+
+    # Define kinematic body lengths
+    l_k = 0.7048  # Length of body in kinematic model (meters)
+    w_k = 0.220   # Width of body in kinematic model (meters)
+
+    # Compute End x position for each leg in Bezier frame
+    FL_end_x = FL_walk_start_x - l_k/2 # FL end x position in Bezier frame
+    FR_end_x = FR_walk_start_x - l_k/2 # FR end x position in Bezier frame
+    HL_end_x = HL_walk_start_x + l_k/2 # HL end x position in Bezier frame
+    HR_end_x = HR_walk_start_x + l_k/2 # HR end x position in Bezier frame
+
+    # Define Bezier control points for each legs swing phase (Bezier frame)
+    # Front Left Leg:
+    c_kX_FL = np.array([0, -0.1*FL_end_x, -0.2*FL_end_x, -0.2*FL_end_x, 0.5*FL_end_x, 0.5*FL_end_x, 1.2*FL_end_x, 1.2*FL_end_x, 1.1*FL_end_x, FL_end_x]) # [m]
+    c_kY_FL = np.array([0.44, 0.44, 0.38, 0.38, 0.40, 0.40, 0.38, 0.38, 0.44, 0.44]) # [m]
+    c_k_FL = np.column_stack((c_kX_FL, c_kY_FL)) # Control points for FL leg in Bezier frame
+    # Front Right Leg:
+    c_kX_FR = np.array([0, -0.1*FR_end_x, -0.2*FR_end_x, -0.2*FR_end_x, 0.5*FR_end_x, 0.5*FR_end_x, 1.2*FR_end_x, 1.2*FR_end_x, 1.1*FR_end_x, FR_end_x]) # [m]
+    c_kY_FR = np.array([0.44, 0.44, 0.38, 0.38, 0.40, 0.40, 0.38, 0.38, 0.44, 0.44]) # [m]
+    c_k_FR = np.column_stack((c_kX_FR, c_kY_FR)) # Control points for FR leg in Bezier frame
+    # Hind Left Leg:
+    c_kX_HL = np.array([0, -0.1*HL_end_x, -0.2*HL_end_x, -0.2*HL_end_x, 0.5*HL_end_x, 0.5*HL_end_x, 1.2*HL_end_x, 1.2*HL_end_x, 1.1*HL_end_x, HL_end_x]) # [m]
+    c_kY_HL = np.array([0.44, 0.44, 0.38, 0.38, 0.40, 0.40, 0.38, 0.38, 0.44, 0.44]) # [m]
+    c_k_HL = np.column_stack((c_kX_HL, c_kY_HL)) # Control points for HL leg in Bezier frame
+    # Hind Right Leg:
+    c_kX_HR = np.array([0, -0.1*HR_end_x, -0.2*HR_end_x, -0.2*HR_end_x, 0.5*HR_end_x, 0.5*HR_end_x, 1.2*HR_end_x, 1.2*HR_end_x, 1.1*HR_end_x, HR_end_x]) # [m]
+    c_kY_HR = np.array([0.44, 0.44, 0.38, 0.38, 0.40, 0.40, 0.38, 0.38, 0.44, 0.44]) # [m]
+    c_k_HR = np.column_stack((c_kX_HR, c_kY_HR)) # Control points for HR leg in Bezier frame
+
+    # Generate the swing phase for each leg
+    _, Swing_Trajectory_FL, Swing_Velocity_FL = Generate_Bezier_Swing_Trajectory(c_k_FL, Swing_Time_Scalar, Swing_Time_Steps)
+    _, Swing_Trajectory_FR, Swing_Velocity_FR = Generate_Bezier_Swing_Trajectory(c_k_FR, Swing_Time_Scalar, Swing_Time_Steps)
+    _, Swing_Trajectory_HL, Swing_Velocity_HL = Generate_Bezier_Swing_Trajectory(c_k_HL, Swing_Time_Scalar, Swing_Time_Steps)
+    _, Swing_Trajectory_HR, Swing_Velocity_HR = Generate_Bezier_Swing_Trajectory(c_k_HR, Swing_Time_Scalar, Swing_Time_Steps)
+    
+    # Generate stand trajectories in body frame
+    x_FL_stand_backend = FL_end_x * np.ones(3 * Swing_Time_Steps)
+    x_FR_stand_frontend = np.zeros(2 * Swing_Time_Steps)
+    x_FR_stand_backend = FR_end_x * np.ones(Swing_Time_Steps)
+    x_HL_stand_frontend = np.zeros(3 * Swing_Time_Steps)
+    x_HR_stand_frontend = np.zeros(Swing_Time_Steps)
+    x_HR_stand_backend = HR_end_x * np.ones(2 * Swing_Time_Steps)
+    z_stand = 0.44 * np.ones(Swing_Time_Steps)
+
+    # Assemble all trajectories in body frame
+    # FL
+    x_FL = np.concatenate((Swing_Trajectory_FL[:,0], x_FL_stand_backend))
+    y_FL = np.zeros(4 * Swing_Time_Steps)
+    z_FL = - np.concatenate((Swing_Trajectory_FL[:,1], z_stand, z_stand, z_stand))
+    FL_Stand_To_Walk = np.vstack((x_FL, y_FL, z_FL))
+    # FR
+    x_FR = np.concatenate((x_FR_stand_frontend, Swing_Trajectory_FR[:,0], x_FR_stand_backend))
+    y_FR = np.zeros(4 * Swing_Time_Steps)
+    z_FR = - np.concatenate((z_stand, z_stand, Swing_Trajectory_FR[:,1], z_stand))
+    FR_Stand_To_Walk = np.vstack((x_FR, y_FR, z_FR))
+    # HL
+    x_HL = np.concatenate((x_HL_stand_frontend, Swing_Trajectory_HL[:,0]))
+    y_HL = np.zeros(4 * Swing_Time_Steps)
+    z_HL = - np.concatenate((z_stand, z_stand, z_stand, Swing_Trajectory_HL[:,1]))
+    HL_Stand_To_Walk = np.vstack((x_HL, y_HL, z_HL))
+    # HR
+    x_HR = np.concatenate((x_HR_stand_frontend, Swing_Trajectory_HR[:,0], x_HR_stand_backend))
+    y_HR = np.zeros(4 * Swing_Time_Steps)
+    z_HR = - np.concatenate((z_stand, Swing_Trajectory_HR[:,1], z_stand, z_stand))
+    HR_Stand_To_Walk = np.vstack((x_HR, y_HR, z_HR))
+
+    # Velocities - zero
+    dot_stand = np.zeros(Swing_Time_Steps)
+
+    # Assemble all velocity arrays
+    # FL
+    x_dot_FL = np.concatenate((Swing_Velocity_FL[:,0], np.zeros(3 * Swing_Time_Steps)))
+    y_dot_FL = np.zeros(4 * Swing_Time_Steps)
+    z_dot_FL = - np.concatenate((Swing_Velocity_FL[:,1], dot_stand, dot_stand, dot_stand))
+    FL_Stand_To_Walk_Velocities = np.vstack((x_dot_FL, y_dot_FL, z_dot_FL))
+    # FR
+    x_dot_FR = np.concatenate((np.zeros(2 * Swing_Time_Steps), Swing_Velocity_FR[:,0], np.zeros(Swing_Time_Steps)))
+    y_dot_FR = np.zeros(4 * Swing_Time_Steps)
+    z_dot_FR = - np.concatenate((dot_stand, dot_stand, Swing_Velocity_FR[:,1], dot_stand))
+    FR_Stand_To_Walk_Velocities = np.vstack((x_dot_FR, y_dot_FR, z_dot_FR))
+    # HL
+    x_dot_HL = np.concatenate((np.zeros(3 * Swing_Time_Steps), Swing_Velocity_HL[:,0]))
+    y_dot_HL = np.zeros(4 * Swing_Time_Steps)
+    z_dot_HL = - np.concatenate((dot_stand, dot_stand, dot_stand, Swing_Velocity_HL[:,1]))
+    HL_Stand_To_Walk_Velocities = np.vstack((x_dot_HL, y_dot_HL, z_dot_HL))
+    # HR
+    x_dot_HR = np.concatenate((np.zeros(Swing_Time_Steps), Swing_Velocity_HR[:,0], np.zeros(2 * Swing_Time_Steps)))
+    y_dot_HR = np.zeros(4 * Swing_Time_Steps)
+    z_dot_HR = - np.concatenate((dot_stand, Swing_Velocity_HR[:,1], dot_stand, dot_stand))
+    HR_Stand_To_Walk_Velocities = np.vstack((x_dot_HR, y_dot_HR, z_dot_HR))
+
+    # Translate to shoulders from COM location
+    Front_Left_Shoulder     = np.array([[ l_k/2], [ w_k/2 + 0.078], [0]])
+    Front_Right_Shoulder    = np.array([[ l_k/2], [-w_k/2 - 0.078], [0]])
+    Hind_Left_Shoulder      = np.array([[-l_k/2], [ w_k/2 + 0.078], [0]])
+    Hind_Right_Shoulder     = np.array([[-l_k/2], [-w_k/2 - 0.078], [0]])
+    FL_Stand_To_Walk = (FL_Stand_To_Walk + Front_Left_Shoulder) 
+    FR_Stand_To_Walk = (FR_Stand_To_Walk + Front_Right_Shoulder)
+    HL_Stand_To_Walk = (HL_Stand_To_Walk + Hind_Left_Shoulder)
+    HR_Stand_To_Walk = (HR_Stand_To_Walk + Hind_Right_Shoulder)
+
+    return FL_Stand_To_Walk, FR_Stand_To_Walk, HL_Stand_To_Walk, HR_Stand_To_Walk, FL_Stand_To_Walk_Velocities, FR_Stand_To_Walk_Velocities, HL_Stand_To_Walk_Velocities, HR_Stand_To_Walk_Velocities
