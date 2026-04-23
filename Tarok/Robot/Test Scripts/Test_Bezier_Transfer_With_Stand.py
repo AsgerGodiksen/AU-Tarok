@@ -62,7 +62,7 @@ dt = 0.005 # seconds (200 Hz)
 
 Swing_Time_Scalar = 1    # [s] swing phase duration
 Stand_Time_Scalar  = 3 * Swing_Time_Scalar # [s] stand phase duration
-Transfer_Time_Scalar = 1 # [s] duration of the COM transfer
+Transfer_Time_Scalar = 1.25 # [s] duration of the COM transfer
 
 total_time = Swing_Time_Scalar + Stand_Time_Scalar
 Total_Time_Steps = int(total_time / dt)
@@ -382,14 +382,6 @@ Theta_dot_FR_STW = np.abs(np.rad2deg(Theta_dot_FR_STW))
 Theta_dot_HL_STW = np.abs(np.rad2deg(Theta_dot_HL_STW))
 Theta_dot_HR_STW = np.abs(np.rad2deg(Theta_dot_HR_STW))
 
-
-
-
-
-
-
-
-
 print("Pre-computations complete.")
 
 ## INITIALIZATION ##
@@ -456,23 +448,39 @@ time.sleep(6)
 
 # Move to Stand position
 print("Moved to zero position, moving to stand position...")
-Position_Control(bus0,ID_1,Theta_FL_stand[0, 0],30)
-Position_Control(bus0,ID_2,Theta_FL_stand[0, 1],30)
-Position_Control(bus0,ID_3,Theta_FL_stand[0, 2],30)
-Position_Control(bus1,ID_1,Theta_FR_stand[0, 0],30)
-Position_Control(bus1,ID_2,Theta_FR_stand[0, 1],30)
-Position_Control(bus1,ID_3,Theta_FR_stand[0, 2],30)
-Position_Control(bus2,ID_1,Theta_HL_stand[0, 0],30)
-Position_Control(bus2,ID_2,Theta_HL_stand[0, 1],30)
-Position_Control(bus2,ID_3,Theta_HL_stand[0, 2],30)
-Position_Control(bus3,ID_1,Theta_HR_stand[0, 0],30)
-Position_Control(bus3,ID_2,Theta_HR_stand[0, 1],30)
-Position_Control(bus3,ID_3,Theta_HR_stand[0, 2],30)
+Position_Control(bus0,ID_1,Theta_FL_stand[0],30)
+Position_Control(bus0,ID_2,Theta_FL_stand[1],30)
+Position_Control(bus0,ID_3,Theta_FL_stand[2],30)
+Position_Control(bus1,ID_1,Theta_FR_stand[0],30)
+Position_Control(bus1,ID_2,Theta_FR_stand[1],30)
+Position_Control(bus1,ID_3,Theta_FR_stand[2],30)
+Position_Control(bus2,ID_1,Theta_HL_stand[0],30)
+Position_Control(bus2,ID_2,Theta_HL_stand[1],30)
+Position_Control(bus2,ID_3,Theta_HL_stand[2],30)
+Position_Control(bus3,ID_1,Theta_HR_stand[0],30)
+Position_Control(bus3,ID_2,Theta_HR_stand[1],30)
+Position_Control(bus3,ID_3,Theta_HR_stand[2],30)
 
 time.sleep(10)
 
 # Move to walk height position
 print("Moved to stand position, moving to walk height...")
+
+print("Writing PI parameters to motors...")
+PID_RAM_Control(bus0,ID_1, PI_UD)
+PID_RAM_Control(bus0,ID_2, PI_UD)
+PID_RAM_Control(bus0,ID_3, PI_UD)
+PID_RAM_Control(bus1,ID_1, PI_UD)
+PID_RAM_Control(bus1,ID_2, PI_UD)
+PID_RAM_Control(bus1,ID_3, PI_UD)
+PID_RAM_Control(bus2,ID_1, PI_UD)  
+PID_RAM_Control(bus2,ID_2, PI_UD)
+PID_RAM_Control(bus2,ID_3, PI_UD)
+PID_RAM_Control(bus3,ID_1, PI_UD)
+PID_RAM_Control(bus3,ID_2, PI_UD)
+PID_RAM_Control(bus3,ID_3, PI_UD)
+time.sleep(0.1) # Sleep for a short time to ensure parameters are written before starting loop, adjust as needed
+
 SWH_Statement = True
 # Note start time
 start_time = cycle_start = current_time = time.monotonic()
@@ -502,10 +510,26 @@ while SWH_Statement:
     Position_Control(bus3, ID_2, Theta_HR_SWH[index, 1], Theta_dot_HR_SWH[1, index])
     Position_Control(bus3, ID_3, Theta_HR_SWH[index, 2], Theta_dot_HR_SWH[2, index])
 
-time.sleep(2) # Sleep for a short time to ensure transition to walk height is complete before continuing, adjust as needed
+time.sleep(1) # Sleep for a short time to ensure transition to walk height is complete before continuing, adjust as needed
 
 # Move to walk start position
 print("Moved to walk height, moving to walk start position...")
+
+print("Writing PI parameters to motors...")
+PID_RAM_Control(bus0,ID_1, PI_Walk)
+PID_RAM_Control(bus0,ID_2, PI_Walk)
+PID_RAM_Control(bus0,ID_3, PI_Walk)
+PID_RAM_Control(bus1,ID_1, PI_Walk)
+PID_RAM_Control(bus1,ID_2, PI_Walk)
+PID_RAM_Control(bus1,ID_3, PI_Walk)
+PID_RAM_Control(bus2,ID_1, PI_Walk)  
+PID_RAM_Control(bus2,ID_2, PI_Walk)
+PID_RAM_Control(bus2,ID_3, PI_Walk)
+PID_RAM_Control(bus3,ID_1, PI_Walk)
+PID_RAM_Control(bus3,ID_2, PI_Walk)
+PID_RAM_Control(bus3,ID_3, PI_Walk)
+time.sleep(0.1) # Sleep for a short time to ensure parameters are written before starting loop, adjust as needed
+
 STW_Statement = True
 # Note start time
 start_time = cycle_start = current_time = time.monotonic()
@@ -514,7 +538,7 @@ while STW_Statement:
     # Time Management
     current_time = time.monotonic()
     elapsed_cycle = current_time - cycle_start
-    if elapsed_cycle >= total_time_SWH:
+    if elapsed_cycle >= total_time_STW:
         STW_Statement = False
         continue
 
@@ -535,7 +559,7 @@ while STW_Statement:
     Position_Control(bus3, ID_2, Theta_HR_STW[index, 1], Theta_dot_HR_STW[1, index])
     Position_Control(bus3, ID_3, Theta_HR_STW[index, 2], Theta_dot_HR_STW[2, index])
 
-time.sleep(2) # Sleep for a short time to ensure transition to walk start position is complete before starting loop, adjust as needed
+time.sleep(1) # Sleep for a short time to ensure transition to walk start position is complete before starting loop, adjust as needed
 
 print("Pre-loop sequence complete, starting loop...")
 
