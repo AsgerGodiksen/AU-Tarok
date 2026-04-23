@@ -398,7 +398,7 @@ def Compute_Joint_Angles(Trajectory, leg):
         Theta[i] = Inverse_Kinematics(End_Effector_Postition, leg)    
     return Theta
 
-def Bezier_Add_Transfer_Phase(t, t_transfer, t_with_transfer, Total_Time_Steps, Total_Time_Steps_With_Transfer, Transfer_Time_Steps, Swing_Time_Steps, Transfer_Time_Scalar, Phase_Offset, x_offset, y_offset, FL_Bezier_Trajectory, FR_Bezier_Trajectory, HL_Bezier_Trajectory, HR_Bezier_Trajectory, FL_Bezier_Velocities, FR_Bezier_Velocities, HL_Bezier_Velocities, HR_Bezier_Velocities):
+def Bezier_Add_Transfer_Phase(t, t_transfer, t_with_transfer, Total_Time_Steps, Total_Time_Steps_With_Transfer, Transfer_Time_Steps, Swing_Time_Steps, Transfer_Time_Scalar, Phase_Offset, x_offset, y_offset, FL_Bezier_Trajectory, FR_Bezier_Trajectory, HL_Bezier_Trajectory, HR_Bezier_Trajectory, FL_Bezier_Velocities, FR_Bezier_Velocities, HL_Bezier_Velocities, HR_Bezier_Velocities, Perform_Roll = True):
     """
     Add transfer phases to the already computed Bezier trajectory
 
@@ -567,12 +567,18 @@ def Bezier_Add_Transfer_Phase(t, t_transfer, t_with_transfer, Total_Time_Steps, 
     HL_Bezier_Velocities_With_Transfer[:, Swing_Start_Index_with_transfer['HL'] - Transfer_Time_Steps : Swing_Start_Index_with_transfer['HL']] = cos_interp_dot(t_transfer, HL_Bezier_Trajectory_With_Transfer[:, Swing_Start_Index_with_transfer['HL'] - Transfer_Time_Steps - 1].reshape((3, 1)), HL_Bezier_Trajectory_With_Transfer[:, Swing_Start_Index_with_transfer['HL']].reshape((3, 1)), 0, Transfer_Time_Scalar)
     
     # Roll everything by one swing phase and one half transfer phase to ensure start with COM centered
-    Roll_amount = (Swing_Time_Steps + 0.5 * Transfer_Time_Steps) / Total_Time_Steps_With_Transfer
-    FL_Bezier_Trajectory_With_Transfer, FL_Bezier_Velocities_With_Transfer = Apply_Phase_Offset(FL_Bezier_Trajectory_With_Transfer, FL_Bezier_Velocities_With_Transfer, Roll_amount)
-    FR_Bezier_Trajectory_With_Transfer, FR_Bezier_Velocities_With_Transfer = Apply_Phase_Offset(FR_Bezier_Trajectory_With_Transfer, FR_Bezier_Velocities_With_Transfer, Roll_amount)
-    HL_Bezier_Trajectory_With_Transfer, HL_Bezier_Velocities_With_Transfer = Apply_Phase_Offset(HL_Bezier_Trajectory_With_Transfer, HL_Bezier_Velocities_With_Transfer, Roll_amount)
-    HR_Bezier_Trajectory_With_Transfer, HR_Bezier_Velocities_With_Transfer = Apply_Phase_Offset(HR_Bezier_Trajectory_With_Transfer, HR_Bezier_Velocities_With_Transfer, Roll_amount)
-
+    if Perform_Roll:
+        Roll_amount = (Swing_Time_Steps + 0.5 * Transfer_Time_Steps) / Total_Time_Steps_With_Transfer
+        FL_Bezier_Trajectory_With_Transfer, FL_Bezier_Velocities_With_Transfer = Apply_Phase_Offset(FL_Bezier_Trajectory_With_Transfer, FL_Bezier_Velocities_With_Transfer, Roll_amount)
+        FR_Bezier_Trajectory_With_Transfer, FR_Bezier_Velocities_With_Transfer = Apply_Phase_Offset(FR_Bezier_Trajectory_With_Transfer, FR_Bezier_Velocities_With_Transfer, Roll_amount)
+        HL_Bezier_Trajectory_With_Transfer, HL_Bezier_Velocities_With_Transfer = Apply_Phase_Offset(HL_Bezier_Trajectory_With_Transfer, HL_Bezier_Velocities_With_Transfer, Roll_amount)
+        HR_Bezier_Trajectory_With_Transfer, HR_Bezier_Velocities_With_Transfer = Apply_Phase_Offset(HR_Bezier_Trajectory_With_Transfer, HR_Bezier_Velocities_With_Transfer, Roll_amount)
+    else:
+        Roll_amount = (4*Swing_Time_Steps + 3.5 * Transfer_Time_Steps) / Total_Time_Steps_With_Transfer
+        FL_Bezier_Trajectory_With_Transfer, FL_Bezier_Velocities_With_Transfer = Apply_Phase_Offset(FL_Bezier_Trajectory_With_Transfer, FL_Bezier_Velocities_With_Transfer, Roll_amount)
+        FR_Bezier_Trajectory_With_Transfer, FR_Bezier_Velocities_With_Transfer = Apply_Phase_Offset(FR_Bezier_Trajectory_With_Transfer, FR_Bezier_Velocities_With_Transfer, Roll_amount)
+        HL_Bezier_Trajectory_With_Transfer, HL_Bezier_Velocities_With_Transfer = Apply_Phase_Offset(HL_Bezier_Trajectory_With_Transfer, HL_Bezier_Velocities_With_Transfer, Roll_amount)
+        HR_Bezier_Trajectory_With_Transfer, HR_Bezier_Velocities_With_Transfer = Apply_Phase_Offset(HR_Bezier_Trajectory_With_Transfer, HR_Bezier_Velocities_With_Transfer, Roll_amount)
     return FL_Bezier_Trajectory_With_Transfer, FR_Bezier_Trajectory_With_Transfer, HL_Bezier_Trajectory_With_Transfer, HR_Bezier_Trajectory_With_Transfer, FL_Bezier_Velocities_With_Transfer, FR_Bezier_Velocities_With_Transfer, HL_Bezier_Velocities_With_Transfer, HR_Bezier_Velocities_With_Transfer
 
 def Building_Stand_To_Walk_Trajectories(Swing_Time_Scalar, Swing_Time_Steps, FL_walk_start_x, FR_walk_start_x, HL_walk_start_x, HR_walk_start_x):
