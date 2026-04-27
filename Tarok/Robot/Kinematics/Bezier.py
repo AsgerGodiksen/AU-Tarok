@@ -712,7 +712,7 @@ def Building_Stand_To_Walk_Trajectories(Swing_Time_Scalar, Swing_Time_Steps, Pha
     # Transfer phase before first, between every and after last swing phase (so 5 transfer phases in total)
 
     # Define time parameters
-    Stand_To_Walk_Transfer_Time = 1.5 # seconds
+    Stand_To_Walk_Transfer_Time = 3 # seconds
     Stand_To_Walk_Transfer_Time_Steps = int(Stand_To_Walk_Transfer_Time * 200) # 200 Hz control frequency
     Stand_To_Walk_Time_Steps_With_Transfer = (4 * Swing_Time_Steps) + (5 * Stand_To_Walk_Transfer_Time_Steps)
     t_transfer = np.linspace(0, Stand_To_Walk_Transfer_Time, Stand_To_Walk_Transfer_Time_Steps)
@@ -720,8 +720,8 @@ def Building_Stand_To_Walk_Trajectories(Swing_Time_Scalar, Swing_Time_Steps, Pha
     t_with_transfer = np.linspace(0, 4 * Swing_Time_Scalar + 5 * Stand_To_Walk_Transfer_Time, Stand_To_Walk_Time_Steps_With_Transfer)
 
     # offsets for stand to walk phase
-    x_offset = 0.035
-    y_offset = 0.04
+    x_offset = 0.04
+    y_offset = 0.045
 
     # Preallocate new trajectory arrays with transfer
     FL_Stand_To_Walk_With_Transfer = np.zeros((3, Stand_To_Walk_Time_Steps_With_Transfer))

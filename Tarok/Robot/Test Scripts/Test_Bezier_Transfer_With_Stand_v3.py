@@ -312,7 +312,7 @@ Theta_dot_HR_SWH = np.abs(np.rad2deg(Theta_dot_HR_SWH))
 ### WALK HEIGHT TO WALK START GENERATION ###
 # ----------------------------- #
 
-STW_Swing_Time_Scalar = 0.4 # [s] duration of swing phase for transition from stand height to walk start
+STW_Swing_Time_Scalar = 2.5 # [s] duration of swing phase for transition from stand height to walk start
 t_swing_STW = np.linspace(0, STW_Swing_Time_Scalar - dt, int(STW_Swing_Time_Scalar / dt)) # Time array for swing phase
 STW_Swing_Time_Steps = len(t_swing_STW) 
 total_time_STW = 4 * STW_Swing_Time_Scalar
