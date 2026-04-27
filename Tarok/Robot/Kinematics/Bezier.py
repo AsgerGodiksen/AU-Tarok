@@ -581,7 +581,7 @@ def Bezier_Add_Transfer_Phase(t, t_transfer, t_with_transfer, Total_Time_Steps, 
         HR_Bezier_Trajectory_With_Transfer, HR_Bezier_Velocities_With_Transfer = Apply_Phase_Offset(HR_Bezier_Trajectory_With_Transfer, HR_Bezier_Velocities_With_Transfer, Roll_amount)
     return FL_Bezier_Trajectory_With_Transfer, FR_Bezier_Trajectory_With_Transfer, HL_Bezier_Trajectory_With_Transfer, HR_Bezier_Trajectory_With_Transfer, FL_Bezier_Velocities_With_Transfer, FR_Bezier_Velocities_With_Transfer, HL_Bezier_Velocities_With_Transfer, HR_Bezier_Velocities_With_Transfer
 
-def Building_Stand_To_Walk_Trajectories(Swing_Time_Scalar, Swing_Time_Steps, FL_walk_start_x, FR_walk_start_x, HL_walk_start_x, HR_walk_start_x):
+def Building_Stand_To_Walk_Trajectories(Swing_Time_Scalar, Swing_Time_Steps, Phase_Offset, FL_walk_start_x, FR_walk_start_x, HL_walk_start_x, HR_walk_start_x):
     """
     Building the trajectories for the transition from stand to walk.
     Specific for each leg.
@@ -591,6 +591,7 @@ def Building_Stand_To_Walk_Trajectories(Swing_Time_Scalar, Swing_Time_Steps, FL_
     Args:
         Swing_Time_Scalar (float): The Swing Time
         Swing_Time_Steps (int): Swing Time Steps
+        PHASE_OFFSET (dict): Phase offsets for each leg
         FL_walk_start_x: x position of the front left foot at the start of the walk cycle (in body frame) [m]
         FR_walk_start_x: x position of the front right foot at the start of the walk cycle (in body frame) [m]
         HL_walk_start_x: x position of the hind left foot at the start of the walk cycle (in body frame) [m]
@@ -707,4 +708,149 @@ def Building_Stand_To_Walk_Trajectories(Swing_Time_Scalar, Swing_Time_Steps, FL_
     HL_Stand_To_Walk = (HL_Stand_To_Walk + Hind_Left_Shoulder)
     HR_Stand_To_Walk = (HR_Stand_To_Walk + Hind_Right_Shoulder)
 
-    return FL_Stand_To_Walk, FR_Stand_To_Walk, HL_Stand_To_Walk, HR_Stand_To_Walk, FL_Stand_To_Walk_Velocities, FR_Stand_To_Walk_Velocities, HL_Stand_To_Walk_Velocities, HR_Stand_To_Walk_Velocities
+    ################################ NEW BELOW - ALL ABOVE WORKS WITH v2 - ALL BELOW WORKS WITH v3 ################
+    # Transfer phase before first, between every and after last swing phase (so 5 transfer phases in total)
+
+    # Define time parameters
+    Stand_To_Walk_Transfer_Time = 1 # seconds
+    Stand_To_Walk_Transfer_Time_Steps = int(Stand_To_Walk_Transfer_Time * 200) # 200 Hz control frequency
+    Stand_To_Walk_Time_Steps_With_Transfer = (4 * Swing_Time_Steps) + (5 * Stand_To_Walk_Transfer_Time_Steps)
+    t_transfer = np.linspace(0, Stand_To_Walk_Transfer_Time, Stand_To_Walk_Transfer_Time_Steps)
+    t_without_transfer = np.linspace(0, 4 * Swing_Time_Scalar, 4 * Swing_Time_Steps)
+    t_with_transfer = np.linspace(0, 4 * Swing_Time_Scalar + 5 * Stand_To_Walk_Transfer_Time, Stand_To_Walk_Time_Steps_With_Transfer)
+
+    # offsets for stand to walk phase
+    x_offset = 0.035
+    y_offset = 0.04
+
+    # Preallocate new trajectory arrays with transfer
+    FL_Stand_To_Walk_With_Transfer = np.zeros((3, Stand_To_Walk_Time_Steps_With_Transfer))
+    FR_Stand_To_Walk_With_Transfer = np.zeros((3, Stand_To_Walk_Time_Steps_With_Transfer))
+    HL_Stand_To_Walk_With_Transfer = np.zeros((3, Stand_To_Walk_Time_Steps_With_Transfer))
+    HR_Stand_To_Walk_With_Transfer = np.zeros((3, Stand_To_Walk_Time_Steps_With_Transfer))
+
+    # Preallocate new velocity arrays with transfer
+    FL_Stand_To_Walk_Velocities_With_Transfer = np.zeros((3, Stand_To_Walk_Time_Steps_With_Transfer))
+    FR_Stand_To_Walk_Velocities_With_Transfer = np.zeros((3, Stand_To_Walk_Time_Steps_With_Transfer))
+    HL_Stand_To_Walk_Velocities_With_Transfer = np.zeros((3, Stand_To_Walk_Time_Steps_With_Transfer))
+    HR_Stand_To_Walk_Velocities_With_Transfer = np.zeros((3, Stand_To_Walk_Time_Steps_With_Transfer))
+
+    # Swing phase start — first discrete step where each leg enters swing
+    SWING_SEQUENCE_Mixed = ['FL', 'HR', 'FR', 'HL']
+
+    Swing_Start_Index = {leg: int(round(Phase_Offset[leg] * 4 * Swing_Time_Steps))
+                         for leg in SWING_SEQUENCE_Mixed}
+    #Swing_Start_Time  = {leg: t_without_transfer[Swing_Start_Index[leg]]
+    #                     for leg in SWING_SEQUENCE_Mixed}
+
+    # Create mew swing start index variable with Transfer_Time_Steps added to FL, 2*Transfer_Time_Steps added to HR, 3*Transfer_Time_Steps added to FR and 4*Transfer_Time_Steps added to HL
+    Swing_Start_Index_with_transfer = {leg: Swing_Start_Index[leg] + (i + 1) * Stand_To_Walk_Transfer_Time_Steps
+                                     for i, leg in enumerate(SWING_SEQUENCE_Mixed)}
+    #Swing_Start_Time_with_transfer  = {leg: t_with_transfer[Swing_Start_Index_with_transfer[leg]]
+    #                                 for leg in SWING_SEQUENCE_Mixed}
+    
+    ## Trajectories: Swing and Stand phases ##
+    # Take swing and stand phases of FL_Stand_To_Walk and add x and y offset and allocate in new trajectory array
+    FL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['FL'] : Swing_Start_Index_with_transfer['FL'] + Swing_Time_Steps] = FL_Stand_To_Walk[:, :Swing_Start_Index['FL'] + Swing_Time_Steps] + np.array([[x_offset], [y_offset], [0]])
+    FL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HR'] : Swing_Start_Index_with_transfer['HR'] + Swing_Time_Steps] = FL_Stand_To_Walk[:, Swing_Start_Index['HR'] : Swing_Start_Index['HR'] + Swing_Time_Steps] + np.array([[-x_offset], [-y_offset], [0]])
+    FL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['FR'] : Swing_Start_Index_with_transfer['FR'] + Swing_Time_Steps] = FL_Stand_To_Walk[:, Swing_Start_Index['FR'] : Swing_Start_Index['FR'] + Swing_Time_Steps] + np.array([[x_offset], [-y_offset], [0]])
+    FL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HL'] : Swing_Start_Index_with_transfer['HL'] + Swing_Time_Steps] = FL_Stand_To_Walk[:, Swing_Start_Index['HL'] : Swing_Start_Index['HL'] + Swing_Time_Steps] + np.array([[-x_offset], [y_offset], [0]])
+
+    # Take swing and stand phases of HR_Stand_To_Walk and add x and y offset and allocate in new trajectory array
+    HR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['FL'] : Swing_Start_Index_with_transfer['FL'] + Swing_Time_Steps] = HR_Stand_To_Walk[:, :Swing_Start_Index['FL'] + Swing_Time_Steps] + np.array([[x_offset], [y_offset], [0]])
+    HR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HR'] : Swing_Start_Index_with_transfer['HR'] + Swing_Time_Steps] = HR_Stand_To_Walk[:, Swing_Start_Index['HR'] : Swing_Start_Index['HR'] + Swing_Time_Steps] + np.array([[-x_offset], [-y_offset], [0]])
+    HR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['FR'] : Swing_Start_Index_with_transfer['FR'] + Swing_Time_Steps] = HR_Stand_To_Walk[:, Swing_Start_Index['FR'] : Swing_Start_Index['FR'] + Swing_Time_Steps] + np.array([[x_offset], [-y_offset], [0]])
+    HR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HL'] : Swing_Start_Index_with_transfer['HL'] + Swing_Time_Steps] = HR_Stand_To_Walk[:, Swing_Start_Index['HL'] : Swing_Start_Index['HL'] + Swing_Time_Steps] + np.array([[-x_offset], [y_offset], [0]])
+
+    # Take swing and stand phases of FR_Stand_To_Walk and add x and y offset and allocate in new trajectory array
+    FR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['FL'] : Swing_Start_Index_with_transfer['FL'] + Swing_Time_Steps] = FR_Stand_To_Walk[:, :Swing_Start_Index['FL'] + Swing_Time_Steps] + np.array([[x_offset], [y_offset], [0]])
+    FR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HR'] : Swing_Start_Index_with_transfer['HR'] + Swing_Time_Steps] = FR_Stand_To_Walk[:, Swing_Start_Index['HR'] : Swing_Start_Index['HR'] + Swing_Time_Steps] + np.array([[-x_offset], [-y_offset], [0]])
+    FR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['FR'] : Swing_Start_Index_with_transfer['FR'] + Swing_Time_Steps] = FR_Stand_To_Walk[:, Swing_Start_Index['FR'] : Swing_Start_Index['FR'] + Swing_Time_Steps] + np.array([[x_offset], [-y_offset], [0]])
+    FR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HL'] : Swing_Start_Index_with_transfer['HL'] + Swing_Time_Steps] = FR_Stand_To_Walk[:, Swing_Start_Index['HL'] : Swing_Start_Index['HL'] + Swing_Time_Steps] + np.array([[-x_offset], [y_offset], [0]])
+
+    # Take swing and stand phases of HL_Stand_To_Walk and add x and y offset and allocate in new trajectory array
+    HL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['FL'] : Swing_Start_Index_with_transfer['FL'] + Swing_Time_Steps] = HL_Stand_To_Walk[:, :Swing_Start_Index['FL'] + Swing_Time_Steps] + np.array([[x_offset], [y_offset], [0]])
+    HL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HR'] : Swing_Start_Index_with_transfer['HR'] + Swing_Time_Steps] = HL_Stand_To_Walk[:, Swing_Start_Index['HR'] : Swing_Start_Index['HR'] + Swing_Time_Steps] + np.array([[-x_offset], [-y_offset], [0]])
+    HL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['FR'] : Swing_Start_Index_with_transfer['FR'] + Swing_Time_Steps] = HL_Stand_To_Walk[:, Swing_Start_Index['FR'] : Swing_Start_Index['FR'] + Swing_Time_Steps] + np.array([[x_offset], [-y_offset], [0]])
+    HL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HL'] : Swing_Start_Index_with_transfer['HL'] + Swing_Time_Steps] = HL_Stand_To_Walk[:, Swing_Start_Index['HL'] : Swing_Start_Index['HL'] + Swing_Time_Steps] + np.array([[-x_offset], [y_offset], [0]])
+
+    ## Trajectories: Transfer phases ##
+    # Compute cos interpolation from previous position to next position for all transfer phases for FL leg and allocate in new trajectory array
+    FL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['FL'] - Stand_To_Walk_Transfer_Time_Steps : Swing_Start_Index_with_transfer['FL']] = cos_interp(t_transfer, FL_Stand_To_Walk[:, 0].reshape(3, 1), FL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['FL']].reshape((3, 1)), 0, Stand_To_Walk_Transfer_Time)
+    FL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HR'] - Stand_To_Walk_Transfer_Time_Steps : Swing_Start_Index_with_transfer['HR']] = cos_interp(t_transfer, FL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HR'] - Stand_To_Walk_Transfer_Time_Steps - 1].reshape((3, 1)), FL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HR']].reshape((3, 1)), 0, Stand_To_Walk_Transfer_Time)
+    FL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['FR'] - Stand_To_Walk_Transfer_Time_Steps : Swing_Start_Index_with_transfer['FR']] = cos_interp(t_transfer, FL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['FR'] - Stand_To_Walk_Transfer_Time_Steps - 1].reshape((3, 1)), FL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['FR']].reshape((3, 1)), 0, Stand_To_Walk_Transfer_Time)
+    FL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HL'] - Stand_To_Walk_Transfer_Time_Steps : Swing_Start_Index_with_transfer['HL']] = cos_interp(t_transfer, FL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HL'] - Stand_To_Walk_Transfer_Time_Steps - 1].reshape((3, 1)), FL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HL']].reshape((3, 1)), 0, Stand_To_Walk_Transfer_Time)
+    FL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HL'] + Swing_Time_Steps :] = cos_interp(t_transfer, FL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HL'] + Swing_Time_Steps - 1].reshape((3, 1)), FL_Stand_To_Walk[:, -1].reshape((3, 1)), 0, Stand_To_Walk_Transfer_Time)
+
+    # Compute cos interpolation from previous position to next position for all transfer phases for HR leg and allocate in new trajectory array
+    HR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['FL'] - Stand_To_Walk_Transfer_Time_Steps : Swing_Start_Index_with_transfer['FL']] = cos_interp(t_transfer, HR_Stand_To_Walk[:, 0].reshape(3, 1), HR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['FL']].reshape((3, 1)), 0, Stand_To_Walk_Transfer_Time)
+    HR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HR'] - Stand_To_Walk_Transfer_Time_Steps : Swing_Start_Index_with_transfer['HR']] = cos_interp(t_transfer, HR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HR'] - Stand_To_Walk_Transfer_Time_Steps - 1].reshape((3, 1)), HR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HR']].reshape((3, 1)), 0, Stand_To_Walk_Transfer_Time)
+    HR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['FR'] - Stand_To_Walk_Transfer_Time_Steps : Swing_Start_Index_with_transfer['FR']] = cos_interp(t_transfer, HR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['FR'] - Stand_To_Walk_Transfer_Time_Steps - 1].reshape((3, 1)), HR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['FR']].reshape((3, 1)), 0, Stand_To_Walk_Transfer_Time)
+    HR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HL'] - Stand_To_Walk_Transfer_Time_Steps : Swing_Start_Index_with_transfer['HL']] = cos_interp(t_transfer, HR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HL'] - Stand_To_Walk_Transfer_Time_Steps - 1].reshape((3, 1)), HR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HL']].reshape((3, 1)), 0, Stand_To_Walk_Transfer_Time)
+    HR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HL'] + Swing_Time_Steps :] = cos_interp(t_transfer, HR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HL'] + Swing_Time_Steps - 1].reshape((3, 1)), HR_Stand_To_Walk[:, -1].reshape((3, 1)), 0, Stand_To_Walk_Transfer_Time)
+
+    # Compute cos interpolation from previous position to next position for all transfer phases for FR leg and allocate in new trajectory array
+    FR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['FL'] - Stand_To_Walk_Transfer_Time_Steps : Swing_Start_Index_with_transfer['FL']] = cos_interp(t_transfer, FR_Stand_To_Walk[:, 0].reshape(3, 1), FR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['FL']].reshape((3, 1)), 0, Stand_To_Walk_Transfer_Time)
+    FR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HR'] - Stand_To_Walk_Transfer_Time_Steps : Swing_Start_Index_with_transfer['HR']] = cos_interp(t_transfer, FR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HR'] - Stand_To_Walk_Transfer_Time_Steps - 1].reshape((3, 1)), FR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HR']].reshape((3, 1)), 0, Stand_To_Walk_Transfer_Time)
+    FR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['FR'] - Stand_To_Walk_Transfer_Time_Steps : Swing_Start_Index_with_transfer['FR']] = cos_interp(t_transfer, FR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['FR'] - Stand_To_Walk_Transfer_Time_Steps - 1].reshape((3, 1)), FR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['FR']].reshape((3, 1)), 0, Stand_To_Walk_Transfer_Time)
+    FR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HL'] - Stand_To_Walk_Transfer_Time_Steps : Swing_Start_Index_with_transfer['HL']] = cos_interp(t_transfer, FR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HL'] - Stand_To_Walk_Transfer_Time_Steps - 1].reshape((3, 1)), FR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HL']].reshape((3, 1)), 0, Stand_To_Walk_Transfer_Time)
+    FR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HL'] + Swing_Time_Steps :] = cos_interp(t_transfer, FR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HL'] + Swing_Time_Steps - 1].reshape((3, 1)), FR_Stand_To_Walk[:, -1].reshape((3, 1)), 0, Stand_To_Walk_Transfer_Time)
+
+    # Compute cos interpolation from previous position to next position for all transfer phases for HL leg and allocate in new trajectory array
+    HL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['FL'] - Stand_To_Walk_Transfer_Time_Steps : Swing_Start_Index_with_transfer['FL']] = cos_interp(t_transfer, HL_Stand_To_Walk[:, 0].reshape(3, 1), HL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['FL']].reshape((3, 1)), 0, Stand_To_Walk_Transfer_Time)
+    HL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HR'] - Stand_To_Walk_Transfer_Time_Steps : Swing_Start_Index_with_transfer['HR']] = cos_interp(t_transfer, HL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HR'] - Stand_To_Walk_Transfer_Time_Steps - 1].reshape((3, 1)), HL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HR']].reshape((3, 1)), 0, Stand_To_Walk_Transfer_Time)
+    HL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['FR'] - Stand_To_Walk_Transfer_Time_Steps : Swing_Start_Index_with_transfer['FR']] = cos_interp(t_transfer, HL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['FR'] - Stand_To_Walk_Transfer_Time_Steps - 1].reshape((3, 1)), HL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['FR']].reshape((3, 1)), 0, Stand_To_Walk_Transfer_Time)
+    HL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HL'] - Stand_To_Walk_Transfer_Time_Steps : Swing_Start_Index_with_transfer['HL']] = cos_interp(t_transfer, HL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HL'] - Stand_To_Walk_Transfer_Time_Steps - 1].reshape((3, 1)), HL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HL']].reshape((3, 1)), 0, Stand_To_Walk_Transfer_Time)
+    HL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HL'] + Swing_Time_Steps :] = cos_interp(t_transfer, HL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HL'] + Swing_Time_Steps - 1].reshape((3, 1)), HL_Stand_To_Walk[:, -1].reshape((3, 1)), 0, Stand_To_Walk_Transfer_Time)
+
+    ## Velocities: Swing and Stand phases ##
+    # Take swing and stand phases of FL_Stand_To_Walk_Velocities and allocate in new trajectory array (no offset for velocities)
+    FL_Stand_To_Walk_Velocities_With_Transfer[:, Swing_Start_Index_with_transfer['FL'] : Swing_Start_Index_with_transfer['FL'] + Swing_Time_Steps] = FL_Stand_To_Walk_Velocities[:, :Swing_Start_Index['FL'] + Swing_Time_Steps]
+    FL_Stand_To_Walk_Velocities_With_Transfer[:, Swing_Start_Index_with_transfer['HR'] : Swing_Start_Index_with_transfer['HR'] + Swing_Time_Steps] = FL_Stand_To_Walk_Velocities[:, Swing_Start_Index['HR'] : Swing_Start_Index['HR'] + Swing_Time_Steps]
+    FL_Stand_To_Walk_Velocities_With_Transfer[:, Swing_Start_Index_with_transfer['FR'] : Swing_Start_Index_with_transfer['FR'] + Swing_Time_Steps] = FL_Stand_To_Walk_Velocities[:, Swing_Start_Index['FR'] : Swing_Start_Index['FR'] + Swing_Time_Steps]
+    FL_Stand_To_Walk_Velocities_With_Transfer[:, Swing_Start_Index_with_transfer['HL'] : Swing_Start_Index_with_transfer['HL'] + Swing_Time_Steps] = FL_Stand_To_Walk_Velocities[:, Swing_Start_Index['HL'] : Swing_Start_Index['HL'] + Swing_Time_Steps]
+
+    # Take swing and stand phases of HR_Stand_To_Walk_Velocities and allocate in new trajectory array (no offset for velocities)
+    HR_Stand_To_Walk_Velocities_With_Transfer[:, Swing_Start_Index_with_transfer['FL'] : Swing_Start_Index_with_transfer['FL'] + Swing_Time_Steps] = HR_Stand_To_Walk_Velocities[:, :Swing_Start_Index['FL'] + Swing_Time_Steps]
+    HR_Stand_To_Walk_Velocities_With_Transfer[:, Swing_Start_Index_with_transfer['HR'] : Swing_Start_Index_with_transfer['HR'] + Swing_Time_Steps] = HR_Stand_To_Walk_Velocities[:, Swing_Start_Index['HR'] : Swing_Start_Index['HR'] + Swing_Time_Steps]
+    HR_Stand_To_Walk_Velocities_With_Transfer[:, Swing_Start_Index_with_transfer['FR'] : Swing_Start_Index_with_transfer['FR'] + Swing_Time_Steps] = HR_Stand_To_Walk_Velocities[:, Swing_Start_Index['FR'] : Swing_Start_Index['FR'] + Swing_Time_Steps]
+    HR_Stand_To_Walk_Velocities_With_Transfer[:, Swing_Start_Index_with_transfer['HL'] : Swing_Start_Index_with_transfer['HL'] + Swing_Time_Steps] = HR_Stand_To_Walk_Velocities[:, Swing_Start_Index['HL'] : Swing_Start_Index['HL'] + Swing_Time_Steps]
+
+    # Take swing and stand phases of FR_Stand_To_Walk_Velocities and allocate in new trajectory array (no offset for velocities)
+    FR_Stand_To_Walk_Velocities_With_Transfer[:, Swing_Start_Index_with_transfer['FL'] : Swing_Start_Index_with_transfer['FL'] + Swing_Time_Steps] = FR_Stand_To_Walk_Velocities[:, :Swing_Start_Index['FL'] + Swing_Time_Steps]
+    FR_Stand_To_Walk_Velocities_With_Transfer[:, Swing_Start_Index_with_transfer['HR'] : Swing_Start_Index_with_transfer['HR'] + Swing_Time_Steps] = FR_Stand_To_Walk_Velocities[:, Swing_Start_Index['HR'] : Swing_Start_Index['HR'] + Swing_Time_Steps]
+    FR_Stand_To_Walk_Velocities_With_Transfer[:, Swing_Start_Index_with_transfer['FR'] : Swing_Start_Index_with_transfer['FR'] + Swing_Time_Steps] = FR_Stand_To_Walk_Velocities[:, Swing_Start_Index['FR'] : Swing_Start_Index['FR'] + Swing_Time_Steps]
+    FR_Stand_To_Walk_Velocities_With_Transfer[:, Swing_Start_Index_with_transfer['HL'] : Swing_Start_Index_with_transfer['HL'] + Swing_Time_Steps] = FR_Stand_To_Walk_Velocities[:, Swing_Start_Index['HL'] : Swing_Start_Index['HL'] + Swing_Time_Steps]
+
+    # Take swing and stand phases of HL_Stand_To_Walk_Velocities and allocate in new trajectory array (no offset for velocities)
+    HL_Stand_To_Walk_Velocities_With_Transfer[:, Swing_Start_Index_with_transfer['FL'] : Swing_Start_Index_with_transfer['FL'] + Swing_Time_Steps] = HL_Stand_To_Walk_Velocities[:, :Swing_Start_Index['FL'] + Swing_Time_Steps]
+    HL_Stand_To_Walk_Velocities_With_Transfer[:, Swing_Start_Index_with_transfer['HR'] : Swing_Start_Index_with_transfer['HR'] + Swing_Time_Steps] = HL_Stand_To_Walk_Velocities[:, Swing_Start_Index['HR'] : Swing_Start_Index['HR'] + Swing_Time_Steps]
+    HL_Stand_To_Walk_Velocities_With_Transfer[:, Swing_Start_Index_with_transfer['FR'] : Swing_Start_Index_with_transfer['FR'] + Swing_Time_Steps] = HL_Stand_To_Walk_Velocities[:, Swing_Start_Index['FR'] : Swing_Start_Index['FR'] + Swing_Time_Steps]
+    HL_Stand_To_Walk_Velocities_With_Transfer[:, Swing_Start_Index_with_transfer['HL'] : Swing_Start_Index_with_transfer['HL'] + Swing_Time_Steps] = HL_Stand_To_Walk_Velocities[:, Swing_Start_Index['HL'] : Swing_Start_Index['HL'] + Swing_Time_Steps]
+
+    ## Velocities: Transfer phases ##
+    # Compute cos interpolation derivatives from previous position to next position for all transfer phases for FL leg and allocate in new trajectory array
+    FL_Stand_To_Walk_Velocities_With_Transfer[:, Swing_Start_Index_with_transfer['FL'] - Stand_To_Walk_Transfer_Time_Steps : Swing_Start_Index_with_transfer['FL']] = cos_interp_dot(t_transfer, FL_Stand_To_Walk[:, 0].reshape((3, 1)), FL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['FL']].reshape((3, 1)), 0, Stand_To_Walk_Transfer_Time)
+    FL_Stand_To_Walk_Velocities_With_Transfer[:, Swing_Start_Index_with_transfer['HR'] - Stand_To_Walk_Transfer_Time_Steps : Swing_Start_Index_with_transfer['HR']] = cos_interp_dot(t_transfer, FL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HR'] - Stand_To_Walk_Transfer_Time_Steps - 1].reshape((3, 1)), FL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HR']].reshape((3, 1)), 0, Stand_To_Walk_Transfer_Time)
+    FL_Stand_To_Walk_Velocities_With_Transfer[:, Swing_Start_Index_with_transfer['FR'] - Stand_To_Walk_Transfer_Time_Steps : Swing_Start_Index_with_transfer['FR']] = cos_interp_dot(t_transfer, FL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['FR'] - Stand_To_Walk_Transfer_Time_Steps - 1].reshape((3, 1)), FL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['FR']].reshape((3, 1)), 0, Stand_To_Walk_Transfer_Time)
+    FL_Stand_To_Walk_Velocities_With_Transfer[:, Swing_Start_Index_with_transfer['HL'] - Stand_To_Walk_Transfer_Time_Steps : Swing_Start_Index_with_transfer['HL']] = cos_interp_dot(t_transfer, FL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HL'] - Stand_To_Walk_Transfer_Time_Steps - 1].reshape((3, 1)), FL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HL']].reshape((3, 1)), 0, Stand_To_Walk_Transfer_Time)
+
+    # Compute cos interpolation derivatives from previous position to next position for all transfer phases for HR leg and allocate in new trajectory array
+    HR_Stand_To_Walk_Velocities_With_Transfer[:, Swing_Start_Index_with_transfer['FL'] - Stand_To_Walk_Transfer_Time_Steps : Swing_Start_Index_with_transfer['FL']] = cos_interp_dot(t_transfer, HR_Stand_To_Walk[:, 0].reshape((3, 1)), HR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['FL']].reshape((3, 1)), 0, Stand_To_Walk_Transfer_Time)
+    HR_Stand_To_Walk_Velocities_With_Transfer[:, Swing_Start_Index_with_transfer['HR'] - Stand_To_Walk_Transfer_Time_Steps : Swing_Start_Index_with_transfer['HR']] = cos_interp_dot(t_transfer, HR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HR'] - Stand_To_Walk_Transfer_Time_Steps - 1].reshape((3, 1)), HR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HR']].reshape((3, 1)), 0, Stand_To_Walk_Transfer_Time)
+    HR_Stand_To_Walk_Velocities_With_Transfer[:, Swing_Start_Index_with_transfer['FR'] - Stand_To_Walk_Transfer_Time_Steps : Swing_Start_Index_with_transfer['FR']] = cos_interp_dot(t_transfer, HR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['FR'] - Stand_To_Walk_Transfer_Time_Steps - 1].reshape((3, 1)), HR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['FR']].reshape((3, 1)), 0, Stand_To_Walk_Transfer_Time)
+    HR_Stand_To_Walk_Velocities_With_Transfer[:, Swing_Start_Index_with_transfer['HL'] - Stand_To_Walk_Transfer_Time_Steps : Swing_Start_Index_with_transfer['HL']] = cos_interp_dot(t_transfer, HR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HL'] - Stand_To_Walk_Transfer_Time_Steps - 1].reshape((3, 1)), HR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HL']].reshape((3, 1)), 0, Stand_To_Walk_Transfer_Time)
+
+    # Compute cos interpolation derivatives from previous position to next position for all transfer phases for FR leg and allocate in new trajectory array
+    FR_Stand_To_Walk_Velocities_With_Transfer[:, Swing_Start_Index_with_transfer['FL'] - Stand_To_Walk_Transfer_Time_Steps : Swing_Start_Index_with_transfer['FL']] = cos_interp_dot(t_transfer, FR_Stand_To_Walk[:, 0].reshape((3, 1)), FR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['FL']].reshape((3, 1)), 0, Stand_To_Walk_Transfer_Time)
+    FR_Stand_To_Walk_Velocities_With_Transfer[:, Swing_Start_Index_with_transfer['HR'] - Stand_To_Walk_Transfer_Time_Steps : Swing_Start_Index_with_transfer['HR']] = cos_interp_dot(t_transfer, FR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HR'] - Stand_To_Walk_Transfer_Time_Steps - 1].reshape((3, 1)), FR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HR']].reshape((3, 1)), 0, Stand_To_Walk_Transfer_Time)
+    FR_Stand_To_Walk_Velocities_With_Transfer[:, Swing_Start_Index_with_transfer['FR'] - Stand_To_Walk_Transfer_Time_Steps : Swing_Start_Index_with_transfer['FR']] = cos_interp_dot(t_transfer, FR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['FR'] - Stand_To_Walk_Transfer_Time_Steps - 1].reshape((3, 1)), FR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['FR']].reshape((3, 1)), 0, Stand_To_Walk_Transfer_Time)
+    FR_Stand_To_Walk_Velocities_With_Transfer[:, Swing_Start_Index_with_transfer['HL'] - Stand_To_Walk_Transfer_Time_Steps : Swing_Start_Index_with_transfer['HL']] = cos_interp_dot(t_transfer, FR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HL'] - Stand_To_Walk_Transfer_Time_Steps - 1].reshape((3, 1)), FR_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HL']].reshape((3, 1)), 0, Stand_To_Walk_Transfer_Time)
+
+    # Compute cos interpolation derivatives from previous position to next position for all transfer phases for HL leg and allocate in new trajectory array
+    HL_Stand_To_Walk_Velocities_With_Transfer[:, Swing_Start_Index_with_transfer['FL'] - Stand_To_Walk_Transfer_Time_Steps : Swing_Start_Index_with_transfer['FL']] = cos_interp_dot(t_transfer, HL_Stand_To_Walk[:, 0].reshape((3, 1)), HL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['FL']].reshape((3, 1)), 0, Stand_To_Walk_Transfer_Time)
+    HL_Stand_To_Walk_Velocities_With_Transfer[:, Swing_Start_Index_with_transfer['HR'] - Stand_To_Walk_Transfer_Time_Steps : Swing_Start_Index_with_transfer['HR']] = cos_interp_dot(t_transfer, HL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HR'] - Stand_To_Walk_Transfer_Time_Steps - 1].reshape((3, 1)), HL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HR']].reshape((3, 1)), 0, Stand_To_Walk_Transfer_Time)
+    HL_Stand_To_Walk_Velocities_With_Transfer[:, Swing_Start_Index_with_transfer['FR'] - Stand_To_Walk_Transfer_Time_Steps : Swing_Start_Index_with_transfer['FR']] = cos_interp_dot(t_transfer, HL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['FR'] - Stand_To_Walk_Transfer_Time_Steps - 1].reshape((3, 1)), HL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['FR']].reshape((3, 1)), 0, Stand_To_Walk_Transfer_Time)
+    HL_Stand_To_Walk_Velocities_With_Transfer[:, Swing_Start_Index_with_transfer['HL'] - Stand_To_Walk_Transfer_Time_Steps : Swing_Start_Index_with_transfer['HL']] = cos_interp_dot(t_transfer, HL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HL'] - Stand_To_Walk_Transfer_Time_Steps - 1].reshape((3, 1)), HL_Stand_To_Walk_With_Transfer[:, Swing_Start_Index_with_transfer['HL']].reshape((3, 1)), 0, Stand_To_Walk_Transfer_Time)
+
+    return t_with_transfer, FL_Stand_To_Walk_With_Transfer, FR_Stand_To_Walk_With_Transfer, HL_Stand_To_Walk_With_Transfer, HR_Stand_To_Walk_With_Transfer, FL_Stand_To_Walk_Velocities_With_Transfer, FR_Stand_To_Walk_Velocities_With_Transfer, HL_Stand_To_Walk_Velocities_With_Transfer, HR_Stand_To_Walk_Velocities_With_Transfer
