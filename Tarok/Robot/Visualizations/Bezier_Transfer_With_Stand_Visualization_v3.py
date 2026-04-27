@@ -285,7 +285,7 @@ Theta_dot_HR_SWH = np.abs(np.rad2deg(Theta_dot_HR_SWH))
 ### WALK HEIGHT TO WALK START GENERATION ###
 # ----------------------------- #
 
-STW_Swing_Time_Scalar = 0.4 # [s] duration of swing phase for transition from stand height to walk start
+STW_Swing_Time_Scalar = 0.8 # [s] duration of swing phase for transition from stand height to walk start
 t_swing_STW = np.linspace(0, STW_Swing_Time_Scalar - dt, int(STW_Swing_Time_Scalar / dt)) # Time array for swing phase
 STW_Swing_Time_Steps = len(t_swing_STW) 
 total_time_STW = 4 * STW_Swing_Time_Scalar
@@ -374,7 +374,7 @@ Theta_dot_HR_STW = np.abs(np.rad2deg(Theta_dot_HR_STW))
 
 
 #### PLOTTING ####
-'''
+
 # Plot FL_stand_to_walk trajectory for verification
 plt.subplot(3, 1, 1)
 plt.plot(t_Stand_To_Walk_With_Transfer, FL_Stand_To_Walk[0, :], label='FL Stand to Walk X')
@@ -394,9 +394,12 @@ plt.title('FL Stand to Walk Trajectory Z Coordinate')
 plt.xlabel('Time (s)')
 plt.ylabel('Z Position (m)')
 plt.legend()
-plt.show()
+
+
+
 
 # Plot_FL_Stand_To_Walk_Velocities for verification
+plt.figure(figsize=(10, 8))
 plt.subplot(3, 1, 1)
 plt.plot(t_Stand_To_Walk_With_Transfer, FL_Stand_To_Walk_Velocities[0, :], label='FL Stand to Walk X Velocity')
 plt.title('FL Stand to Walk Trajectory X Velocity')
@@ -430,7 +433,7 @@ print("Shape of FL_Stand_To_Walk_With_Transfer:", FL_Stand_To_Walk.shape)
 # print shape of FL_Bezier_Trajectory_With_Transfer
 print("Shape of FL_Bezier_Trajectory_With_Transfer:", FL_Bezier_Trajectory_With_Transfer.shape)
 
-'''
+
 FL_Trajectory_Stacked = np.hstack((P_FL_body_stand.reshape(3, 1), P_FL_body_SWH, FL_Stand_To_Walk, FL_Bezier_Trajectory_With_Transfer))
 FR_Trajectory_Stacked = np.hstack((P_FR_body_stand.reshape(3, 1), P_FR_body_SWH, FR_Stand_To_Walk, FR_Bezier_Trajectory_With_Transfer))
 HL_Trajectory_Stacked = np.hstack((P_HL_body_stand.reshape(3, 1), P_HL_body_SWH, HL_Stand_To_Walk, HL_Bezier_Trajectory_With_Transfer))
