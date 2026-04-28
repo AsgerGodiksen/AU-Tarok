@@ -544,10 +544,83 @@ plt.show()
 
 
 
-Theta_FL_anim = np.deg2rad(Theta_FL_Stacked)
-Theta_FR_anim = np.deg2rad(Theta_FR_Stacked)
-Theta_HL_anim = np.deg2rad(Theta_HL_Stacked)
-Theta_HR_anim = np.deg2rad(Theta_HR_Stacked)
+### PLOT WITH RETURN
+
+FL_Trajectory_Stacked_Return = np.hstack((P_FL_body_stand.reshape(3, 1), P_FL_body_SWH, FL_Stand_To_Walk, FL_Bezier_Trajectory_With_Transfer, FL_Stand_To_Walk[:, ::-1], P_FL_body_SWH[:, ::-1], P_FL_body_stand.reshape(3, 1)))
+FR_Trajectory_Stacked_Return = np.hstack((P_FR_body_stand.reshape(3, 1), P_FR_body_SWH, FR_Stand_To_Walk, FR_Bezier_Trajectory_With_Transfer, FR_Stand_To_Walk[:, ::-1], P_FR_body_SWH[:, ::-1], P_FR_body_stand.reshape(3, 1)))
+HL_Trajectory_Stacked_Return = np.hstack((P_HL_body_stand.reshape(3, 1), P_HL_body_SWH, HL_Stand_To_Walk, HL_Bezier_Trajectory_With_Transfer, HL_Stand_To_Walk[:, ::-1], P_HL_body_SWH[:, ::-1], P_HL_body_stand.reshape(3, 1)))
+HR_Trajectory_Stacked_Return = np.hstack((P_HR_body_stand.reshape(3, 1), P_HR_body_SWH, HR_Stand_To_Walk, HR_Bezier_Trajectory_With_Transfer, HR_Stand_To_Walk[:, ::-1], P_HR_body_SWH[:, ::-1], P_HR_body_stand.reshape(3, 1)))
+
+# Plot stacked trajectory for all legs
+# With a thin vertical line a transition point between each of the 4 trajectory segments (stand height, stand to walk height, walk height to walk start, walk start to walk with transfer)
+t_stacked_Return = np.linspace(0, dt + total_time_SWH + total_time_STW_with_transfer + total_time_with_transfer + total_time_STW_with_transfer + total_time_SWH + dt, FL_Trajectory_Stacked_Return.shape[1]) # Create time array for stacked trajectory with return
+plt.subplot(3, 1, 1)
+plt.plot(t_stacked_Return, FL_Trajectory_Stacked_Return[0, :], label='FL')
+plt.plot(t_stacked_Return, FR_Trajectory_Stacked_Return[0, :], label='FR')
+plt.plot(t_stacked_Return, HL_Trajectory_Stacked_Return[0, :], label='HL')
+plt.plot(t_stacked_Return, HR_Trajectory_Stacked_Return[0, :], label='HR')
+plt.title('Stand to Walk to Stand Trajectory')
+plt.xlabel('Time (s)')
+plt.ylabel('X Position (m)')
+plt.legend()
+plt.axvline(x=dt, color='k', linestyle='--', linewidth=0.5)
+plt.axvline(x=dt + total_time_SWH, color='k', linestyle='--', linewidth=0.5)
+plt.axvline(x=dt + total_time_SWH + total_time_STW_with_transfer, color='k', linestyle='--', linewidth=0.5)
+plt.axvline(x=dt + total_time_SWH + total_time_STW_with_transfer + total_time_with_transfer, color='k', linestyle='--', linewidth=0.5)
+plt.axvline(x=dt + total_time_SWH + total_time_STW_with_transfer + total_time_with_transfer + total_time_STW_with_transfer, color='k', linestyle='--', linewidth=0.5)
+plt.axvline(x=dt + total_time_SWH + total_time_STW_with_transfer + total_time_with_transfer + total_time_STW_with_transfer + total_time_SWH, color='k', linestyle='--', linewidth=0.5)
+
+plt.subplot(3, 1, 2)
+plt.plot(t_stacked_Return, FL_Trajectory_Stacked_Return[1, :], label='FL')
+plt.plot(t_stacked_Return, FR_Trajectory_Stacked_Return[1, :], label='FR')
+plt.plot(t_stacked_Return, HL_Trajectory_Stacked_Return[1, :], label='HL')
+plt.plot(t_stacked_Return, HR_Trajectory_Stacked_Return[1, :], label='HR')
+plt.xlabel('Time (s)')
+plt.ylabel('Y Position (m)')
+plt.legend()
+plt.axvline(x=dt, color='k', linestyle='--', linewidth=0.5)
+plt.axvline(x=dt + total_time_SWH, color='k', linestyle='--', linewidth=0.5)
+plt.axvline(x=dt + total_time_SWH + total_time_STW_with_transfer, color='k', linestyle='--', linewidth=0.5)
+plt.axvline(x=dt + total_time_SWH + total_time_STW_with_transfer + total_time_with_transfer, color='k', linestyle='--', linewidth=0.5)
+plt.axvline(x=dt + total_time_SWH + total_time_STW_with_transfer + total_time_with_transfer + total_time_STW_with_transfer, color='k', linestyle='--', linewidth=0.5)
+plt.axvline(x=dt + total_time_SWH + total_time_STW_with_transfer + total_time_with_transfer + total_time_STW_with_transfer + total_time_SWH, color='k', linestyle='--', linewidth=0.5)
+
+plt.subplot(3, 1, 3)
+plt.plot(t_stacked_Return, FL_Trajectory_Stacked_Return[2, :], label='FL')
+plt.plot(t_stacked_Return, FR_Trajectory_Stacked_Return[2, :], label='FR')
+plt.plot(t_stacked_Return, HL_Trajectory_Stacked_Return[2, :], label='HL')
+plt.plot(t_stacked_Return, HR_Trajectory_Stacked_Return[2, :], label='HR')
+plt.xlabel('Time (s)')
+plt.ylabel('Z Position (m)')
+plt.legend()
+plt.axvline(x=dt, color='k', linestyle='--', linewidth=0.5)
+plt.axvline(x=dt + total_time_SWH, color='k', linestyle='--', linewidth=0.5)
+plt.axvline(x=dt + total_time_SWH + total_time_STW_with_transfer, color='k', linestyle='--', linewidth=0.5)
+plt.axvline(x=dt + total_time_SWH + total_time_STW_with_transfer + total_time_with_transfer, color='k', linestyle='--', linewidth=0.5)
+plt.axvline(x=dt + total_time_SWH + total_time_STW_with_transfer + total_time_with_transfer + total_time_STW_with_transfer, color='k', linestyle='--', linewidth=0.5)
+plt.axvline(x=dt + total_time_SWH + total_time_STW_with_transfer + total_time_with_transfer + total_time_STW_with_transfer + total_time_SWH, color='k', linestyle='--', linewidth=0.5)
+plt.show()
+
+
+
+
+# Stack Theta_XX arrays with return
+Theta_FL_Stacked_Return = np.vstack((Theta_FL_stand, Theta_FL_SWH, Theta_FL_STW, Theta_FL, Theta_FL_STW[::-1, :], Theta_FL_SWH[::-1, :], Theta_FL_stand))
+Theta_FR_Stacked_Return = np.vstack((Theta_FR_stand, Theta_FR_SWH, Theta_FR_STW, Theta_FR, Theta_FR_STW[::-1, :], Theta_FR_SWH[::-1, :], Theta_FR_stand))
+Theta_HL_Stacked_Return = np.vstack((Theta_HL_stand, Theta_HL_SWH, Theta_HL_STW, Theta_HL, Theta_HL_STW[::-1, :], Theta_HL_SWH[::-1, :], Theta_HL_stand))
+Theta_HR_Stacked_Return = np.vstack((Theta_HR_stand, Theta_HR_SWH, Theta_HR_STW, Theta_HR, Theta_HR_STW[::-1, :], Theta_HR_SWH[::-1, :], Theta_HR_stand))
+
+
+
+
+
+
+
+
+Theta_FL_anim = np.deg2rad(Theta_FL_Stacked_Return)
+Theta_FR_anim = np.deg2rad(Theta_FR_Stacked_Return)
+Theta_HL_anim = np.deg2rad(Theta_HL_Stacked_Return)
+Theta_HR_anim = np.deg2rad(Theta_HR_Stacked_Return)
 
 #### ANIMATION #### (Note: not true time)
 # Animation which plots the trajectory of the legs in 3D space based on the computed joint angles and forward kinematics, showing the up/down motion of the legs as defined by the desired end-effector trajectory. The animation will show the movement of the legs over time, with the foot positions being updated according to the forward kinematics computed from the inverse kinematics joint angles.
@@ -643,6 +716,6 @@ def update(num):
         line.set_3d_properties(zs)
 
     return lineFL, lineFR, lineHL, lineHR
-ani = animation.FuncAnimation(fig, update, frames=(len(t_stacked)), init_func=init,
+ani = animation.FuncAnimation(fig, update, frames=(len(t_stacked_Return)), init_func=init,
                               interval=1, blit=True)
 plt.show()

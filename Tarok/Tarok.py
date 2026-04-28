@@ -33,7 +33,8 @@ State = "STAND"             # Define state variable, initial state is standing p
 
 ### PARAMETER IMPORTS ###
 Tarok = TarokDymensions()
-PHASE_OFFSET = Tarok.CRAWL_OFFSETS
+#PHASE_OFFSET = Tarok.CRAWL_OFFSETS
+PHASE_OFFSET = Tarok.CRAWL_OFFSETS_Mixed
 
 ## PI PARAMETERS ## 
 # Stand state PI parameters (test 10)
@@ -78,6 +79,7 @@ pi_up_down = {
     'torque_ki': 25
 }
 
+'''
 # Bezier walk state PI parameters - currently the ones tuned for up/down (Test 19)
 pi_bezier_walk = {
     'angle_kp':  110,
@@ -86,6 +88,17 @@ pi_bezier_walk = {
     'speed_ki':  16,
     'torque_kp': 55,
     'torque_ki': 20
+}
+'''
+
+# Bezier walk state PI parameters - Manufacturing - the ones used in Test_Bezier_Transfer_With_Stand.py
+pi_bezier_walk = {
+    'angle_kp':  100,
+    'angle_ki':  100,
+    'speed_kp':  50,
+    'speed_ki':  40,
+    'torque_kp': 50,
+    'torque_ki': 50
 }
 
 ### FUNCTION DEFINITIONS ###
@@ -112,6 +125,9 @@ def main_on_press(key):
         if key == keyboard.KeyCode.from_char('w'):
             State = "BEZIER WALK GAIT"
             print("W key pressed - Changing state to BEZIER WALK GAIT")
+        if key == keyboard.KeyCode.from_char('r'):
+            State = "REVERSE BEZIER WALK GAIT"
+            print("R key pressed - Changing state to REVERSE BEZIER WALK GAIT")
 
 ### STATE FUNCTIONS ###
 # Define functions for each state here, such as standing pose, walking gait, etc. Each function should implement the behavior for that state and return to standing pose at the end of the state.
@@ -470,8 +486,8 @@ def Up_Down_State(bus0, bus1, bus2, bus3, ID_1, ID_2, ID_3):
 
     print("Returned to standing pose at the end of UP/DOWN state")
 
-# Bezier Walk gait state function
-def Bezier_Walk_State(bus0, bus1, bus2, bus3, ID_1, ID_2, ID_3):
+# Old!! Bezier Walk gait state function
+def Old_Bezier_Walk_State(bus0, bus1, bus2, bus3, ID_1, ID_2, ID_3):
     '''
     State function for Bezier walk gait.
     This function computes a Bezier walk gait trajectory and runs it until the state is changed by the user.
@@ -671,6 +687,587 @@ def Bezier_Walk_State(bus0, bus1, bus2, bus3, ID_1, ID_2, ID_3):
     Position_Control(bus3,ID_3,Theta_HR_stand[2],20)
     print("Returned to standing pose at the end of BEZIER WALK GAIT state")
 
+# NEW!! Bezier Walk gait state function
+def Bezier_Walk_State(bus0, bus1, bus2, bus3, ID_1, ID_2, ID_3, Direction = "Forward"):
+    '''
+    State function for Bezier walk gait.
+    This function computes a Bezier walk gait trajectory and runs it until the state is changed by the user.
+    The State includes a transfer phase from standing pose to initial walk position and back to standing pose at the end of the state.
+
+    Press "W" to switch to walking gait state, press "S" to switch back to standing pose state
+
+    Inputs:
+    - bus0, bus1, bus2, bus3: CAN bus objects for each leg
+    - ID_1, ID_2, ID_3: Motor IDs for each joint
+    - Direction: "Forward" or "Backward", determines the direction of the walk, default is "Forward"
+
+    Returns:
+    - None, but runs the Bezier walk gait trajectory until state is changed by user, at which point it returns to standing pose
+    '''
+
+    print("Executing BEZIER WALK GAIT state")
+    print("Performing pre-computations for BEZIER WALK GAIT state...")
+
+    # Offsets for COM transfer during stand phase
+    x_offset = 0.03 # [m] how much to move COM forward/backward during transfer
+    y_offset = 0.04 # [m] how much to move COM to the left/right during transfer
+
+    # Time parameters
+    dt = 0.005 # seconds (200 Hz)
+
+    Swing_Time_Scalar = 1    # [s] swing phase duration
+    Stand_Time_Scalar  = 3 * Swing_Time_Scalar # [s] stand phase duration
+    Transfer_Time_Scalar = 1.25 # [s] duration of the COM transfer
+
+    total_time = Swing_Time_Scalar + Stand_Time_Scalar
+    Total_Time_Steps = int(total_time / dt)
+    total_time_with_transfer = total_time + 4 * Transfer_Time_Scalar
+    Total_Time_Steps_with_transfer = int(total_time_with_transfer / dt)
+
+    t_swing = np.linspace(0, Swing_Time_Scalar - dt, int(Swing_Time_Scalar / dt)) # Time array for swing phase
+    t_stand = np.linspace(Swing_Time_Scalar, total_time - dt, int(Stand_Time_Scalar / dt)) # Time array for stand phase
+    t_transfer = np.linspace(0, Transfer_Time_Scalar - dt, int(Transfer_Time_Scalar / dt)) # Time array for transfer phase
+
+    t = np.concatenate((t_swing, t_stand)) # Full time array for one cycle of the gait
+    t_with_transfer = np.linspace(0, total_time_with_transfer - dt, Total_Time_Steps_with_transfer)
+
+    Swing_Time_Steps = len(t_swing)
+    Stand_Time_Steps = len(t_stand)
+    Transfer_Time_Steps = len(t_transfer)
+
+    # Define time parameters for transition from stand height to walk height
+    total_time_SWH = 1 # [s] total time for transition from stand height to walk height
+    num_time_steps_SWH = int(total_time_SWH / dt)
+    t_SWH = np.linspace(0, total_time_SWH, num_time_steps_SWH) # time array for transition from stand height to walk height
+
+    # Define time parameters for transition from walk height to walk start position
+    STW_Swing_Time_Scalar = 2.5 # [s] duration of swing phase for transition from stand height to walk start
+    t_swing_STW = np.linspace(0, STW_Swing_Time_Scalar - dt, int(STW_Swing_Time_Scalar / dt)) # Time array for swing phase
+    STW_Swing_Time_Steps = len(t_swing_STW) 
+    total_time_STW = 4 * STW_Swing_Time_Scalar
+    t_STW = np.linspace(0, total_time_STW - dt, int(total_time_STW / dt)) # Full time array for transition from stand height to walk start
+
+    # ----------------------------- #
+    ### WALK GENERATION ###
+    # ----------------------------- #
+
+    # Trajectory generation (Bezier curve in body frame)
+    Bezier_Trajectory, Bezier_Velocities, _ = Building_Bezier_Trajectories(
+                                        Swing_Time_Scalar,
+                                        Stand_Time_Scalar,
+                                        Swing_Time_Steps,
+                                        Stand_Time_Steps,
+                                        Stand_Phase_type = "Constant",
+                                        Leg = "FL"
+                                        )
+
+    # Translation to four shoulder
+    Front_Left_Shoulder, Front_Right_Shoulder, Hind_Left_Shoulder, Hind_Right_Shoulder = Tarok.Shoulder_Positions()
+    FL_Bezier_Trajectory = (Bezier_Trajectory + Front_Left_Shoulder) 
+    FR_Bezier_Trajectory = (Bezier_Trajectory + Front_Right_Shoulder)
+    HL_Bezier_Trajectory = (Bezier_Trajectory + Hind_Left_Shoulder)  
+    HR_Bezier_Trajectory = (Bezier_Trajectory + Hind_Right_Shoulder) 
+
+    # Apply phase offsets for crawl gait
+    FL_Bezier_Trajectory, FL_Bezier_Velocities = Apply_Phase_Offset(FL_Bezier_Trajectory, Bezier_Velocities, PHASE_OFFSET['FL'])
+    FR_Bezier_Trajectory, FR_Bezier_Velocities = Apply_Phase_Offset(FR_Bezier_Trajectory, Bezier_Velocities, PHASE_OFFSET['FR'])
+    HL_Bezier_Trajectory, HL_Bezier_Velocities = Apply_Phase_Offset(HL_Bezier_Trajectory, Bezier_Velocities, PHASE_OFFSET['HL'])
+    HR_Bezier_Trajectory, HR_Bezier_Velocities = Apply_Phase_Offset(HR_Bezier_Trajectory, Bezier_Velocities, PHASE_OFFSET['HR'])
+
+    ### ADD TRANSFER PHASE TO TRAJECTORY ###
+    FL_Bezier_Trajectory_With_Transfer, FR_Bezier_Trajectory_With_Transfer, HL_Bezier_Trajectory_With_Transfer, HR_Bezier_Trajectory_With_Transfer, FL_Bezier_Velocities_With_Transfer, FR_Bezier_Velocities_With_Transfer, HL_Bezier_Velocities_With_Transfer, HR_Bezier_Velocities_With_Transfer = Bezier_Add_Transfer_Phase(
+                t,
+                t_transfer,
+                t_with_transfer,
+                Total_Time_Steps,
+                Total_Time_Steps_with_transfer,
+                Transfer_Time_Steps,
+                Swing_Time_Steps,
+                Transfer_Time_Scalar,
+                PHASE_OFFSET,
+                x_offset,
+                y_offset,
+                FL_Bezier_Trajectory,
+                FR_Bezier_Trajectory,
+                HL_Bezier_Trajectory,
+                HR_Bezier_Trajectory,
+                FL_Bezier_Velocities,
+                FR_Bezier_Velocities,
+                HL_Bezier_Velocities,
+                HR_Bezier_Velocities
+    )
+
+    ### TRANSFORMATIONS ###
+    # Transform the Bezier trajectory from Body Frame to Leg Base Frames
+    P_FL_Base = np.array([T0_B(FL_Bezier_Trajectory_With_Transfer[:, i].reshape((3, 1)), 'FL') for i in range((len(t_with_transfer)))])
+    P_FR_Base = np.array([T0_B(FR_Bezier_Trajectory_With_Transfer[:, i].reshape((3, 1)), 'FR') for i in range((len(t_with_transfer)))])
+    P_HL_Base = np.array([T0_B(HL_Bezier_Trajectory_With_Transfer[:, i].reshape((3, 1)), 'HL') for i in range((len(t_with_transfer)))])
+    P_HR_Base = np.array([T0_B(HR_Bezier_Trajectory_With_Transfer[:, i].reshape((3, 1)), 'HR') for i in range((len(t_with_transfer)))])
+
+    # Transform desired end-effector velocity from body frame to leg base frames
+    V_FL_base = np.array([R0_B(FL_Bezier_Velocities_With_Transfer[:, i].reshape((3, 1)), 'FL') for i in range((len(t_with_transfer)))])
+    V_FR_base = np.array([R0_B(FR_Bezier_Velocities_With_Transfer[:, i].reshape((3, 1)), 'FR') for i in range((len(t_with_transfer)))])
+    V_HL_base = np.array([R0_B(HL_Bezier_Velocities_With_Transfer[:, i].reshape((3, 1)), 'HL') for i in range((len(t_with_transfer)))])
+    V_HR_base = np.array([R0_B(HR_Bezier_Velocities_With_Transfer[:, i].reshape((3, 1)), 'HR') for i in range((len(t_with_transfer)))])
+
+    ### Kinematics ###
+    # Determine joint angles for all 4 legs using inverse kinematics
+    Theta_FL = np.array([Inverse_Kinematics(P_FL_Base[i], 'FL') for i in range((len(t_with_transfer)))]) # Shape (num_time_steps, 3), containing theta1, theta2, theta3 for each time step
+    Theta_FR = np.array([Inverse_Kinematics(P_FR_Base[i], 'FR') for i in range((len(t_with_transfer)))]) # Shape (num_time_steps, 3), containing theta1, theta2, theta3 for each time step
+    Theta_HL = np.array([Inverse_Kinematics(P_HL_Base[i], 'HL') for i in range((len(t_with_transfer)))]) # Shape (num_time_steps, 3), containing theta1, theta2, theta3 for each time step
+    Theta_HR = np.array([Inverse_Kinematics(P_HR_Base[i], 'HR') for i in range((len(t_with_transfer)))]) # Shape (num_time_steps, 3), containing theta1, theta2, theta3 for each time step
+
+    # Determine joint velocities for all 4 legs using Jacobian
+    # Damped least squares inverse to avoid singularities - theta_dot = (J^T*J + damp^2*I)^-1 * J^T * cartesian_velocity 
+    Theta_dot_FL = np.zeros((3, len(t_with_transfer)))  # Initialize joint velocity array
+    Theta_dot_FR = np.zeros((3, len(t_with_transfer)))  # Initialize joint velocity array
+    Theta_dot_HL = np.zeros((3, len(t_with_transfer)))  # Initialize joint velocity array
+    Theta_dot_HR = np.zeros((3, len(t_with_transfer)))  # Initialize joint velocity array
+    damp = 0.001  # Damping factor
+    for i in range((Total_Time_Steps_with_transfer)):
+        Jac_i_FL = Jacobian(Theta_FL[i, 0], Theta_FL[i, 1], Theta_FL[i, 2], 'FL')
+        Jac_i_FR = Jacobian(Theta_FR[i, 0], Theta_FR[i, 1], Theta_FR[i, 2], 'FR')
+        Jac_i_HL = Jacobian(Theta_HL[i, 0], Theta_HL[i, 1], Theta_HL[i, 2], 'HL')
+        Jac_i_HR = Jacobian(Theta_HR[i, 0], Theta_HR[i, 1], Theta_HR[i, 2], 'HR')
+        JT_FL = Jac_i_FL.T
+        JT_FR = Jac_i_FR.T
+        JT_HL = Jac_i_HL.T
+        JT_HR = Jac_i_HR.T
+        term_FL = JT_FL @ Jac_i_FL + (damp**2)*np.eye(3)
+        term_FR = JT_FR @ Jac_i_FR + (damp**2)*np.eye(3)
+        term_HL = JT_HL @ Jac_i_HL + (damp**2)*np.eye(3)
+        term_HR = JT_HR @ Jac_i_HR + (damp**2)*np.eye(3)
+        Theta_dot_FL[:, i] = np.linalg.solve(term_FL, JT_FL @ V_FL_base[i].flatten())
+        Theta_dot_FR[:, i] = np.linalg.solve(term_FR, JT_FR @ V_FR_base[i].flatten())
+        Theta_dot_HL[:, i] = np.linalg.solve(term_HL, JT_HL @ V_HL_base[i].flatten())
+        Theta_dot_HR[:, i] = np.linalg.solve(term_HR, JT_HR @ V_HR_base[i].flatten())
+
+    # Convert joint angles and velocities to degrees and abs(degrees/s) for right units for motor control
+    Theta_FL = np.rad2deg(Theta_FL)
+    Theta_FR = np.rad2deg(Theta_FR)
+    Theta_HL = np.rad2deg(Theta_HL)
+    Theta_HR = np.rad2deg(Theta_HR)
+    Theta_dot_FL = np.abs(np.rad2deg(Theta_dot_FL))
+    Theta_dot_FR = np.abs(np.rad2deg(Theta_dot_FR))
+    Theta_dot_HL = np.abs(np.rad2deg(Theta_dot_HL))
+    Theta_dot_HR = np.abs(np.rad2deg(Theta_dot_HR))
+
+    # ----------------------------- #
+    ### STAND HEIGHT TO WALK HEIGHT GENERATION ###
+    # ----------------------------- #
+
+    # Define desired end-effector trajectory for transition from stand height to walk height
+    x_FL_SWH = x_FR_SWH = (l_k/2) * np.ones_like(t_SWH) # X position in meters (constant)
+    x_HL_SWH = x_HR_SWH = (-l_k/2) * np.ones_like(t_SWH) # X position in meters (constant)
+    y_FL_SWH = y_HL_SWH = (w_k/2 + 0.078) * np.ones_like(t_SWH) # Y position in meters (constant)
+    y_FR_SWH = y_HR_SWH = (-w_k/2 - 0.078) * np.ones_like(t_SWH) # Y position in meters (constant)
+    z_SWH = cos_interp(t_SWH, z_stand, -P_FL_Base[0, 0], 0, total_time_SWH) # Z position in meters (cosine interpolation from stand height to walk height)
+
+    # Define desired end-effector velocity for transition from stand height to walk height
+    x_dot_SWH = np.zeros_like(t_SWH) # X velocity in m/s (constant)
+    y_dot_SWH = np.zeros_like(t_SWH) # Y velocity in m/s (constant)
+    z_dot_SWH = cos_interp_dot(t_SWH, z_stand, -P_FL_Base[0, 0], 0, total_time_SWH) # Z velocity in m/s (derivative of cosine interpolation)
+
+    ### Transformations ###
+    # Combine trajectories into position arrays for each leg
+    P_FL_body_SWH = np.vstack((x_FL_SWH, y_FL_SWH, z_SWH))
+    P_FR_body_SWH = np.vstack((x_FR_SWH, y_FR_SWH, z_SWH))
+    P_HL_body_SWH = np.vstack((x_HL_SWH, y_HL_SWH, z_SWH))
+    P_HR_body_SWH = np.vstack((x_HR_SWH, y_HR_SWH, z_SWH))
+
+    # Transform desired end-effector trajectory from body frame to leg base frames
+    P_FL_base_SWH = np.array([T0_B(P_FL_body_SWH[:, i].reshape((3, 1)), 'FL') for i in range(len(t_SWH))])
+    P_FR_base_SWH = np.array([T0_B(P_FR_body_SWH[:, i].reshape((3, 1)), 'FR') for i in range(len(t_SWH))])
+    P_HL_base_SWH = np.array([T0_B(P_HL_body_SWH[:, i].reshape((3, 1)), 'HL') for i in range(len(t_SWH))])
+    P_HR_base_SWH = np.array([T0_B(P_HR_body_SWH[:, i].reshape((3, 1)), 'HR') for i in range(len(t_SWH))])
+
+    # Combine body frame trajectory cartesian velocities into array
+    V_body_SWH = np.vstack((x_dot_SWH, y_dot_SWH, z_dot_SWH))
+    # Transform desired end-effector velocity from body frame to leg base frames
+    V_FL_base_SWH = np.array([R0_B(V_body_SWH[:, i].reshape((3, 1)), 'FL') for i in range(len(t_SWH))])
+    V_FR_base_SWH = np.array([R0_B(V_body_SWH[:, i].reshape((3, 1)), 'FR') for i in range(len(t_SWH))])
+    V_HL_base_SWH = np.array([R0_B(V_body_SWH[:, i].reshape((3, 1)), 'HL') for i in range(len(t_SWH))])
+    V_HR_base_SWH = np.array([R0_B(V_body_SWH[:, i].reshape((3, 1)), 'HR') for i in range(len(t_SWH))])
+
+    ### Kinematics ###
+    # Determine joint angles for all 4 legs using inverse kinematics
+    Theta_FL_SWH = np.array([Inverse_Kinematics(P_FL_base_SWH[i], 'FL') for i in range(len(t_SWH))]) # Shape (num_time_steps, 3), containing theta1, theta2, theta3 for each time step
+    Theta_FR_SWH = np.array([Inverse_Kinematics(P_FR_base_SWH[i], 'FR') for i in range(len(t_SWH))]) # Shape (num_time_steps, 3), containing theta1, theta2, theta3 for each time step
+    Theta_HL_SWH = np.array([Inverse_Kinematics(P_HL_base_SWH[i], 'HL') for i in range(len(t_SWH))]) # Shape (num_time_steps, 3), containing theta1, theta2, theta3 for each time step
+    Theta_HR_SWH = np.array([Inverse_Kinematics(P_HR_base_SWH[i], 'HR') for i in range(len(t_SWH))]) # Shape (num_time_steps, 3), containing theta1, theta2, theta3 for each time step
+
+    # Determine joint velocities for all 4 legs using Jacobian
+    # Damped least squares inverse to avoid singularities - theta_dot = (J^T*J + damp^2*I)^-1 * J^T * cartesian_velocity 
+    Theta_dot_FL_SWH = np.zeros((3, len(t_SWH)))  # Initialize joint velocity array
+    Theta_dot_FR_SWH = np.zeros((3, len(t_SWH)))  # Initialize joint velocity array
+    Theta_dot_HL_SWH = np.zeros((3, len(t_SWH)))  # Initialize joint velocity array
+    Theta_dot_HR_SWH = np.zeros((3, len(t_SWH)))  # Initialize joint velocity array
+    damp = 0.001  # Damping factor
+    for i in range(len(t_SWH)):
+        Jac_i_FL = Jacobian(Theta_FL_SWH[i, 0], Theta_FL_SWH[i, 1], Theta_FL_SWH[i, 2], 'FL')
+        Jac_i_FR = Jacobian(Theta_FR_SWH[i, 0], Theta_FR_SWH[i, 1], Theta_FR_SWH[i, 2], 'FR')
+        Jac_i_HL = Jacobian(Theta_HL_SWH[i, 0], Theta_HL_SWH[i, 1], Theta_HL_SWH[i, 2], 'HL')
+        Jac_i_HR = Jacobian(Theta_HR_SWH[i, 0], Theta_HR_SWH[i, 1], Theta_HR_SWH[i, 2], 'HR')
+        JT_FL = Jac_i_FL.T
+        JT_FR = Jac_i_FR.T
+        JT_HL = Jac_i_HL.T
+        JT_HR = Jac_i_HR.T
+        term_FL = JT_FL @ Jac_i_FL + (damp**2)*np.eye(3)
+        term_FR = JT_FR @ Jac_i_FR + (damp**2)*np.eye(3)
+        term_HL = JT_HL @ Jac_i_HL + (damp**2)*np.eye(3)
+        term_HR = JT_HR @ Jac_i_HR + (damp**2)*np.eye(3)
+        Theta_dot_FL_SWH[:, i] = np.linalg.solve(term_FL, JT_FL @ V_FL_base_SWH[i].flatten())
+        Theta_dot_FR_SWH[:, i] = np.linalg.solve(term_FR, JT_FR @ V_FR_base_SWH[i].flatten())
+        Theta_dot_HL_SWH[:, i] = np.linalg.solve(term_HL, JT_HL @ V_HL_base_SWH[i].flatten())
+        Theta_dot_HR_SWH[:, i] = np.linalg.solve(term_HR, JT_HR @ V_HR_base_SWH[i].flatten())
+
+    # Convert joint angles and velocities to degrees and abs(degrees/s) for right units for motor control
+    Theta_FL_SWH = np.rad2deg(Theta_FL_SWH)
+    Theta_FR_SWH = np.rad2deg(Theta_FR_SWH)
+    Theta_HL_SWH = np.rad2deg(Theta_HL_SWH)
+    Theta_HR_SWH = np.rad2deg(Theta_HR_SWH)
+    Theta_dot_FL_SWH = np.abs(np.rad2deg(Theta_dot_FL_SWH))
+    Theta_dot_FR_SWH = np.abs(np.rad2deg(Theta_dot_FR_SWH))
+    Theta_dot_HL_SWH = np.abs(np.rad2deg(Theta_dot_HL_SWH))
+    Theta_dot_HR_SWH = np.abs(np.rad2deg(Theta_dot_HR_SWH))
+
+    # ----------------------------- #
+    ### WALK HEIGHT TO WALK START GENERATION ###
+    # ----------------------------- #
+
+    # Trajectory generation
+    t_Stand_To_Walk_With_Transfer, FL_Stand_To_Walk, FR_Stand_To_Walk, HL_Stand_To_Walk, HR_Stand_To_Walk, FL_Stand_To_Walk_Velocities, FR_Stand_To_Walk_Velocities, HL_Stand_To_Walk_Velocities, HR_Stand_To_Walk_Velocities = Building_Stand_To_Walk_Trajectories(
+                                        STW_Swing_Time_Scalar, 
+                                        STW_Swing_Time_Steps,
+                                        PHASE_OFFSET, 
+                                        FL_Bezier_Trajectory_With_Transfer[0, 0], 
+                                        FR_Bezier_Trajectory_With_Transfer[0, 0], 
+                                        HL_Bezier_Trajectory_With_Transfer[0, 0], 
+                                        HR_Bezier_Trajectory_With_Transfer[0, 0])
+    total_time_STW_with_transfer = t_Stand_To_Walk_With_Transfer[-1]
+
+    ### TRANSFORMATIONS ###
+    # Transform the stand to walk trajectory from Body Frame to Leg Base Frames
+    P_FL_Base_STW = np.array([T0_B(FL_Stand_To_Walk[:, i].reshape((3, 1)), 'FL') for i in range((len(t_Stand_To_Walk_With_Transfer)))])
+    P_FR_Base_STW = np.array([T0_B(FR_Stand_To_Walk[:, i].reshape((3, 1)), 'FR') for i in range((len(t_Stand_To_Walk_With_Transfer)))])
+    P_HL_Base_STW = np.array([T0_B(HL_Stand_To_Walk[:, i].reshape((3, 1)), 'HL') for i in range((len(t_Stand_To_Walk_With_Transfer)))])
+    P_HR_Base_STW = np.array([T0_B(HR_Stand_To_Walk[:, i].reshape((3, 1)), 'HR') for i in range((len(t_Stand_To_Walk_With_Transfer)))])
+
+    # Transform desired end-effector velocity from body frame to leg base frames
+    V_FL_base_STW = np.array([R0_B(FL_Stand_To_Walk_Velocities[:, i].reshape((3, 1)), 'FL') for i in range((len(t_Stand_To_Walk_With_Transfer)))])
+    V_FR_base_STW = np.array([R0_B(FR_Stand_To_Walk_Velocities[:, i].reshape((3, 1)), 'FR') for i in range((len(t_Stand_To_Walk_With_Transfer)))])
+    V_HL_base_STW = np.array([R0_B(HL_Stand_To_Walk_Velocities[:, i].reshape((3, 1)), 'HL') for i in range((len(t_Stand_To_Walk_With_Transfer)))])
+    V_HR_base_STW = np.array([R0_B(HR_Stand_To_Walk_Velocities[:, i].reshape((3, 1)), 'HR') for i in range((len(t_Stand_To_Walk_With_Transfer)))])
+
+    ### Kinematics ###
+    # Determine joint angles for all 4 legs using inverse kinematics
+    Theta_FL_STW = np.array([Inverse_Kinematics(P_FL_Base_STW[i], 'FL') for i in range((len(t_Stand_To_Walk_With_Transfer)))]) # Shape (num_time_steps, 3), containing theta1, theta2, theta3 for each time step
+    Theta_FR_STW = np.array([Inverse_Kinematics(P_FR_Base_STW[i], 'FR') for i in range((len(t_Stand_To_Walk_With_Transfer)))]) # Shape (num_time_steps, 3), containing theta1, theta2, theta3 for each time step
+    Theta_HL_STW = np.array([Inverse_Kinematics(P_HL_Base_STW[i], 'HL') for i in range((len(t_Stand_To_Walk_With_Transfer)))]) # Shape (num_time_steps, 3), containing theta1, theta2, theta3 for each time step
+    Theta_HR_STW = np.array([Inverse_Kinematics(P_HR_Base_STW[i], 'HR') for i in range((len(t_Stand_To_Walk_With_Transfer)))]) # Shape (num_time_steps, 3), containing theta1, theta2, theta3 for each time step
+
+    # Determine joint velocities for all 4 legs using Jacobian
+    # Damped least squares inverse to avoid singularities - theta_dot = (J^T*J + damp^2*I)^-1 * J^T * cartesian_velocity 
+    Theta_dot_FL_STW = np.zeros((3, len(t_Stand_To_Walk_With_Transfer)))  # Initialize joint velocity array
+    Theta_dot_FR_STW = np.zeros((3, len(t_Stand_To_Walk_With_Transfer)))  # Initialize joint velocity array
+    Theta_dot_HL_STW = np.zeros((3, len(t_Stand_To_Walk_With_Transfer)))  # Initialize joint velocity array
+    Theta_dot_HR_STW = np.zeros((3, len(t_Stand_To_Walk_With_Transfer)))  # Initialize joint velocity array
+    damp = 0.001  # Damping factor
+    for i in range((int(total_time_STW_with_transfer / dt))):
+        Jac_i_FL = Jacobian(Theta_FL_STW[i, 0], Theta_FL_STW[i, 1], Theta_FL_STW[i, 2], 'FL')
+        Jac_i_FR = Jacobian(Theta_FR_STW[i, 0], Theta_FR_STW[i, 1], Theta_FR_STW[i, 2], 'FR')
+        Jac_i_HL = Jacobian(Theta_HL_STW[i, 0], Theta_HL_STW[i, 1], Theta_HL_STW[i, 2], 'HL')
+        Jac_i_HR = Jacobian(Theta_HR_STW[i, 0], Theta_HR_STW[i, 1], Theta_HR_STW[i, 2], 'HR')
+        JT_FL = Jac_i_FL.T
+        JT_FR = Jac_i_FR.T
+        JT_HL = Jac_i_HL.T
+        JT_HR = Jac_i_HR.T
+        term_FL = JT_FL @ Jac_i_FL + (damp**2)*np.eye(3)
+        term_FR = JT_FR @ Jac_i_FR + (damp**2)*np.eye(3)
+        term_HL = JT_HL @ Jac_i_HL + (damp**2)*np.eye(3)
+        term_HR = JT_HR @ Jac_i_HR + (damp**2)*np.eye(3)
+        Theta_dot_FL_STW[:, i] = np.linalg.solve(term_FL, JT_FL @ V_FL_base_STW[i].flatten())
+        Theta_dot_FR_STW[:, i] = np.linalg.solve(term_FR, JT_FR @ V_FR_base_STW[i].flatten())
+        Theta_dot_HL_STW[:, i] = np.linalg.solve(term_HL, JT_HL @ V_HL_base_STW[i].flatten())
+        Theta_dot_HR_STW[:, i] = np.linalg.solve(term_HR, JT_HR @ V_HR_base_STW[i].flatten())
+
+    # Convert joint angles and velocities to degrees and abs(degrees/s) for right units for motor control
+    Theta_FL_STW = np.rad2deg(Theta_FL_STW)
+    Theta_FR_STW = np.rad2deg(Theta_FR_STW)
+    Theta_HL_STW = np.rad2deg(Theta_HL_STW)
+    Theta_HR_STW = np.rad2deg(Theta_HR_STW)
+    Theta_dot_FL_STW = np.abs(np.rad2deg(Theta_dot_FL_STW))
+    Theta_dot_FR_STW = np.abs(np.rad2deg(Theta_dot_FR_STW))
+    Theta_dot_HL_STW = np.abs(np.rad2deg(Theta_dot_HL_STW))
+    Theta_dot_HR_STW = np.abs(np.rad2deg(Theta_dot_HR_STW))
+
+    # ----------------------------- #
+    ### DIRECTION ###
+    # ----------------------------- #
+    # If Direction is forward, no changes needed as trajectories are generated for forward direction
+    # If Direction is backward, FL and HR are swapped and FR and HL are swapped for all arrays used for control
+    if Direction == "Backward":
+        # Walk
+        Theta_FL, Theta_FR, Theta_HL, Theta_HR = Theta_HR, Theta_HL, Theta_FR, Theta_FL
+        Theta_dot_FL, Theta_dot_FR, Theta_dot_HL, Theta_dot_HR = Theta_dot_HR, Theta_dot_HL, Theta_dot_FR, Theta_dot_FL
+
+        # Stand height to walk height
+        Theta_FL_SWH, Theta_FR_SWH, Theta_HL_SWH, Theta_HR_SWH = Theta_HR_SWH, Theta_HL_SWH, Theta_FR_SWH, Theta_FL_SWH
+        Theta_dot_FL_SWH, Theta_dot_FR_SWH, Theta_dot_HL_SWH, Theta_dot_HR_SWH = Theta_dot_HR_SWH, Theta_dot_HL_SWH, Theta_dot_FR_SWH, Theta_dot_FL_SWH
+
+        # Walk height to walk start
+        Theta_FL_STW, Theta_FR_STW, Theta_HL_STW, Theta_HR_STW = Theta_HR_STW, Theta_HL_STW, Theta_FR_STW, Theta_FL_STW
+        Theta_dot_FL_STW, Theta_dot_FR_STW, Theta_dot_HL_STW, Theta_dot_HR_STW = Theta_dot_HR_STW, Theta_dot_HL_STW, Theta_dot_FR_STW, Theta_dot_FL_STW
+
+    # ----------------------------- #
+    ### RETURN ARRAYS ###
+    # ----------------------------- #
+    # Create arrays for return to stand pose using reversed trajectories (Note that forward and backward direction is already handled in previous section)
+    # Walk height to stand height
+    Theta_FL_SWH_Return = Theta_FL_SWH[::-1, :]
+    Theta_FR_SWH_Return = Theta_FR_SWH[::-1, :]
+    Theta_HL_SWH_Return = Theta_HL_SWH[::-1, :]
+    Theta_HR_SWH_Return = Theta_HR_SWH[::-1, :]
+    Theta_dot_FL_SWH_Return = Theta_dot_FL_SWH[::-1, :]
+    Theta_dot_FR_SWH_Return = Theta_dot_FR_SWH[::-1, :]
+    Theta_dot_HL_SWH_Return = Theta_dot_HL_SWH[::-1, :]
+    Theta_dot_HR_SWH_Return = Theta_dot_HR_SWH[::-1, :]
+
+    # Walk start to walk height
+    Theta_FL_STW_Return = Theta_FL_STW[::-1, :]
+    Theta_FR_STW_Return = Theta_FR_STW[::-1, :]
+    Theta_HL_STW_Return = Theta_HL_STW[::-1, :]
+    Theta_HR_STW_Return = Theta_HR_STW[::-1, :]
+    Theta_dot_FL_STW_Return = Theta_dot_FL_STW[::-1, :]
+    Theta_dot_FR_STW_Return = Theta_dot_FR_STW[::-1, :]
+    Theta_dot_HL_STW_Return = Theta_dot_HL_STW[::-1, :]
+    Theta_dot_HR_STW_Return = Theta_dot_HR_STW[::-1, :]
+
+    ### PRE-LOOP ###   
+    # Pre-loop sequence to move to initial walk position in a reasonable way
+    print("Pre-computations complete, executing pre-loop sequence for BEZIER WALK GAIT state...")
+    print("Moving to walk height...")
+
+    # Writing up/down PI parameters for transition from stand height to walk height
+    PID_RAM_Control(bus0,ID_1, pi_up_down)
+    PID_RAM_Control(bus0,ID_2, pi_up_down)
+    PID_RAM_Control(bus0,ID_3, pi_up_down)
+    PID_RAM_Control(bus1,ID_1, pi_up_down)
+    PID_RAM_Control(bus1,ID_2, pi_up_down)
+    PID_RAM_Control(bus1,ID_3, pi_up_down)
+    PID_RAM_Control(bus2,ID_1, pi_up_down)
+    PID_RAM_Control(bus2,ID_2, pi_up_down)
+    PID_RAM_Control(bus2,ID_3, pi_up_down)
+    PID_RAM_Control(bus3,ID_1, pi_up_down)
+    PID_RAM_Control(bus3,ID_2, pi_up_down)
+    PID_RAM_Control(bus3,ID_3, pi_up_down)
+    time.sleep(0.1) # Short sleep to ensure PI parameters are written before sending position commands
+
+    SWH_Statement = True
+    # Note start time
+    start_time = cycle_start = current_time = time.monotonic()
+    # Run until transition is done
+    while SWH_Statement:
+        # Time Management
+        current_time = time.monotonic()
+        elapsed_cycle = current_time - cycle_start
+        if elapsed_cycle >= total_time_SWH:
+            SWH_Statement = False
+            continue
+
+        # Find closest value in t to elapsed in current cycle
+        index = min(int(elapsed_cycle / dt), len(t_SWH) - 1)
+
+        # Send position control commands to motors for current time step
+        Position_Control(bus0, ID_1, Theta_FL_SWH[index, 0], Theta_dot_FL_SWH[0, index])
+        Position_Control(bus0, ID_2, Theta_FL_SWH[index, 1], Theta_dot_FL_SWH[1, index])
+        Position_Control(bus0, ID_3, Theta_FL_SWH[index, 2], Theta_dot_FL_SWH[2, index])
+        Position_Control(bus1, ID_1, Theta_FR_SWH[index, 0], Theta_dot_FR_SWH[0, index])
+        Position_Control(bus1, ID_2, Theta_FR_SWH[index, 1], Theta_dot_FR_SWH[1, index])
+        Position_Control(bus1, ID_3, Theta_FR_SWH[index, 2], Theta_dot_FR_SWH[2, index])
+        Position_Control(bus2, ID_1, Theta_HL_SWH[index, 0], Theta_dot_HL_SWH[0, index])
+        Position_Control(bus2, ID_2, Theta_HL_SWH[index, 1], Theta_dot_HL_SWH[1, index])
+        Position_Control(bus2, ID_3, Theta_HL_SWH[index, 2], Theta_dot_HL_SWH[2, index])
+        Position_Control(bus3, ID_1, Theta_HR_SWH[index, 0], Theta_dot_HR_SWH[0, index])
+        Position_Control(bus3, ID_2, Theta_HR_SWH[index, 1], Theta_dot_HR_SWH[1, index])
+        Position_Control(bus3, ID_3, Theta_HR_SWH[index, 2], Theta_dot_HR_SWH[2, index])
+
+    time.sleep(1) # Sleep for a short time to ensure transition to walk height is complete before continuing, adjust as needed
+
+    # Move to walk start position
+    print("Moved to walk height, moving to walk start position...")
+
+    print("Writing PI parameters to motors...")
+    PID_RAM_Control(bus0,ID_1, pi_bezier_walk)
+    PID_RAM_Control(bus0,ID_2, pi_bezier_walk)
+    PID_RAM_Control(bus0,ID_3, pi_bezier_walk)
+    PID_RAM_Control(bus1,ID_1, pi_bezier_walk)
+    PID_RAM_Control(bus1,ID_2, pi_bezier_walk)
+    PID_RAM_Control(bus1,ID_3, pi_bezier_walk)
+    PID_RAM_Control(bus2,ID_1, pi_bezier_walk)  
+    PID_RAM_Control(bus2,ID_2, pi_bezier_walk)
+    PID_RAM_Control(bus2,ID_3, pi_bezier_walk)
+    PID_RAM_Control(bus3,ID_1, pi_bezier_walk)
+    PID_RAM_Control(bus3,ID_2, pi_bezier_walk)
+    PID_RAM_Control(bus3,ID_3, pi_bezier_walk)
+    time.sleep(0.1) # Sleep for a short time to ensure parameters are written before starting loop, adjust as needed
+
+    STW_Statement = True
+    # Note start time
+    start_time = cycle_start = current_time = time.monotonic()
+    # Run until transition is done
+    while STW_Statement:
+        # Time Management
+        current_time = time.monotonic()
+        elapsed_cycle = current_time - cycle_start
+        if elapsed_cycle >= total_time_STW_with_transfer:
+            STW_Statement = False
+            continue
+
+        # Find closest value in t to elapsed in current cycle
+        index = min(int(elapsed_cycle / dt), len(t_Stand_To_Walk_With_Transfer) - 1)
+
+        # Send position control commands to motors for current time step
+        Position_Control(bus0, ID_1, Theta_FL_STW[index, 0], Theta_dot_FL_STW[0, index])
+        Position_Control(bus0, ID_2, Theta_FL_STW[index, 1], Theta_dot_FL_STW[1, index])
+        Position_Control(bus0, ID_3, Theta_FL_STW[index, 2], Theta_dot_FL_STW[2, index])
+        Position_Control(bus1, ID_1, Theta_FR_STW[index, 0], Theta_dot_FR_STW[0, index])
+        Position_Control(bus1, ID_2, Theta_FR_STW[index, 1], Theta_dot_FR_STW[1, index])
+        Position_Control(bus1, ID_3, Theta_FR_STW[index, 2], Theta_dot_FR_STW[2, index])
+        Position_Control(bus2, ID_1, Theta_HL_STW[index, 0], Theta_dot_HL_STW[0, index])
+        Position_Control(bus2, ID_2, Theta_HL_STW[index, 1], Theta_dot_HL_STW[1, index])
+        Position_Control(bus2, ID_3, Theta_HL_STW[index, 2], Theta_dot_HL_STW[2, index])
+        Position_Control(bus3, ID_1, Theta_HR_STW[index, 0], Theta_dot_HR_STW[0, index])
+        Position_Control(bus3, ID_2, Theta_HR_STW[index, 1], Theta_dot_HR_STW[1, index])
+        Position_Control(bus3, ID_3, Theta_HR_STW[index, 2], Theta_dot_HR_STW[2, index])
+
+    time.sleep(1) # Sleep for a short time to ensure transition to walk start position is complete before starting loop, adjust as needed
+
+    # Main loop for BEZIER WALK GAIT state
+    print("Pre-loop sequence complete, starting BEZIER WALK GAIT loop...")
+    print("Press 'S' to switch to standing pose - Press ctrl+c in terminal for shutdown")
+
+    # Note start time
+    start_time = cycle_start = current_time = time.monotonic()
+    try:
+        while True:
+            # Loop time managment (if needed)
+            current_time = time.monotonic()
+            elapsed_cycle = current_time - cycle_start # Elapsed time in current cycle
+            #elapsed_total = current_time - start_time  # Elapsed time since start of program
+            # Check if current cycle is over -> start new cycle
+            if elapsed_cycle >= total_time_with_transfer:
+                cycle_start += total_time_with_transfer # Force next cycle start time to be exactly total trajectory time after previous cycle start time to avoid drift
+                # Check if state has been changed, if so exit this state function to switch to new state
+                with lock:
+                    if State != "BEZIER WALK GAIT":  # Check if state has been changed, if so exit this state function to switch to new state
+                        print("State change detected, exiting WALK state function")
+                        break
+                continue
+
+            # Find closest value in t to elapsed in current cycle
+            index = min(int(elapsed_cycle / dt), len(t_with_transfer) - 1)
+            
+            # Send position control commands to motors for current time step
+            Position_Control(bus0, ID_1, Theta_FL[index, 0], Theta_dot_FL[0, index])
+            Position_Control(bus0, ID_2, Theta_FL[index, 1], Theta_dot_FL[1, index])
+            Position_Control(bus0, ID_3, Theta_FL[index, 2], Theta_dot_FL[2, index])
+            Position_Control(bus1, ID_1, Theta_FR[index, 0], Theta_dot_FR[0, index])
+            Position_Control(bus1, ID_2, Theta_FR[index, 1], Theta_dot_FR[1, index])
+            Position_Control(bus1, ID_3, Theta_FR[index, 2], Theta_dot_FR[2, index])
+            Position_Control(bus2, ID_1, Theta_HL[index, 0], Theta_dot_HL[0, index])
+            Position_Control(bus2, ID_2, Theta_HL[index, 1], Theta_dot_HL[1, index])
+            Position_Control(bus2, ID_3, Theta_HL[index, 2], Theta_dot_HL[2, index])
+            Position_Control(bus3, ID_1, Theta_HR[index, 0], Theta_dot_HR[0, index])
+            Position_Control(bus3, ID_2, Theta_HR[index, 1], Theta_dot_HR[1, index])
+            Position_Control(bus3, ID_3, Theta_HR[index, 2], Theta_dot_HR[2, index])
+
+    except KeyboardInterrupt:
+        raise # Just raise the exception to be caught in the main loop try-except block for shutdown
+    
+    # Move to walk height
+    print("Moving to walk height...")
+
+    STW_Statement = True
+    # Note start time
+    start_time = cycle_start = current_time = time.monotonic()
+    # Run until transition is done
+    while STW_Statement:
+        # Time Management
+        current_time = time.monotonic()
+        elapsed_cycle = current_time - cycle_start
+        if elapsed_cycle >= total_time_STW_with_transfer:
+            STW_Statement = False
+            continue
+
+        # Find closest value in t to elapsed in current cycle
+        index = min(int(elapsed_cycle / dt), len(t_Stand_To_Walk_With_Transfer) - 1)
+
+        # Send position control commands to motors for current time step
+        Position_Control(bus0, ID_1, Theta_FL_STW_Return[index, 0], Theta_dot_FL_STW_Return[0, index])
+        Position_Control(bus0, ID_2, Theta_FL_STW_Return[index, 1], Theta_dot_FL_STW_Return[1, index])
+        Position_Control(bus0, ID_3, Theta_FL_STW_Return[index, 2], Theta_dot_FL_STW_Return[2, index])
+        Position_Control(bus1, ID_1, Theta_FR_STW_Return[index, 0], Theta_dot_FR_STW_Return[0, index])
+        Position_Control(bus1, ID_2, Theta_FR_STW_Return[index, 1], Theta_dot_FR_STW_Return[1, index])
+        Position_Control(bus1, ID_3, Theta_FR_STW_Return[index, 2], Theta_dot_FR_STW_Return[2, index])
+        Position_Control(bus2, ID_1, Theta_HL_STW_Return[index, 0], Theta_dot_HL_STW_Return[0, index])
+        Position_Control(bus2, ID_2, Theta_HL_STW_Return[index, 1], Theta_dot_HL_STW_Return[1, index])
+        Position_Control(bus2, ID_3, Theta_HL_STW_Return[index, 2], Theta_dot_HL_STW_Return[2, index])
+        Position_Control(bus3, ID_1, Theta_HR_STW_Return[index, 0], Theta_dot_HR_STW_Return[0, index])
+        Position_Control(bus3, ID_2, Theta_HR_STW_Return[index, 1], Theta_dot_HR_STW_Return[1, index])
+        Position_Control(bus3, ID_3, Theta_HR_STW_Return[index, 2], Theta_dot_HR_STW_Return[2, index])
+
+    time.sleep(1) # Sleep for a short time to ensure transition to stand height position is complete before continuing, adjust as needed
+
+    print("Moved to walk height, moving to standing pose")
+    # Writing up/down PI parameters for transition from walk height to stand height
+    PID_RAM_Control(bus0,ID_1, pi_up_down)
+    PID_RAM_Control(bus0,ID_2, pi_up_down)
+    PID_RAM_Control(bus0,ID_3, pi_up_down)
+    PID_RAM_Control(bus1,ID_1, pi_up_down)
+    PID_RAM_Control(bus1,ID_2, pi_up_down)
+    PID_RAM_Control(bus1,ID_3, pi_up_down)
+    PID_RAM_Control(bus2,ID_1, pi_up_down)
+    PID_RAM_Control(bus2,ID_2, pi_up_down)
+    PID_RAM_Control(bus2,ID_3, pi_up_down)
+    PID_RAM_Control(bus3,ID_1, pi_up_down)
+    PID_RAM_Control(bus3,ID_2, pi_up_down)
+    PID_RAM_Control(bus3,ID_3, pi_up_down)
+    time.sleep(0.1) # Short sleep to ensure PI parameters are written before sending position commands
+
+    SWH_Statement = True
+    # Note start time
+    start_time = cycle_start = current_time = time.monotonic()
+    # Run until transition is done
+    while SWH_Statement:
+        # Time Management
+        current_time = time.monotonic()
+        elapsed_cycle = current_time - cycle_start
+        if elapsed_cycle >= total_time_SWH:
+            SWH_Statement = False
+            continue
+
+        # Find closest value in t to elapsed in current cycle
+        index = min(int(elapsed_cycle / dt), len(t_SWH) - 1)
+
+        # Send position control commands to motors for current time step
+        Position_Control(bus0, ID_1, Theta_FL_SWH_Return[index, 0], Theta_dot_FL_SWH_Return[0, index])
+        Position_Control(bus0, ID_2, Theta_FL_SWH_Return[index, 1], Theta_dot_FL_SWH_Return[1, index])
+        Position_Control(bus0, ID_3, Theta_FL_SWH_Return[index, 2], Theta_dot_FL_SWH_Return[2, index])
+        Position_Control(bus1, ID_1, Theta_FR_SWH_Return[index, 0], Theta_dot_FR_SWH_Return[0, index])
+        Position_Control(bus1, ID_2, Theta_FR_SWH_Return[index, 1], Theta_dot_FR_SWH_Return[1, index])
+        Position_Control(bus1, ID_3, Theta_FR_SWH_Return[index, 2], Theta_dot_FR_SWH_Return[2, index])
+        Position_Control(bus2, ID_1, Theta_HL_SWH_Return[index, 0], Theta_dot_HL_SWH_Return[0, index])
+        Position_Control(bus2, ID_2, Theta_HL_SWH_Return[index, 1], Theta_dot_HL_SWH_Return[1, index])
+        Position_Control(bus2, ID_3, Theta_HL_SWH_Return[index, 2], Theta_dot_HL_SWH_Return[2, index])
+        Position_Control(bus3, ID_1, Theta_HR_SWH_Return[index, 0], Theta_dot_HR_SWH_Return[0, index])
+        Position_Control(bus3, ID_2, Theta_HR_SWH_Return[index, 1], Theta_dot_HR_SWH_Return[1, index])
+        Position_Control(bus3, ID_3, Theta_HR_SWH_Return[index, 2], Theta_dot_HR_SWH_Return[2, index])
+
+    time.sleep(0.1) # Sleep for a short time to ensure transition to stand height is complete before continuing, adjust as needed
+
+    print("Returned to standing pose at the end of BEZIER WALK GAIT state")
+
 ### SCRIPT START ###
 ## PRECOMPUTATIONS ##
 print("Performing pre-computations...")
@@ -848,7 +1445,7 @@ Position_Control(bus3,ID_1,0,30)
 Position_Control(bus3,ID_2,0,30)
 Position_Control(bus3,ID_3,0,30)
 
-time.sleep(5)
+time.sleep(8)
 
 # Move to standing position
 print("Moved to zero position, moving to standing position...")
@@ -875,9 +1472,6 @@ main_listener = keyboard.Listener(on_press=main_on_press)
 main_listener.start()  # Start the listener in a separate thread
 
 print("Loop started - Press ctrl+c in terminal for shutdown")
-
-# Note start time
-#start_time = cycle_start = current_time = time.monotonic()
 
 try:
     while True:
@@ -926,7 +1520,12 @@ try:
                 State = "STAND" # After finishing the state function, switch back to standing pose state
             returned_from_state = True
         elif current_state == "BEZIER WALK GAIT":
-            Bezier_Walk_State(bus0, bus1, bus2, bus3, ID_1, ID_2, ID_3)
+            Bezier_Walk_State(bus0, bus1, bus2, bus3, ID_1, ID_2, ID_3, Direction="Forward")
+            with lock:
+                State = "STAND" # After finishing the state function, switch back to standing pose state
+            returned_from_state = True
+        elif current_state == "REVERSE BEZIER WALK GAIT":
+            Bezier_Walk_State(bus0, bus1, bus2, bus3, ID_1, ID_2, ID_3, Direction="Backward")
             with lock:
                 State = "STAND" # After finishing the state function, switch back to standing pose state
             returned_from_state = True
