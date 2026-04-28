@@ -715,9 +715,9 @@ def Bezier_Walk_State(bus0, bus1, bus2, bus3, ID_1, ID_2, ID_3, Direction = "For
     # Time parameters
     dt = 0.005 # seconds (200 Hz)
 
-    Swing_Time_Scalar = 1    # [s] swing phase duration
+    Swing_Time_Scalar = 0.8    # [s] swing phase duration
     Stand_Time_Scalar  = 3 * Swing_Time_Scalar # [s] stand phase duration
-    Transfer_Time_Scalar = 1.25 # [s] duration of the COM transfer
+    Transfer_Time_Scalar = 1 # [s] duration of the COM transfer
 
     total_time = Swing_Time_Scalar + Stand_Time_Scalar
     Total_Time_Steps = int(total_time / dt)
@@ -1160,12 +1160,12 @@ def Bezier_Walk_State(bus0, bus1, bus2, bus3, ID_1, ID_2, ID_3, Direction = "For
                 cycle_start += total_time_with_transfer # Force next cycle start time to be exactly total trajectory time after previous cycle start time to avoid drift
                 # Check if state has been changed, if so exit this state function to switch to new state
                 with lock:
-                    if State != "BEZIER WALK GAIT":  # Check if state has been changed, if so exit this state function to switch to new state
+                    if State != "BEZIER WALK GAIT" and State != "REVERSE BEZIER WALK GAIT":  # Check if state has been changed, if so exit this state function to switch to new state
                         print("State change detected, exiting WALK state function")
                         break
                 continue
 
-            # Find closest value in t to elapsed in current cycle
+            # Find closest value in t to elapsed in current cyclew
             index = min(int(elapsed_cycle / dt), len(t_with_transfer) - 1)
             
             # Send position control commands to motors for current time step

@@ -57,9 +57,9 @@ def Bezier_Control_Points():
     # By Dong Jin Hyun, et al. 2014
     X = np.array([-0.200, -0.2805, -0.300, -0.300, -0.300, 0, 0, 0, 0.3032, 0.3032, 0.2826, 0.200]) # [m]
     Y = np.array([0.500,  0.500,   0.3611, 0.3611, 0.3611, 0.3611, 0.3611, 0.3214, 0.3214, 0.3214, 0.500, 0.500]) # [m]
-    Scaling_Factor_X = 0.3
-    Scaling_Factor_Y = 0.4
-    Offset = 0.24
+    Scaling_Factor_X = 0.5
+    Scaling_Factor_Y = 0.5
+    Offset = 0.19
     # Note that the height of stand to swing phase transition is at H = Scaling_Factor_Y * 0.500 + Offset
     # For example, Scaling_factor_Y = 0.6 and Offset = 0.16 gives transition at H = 0.46 m
     # This should always be below 0.48 m 
@@ -621,19 +621,19 @@ def Building_Stand_To_Walk_Trajectories(Swing_Time_Scalar, Swing_Time_Steps, Pha
     # Define Bezier control points for each legs swing phase (Bezier frame)
     # Front Left Leg:
     c_kX_FL = np.array([0, -0.1*FL_end_x, -0.2*FL_end_x, -0.2*FL_end_x, 0.5*FL_end_x, 0.5*FL_end_x, 1.2*FL_end_x, 1.2*FL_end_x, 1.1*FL_end_x, FL_end_x]) # [m]
-    c_kY_FL = np.array([0.44, 0.44, 0.38, 0.38, 0.40, 0.40, 0.38, 0.38, 0.44, 0.44]) # [m]
+    c_kY_FL = np.array([0.44, 0.44, 0.37, 0.37, 0.39, 0.39, 0.37, 0.37, 0.44, 0.44]) # [m]
     c_k_FL = np.column_stack((c_kX_FL, c_kY_FL)) # Control points for FL leg in Bezier frame
     # Front Right Leg:
     c_kX_FR = np.array([0, -0.1*FR_end_x, -0.2*FR_end_x, -0.2*FR_end_x, 0.5*FR_end_x, 0.5*FR_end_x, 1.2*FR_end_x, 1.2*FR_end_x, 1.1*FR_end_x, FR_end_x]) # [m]
-    c_kY_FR = np.array([0.44, 0.44, 0.38, 0.38, 0.40, 0.40, 0.38, 0.38, 0.44, 0.44]) # [m]
+    c_kY_FR = np.array([0.44, 0.44, 0.37, 0.37, 0.39, 0.39, 0.37, 0.37, 0.44, 0.44]) # [m]
     c_k_FR = np.column_stack((c_kX_FR, c_kY_FR)) # Control points for FR leg in Bezier frame
     # Hind Left Leg:
     c_kX_HL = np.array([0, -0.1*HL_end_x, -0.2*HL_end_x, -0.2*HL_end_x, 0.5*HL_end_x, 0.5*HL_end_x, 1.2*HL_end_x, 1.2*HL_end_x, 1.1*HL_end_x, HL_end_x]) # [m]
-    c_kY_HL = np.array([0.44, 0.44, 0.38, 0.38, 0.40, 0.40, 0.38, 0.38, 0.44, 0.44]) # [m]
+    c_kY_HL = np.array([0.44, 0.44, 0.37, 0.37, 0.39, 0.39, 0.37, 0.37, 0.44, 0.44]) # [m]
     c_k_HL = np.column_stack((c_kX_HL, c_kY_HL)) # Control points for HL leg in Bezier frame
     # Hind Right Leg:
     c_kX_HR = np.array([0, -0.1*HR_end_x, -0.2*HR_end_x, -0.2*HR_end_x, 0.5*HR_end_x, 0.5*HR_end_x, 1.2*HR_end_x, 1.2*HR_end_x, 1.1*HR_end_x, HR_end_x]) # [m]
-    c_kY_HR = np.array([0.44, 0.44, 0.38, 0.38, 0.40, 0.40, 0.38, 0.38, 0.44, 0.44]) # [m]
+    c_kY_HR = np.array([0.44, 0.44, 0.37, 0.37, 0.39, 0.39, 0.37, 0.37, 0.44, 0.44]) # [m]
     c_k_HR = np.column_stack((c_kX_HR, c_kY_HR)) # Control points for HR leg in Bezier frame
 
     # Generate the swing phase for each leg
@@ -720,7 +720,7 @@ def Building_Stand_To_Walk_Trajectories(Swing_Time_Scalar, Swing_Time_Steps, Pha
     t_with_transfer = np.linspace(0, 4 * Swing_Time_Scalar + 5 * Stand_To_Walk_Transfer_Time, Stand_To_Walk_Time_Steps_With_Transfer)
 
     # offsets for stand to walk phase
-    x_offset = 0.04
+    x_offset = 0.05
     y_offset = 0.045
 
     # Preallocate new trajectory arrays with transfer
@@ -827,9 +827,6 @@ def Building_Stand_To_Walk_Trajectories(Swing_Time_Scalar, Swing_Time_Steps, Pha
     HL_Stand_To_Walk_Velocities_With_Transfer[:, Swing_Start_Index_with_transfer['HR'] : Swing_Start_Index_with_transfer['HR'] + Swing_Time_Steps] = HL_Stand_To_Walk_Velocities[:, Swing_Start_Index['HR'] : Swing_Start_Index['HR'] + Swing_Time_Steps]
     HL_Stand_To_Walk_Velocities_With_Transfer[:, Swing_Start_Index_with_transfer['FR'] : Swing_Start_Index_with_transfer['FR'] + Swing_Time_Steps] = HL_Stand_To_Walk_Velocities[:, Swing_Start_Index['FR'] : Swing_Start_Index['FR'] + Swing_Time_Steps]
     HL_Stand_To_Walk_Velocities_With_Transfer[:, Swing_Start_Index_with_transfer['HL'] : Swing_Start_Index_with_transfer['HL'] + Swing_Time_Steps] = HL_Stand_To_Walk_Velocities[:, Swing_Start_Index['HL'] : Swing_Start_Index['HL'] + Swing_Time_Steps]
-
-
-
 
     ## Velocities: Transfer phases ##
     # Compute cos interpolation derivatives from previous position to next position for all transfer phases for FL leg and allocate in new trajectory array
