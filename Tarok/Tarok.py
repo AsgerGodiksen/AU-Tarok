@@ -1028,20 +1028,20 @@ def Bezier_Walk_State(bus0, bus1, bus2, bus3, ID_1, ID_2, ID_3, Direction = "For
     Theta_FR_SWH_Return = Theta_FR_SWH[::-1, :]
     Theta_HL_SWH_Return = Theta_HL_SWH[::-1, :]
     Theta_HR_SWH_Return = Theta_HR_SWH[::-1, :]
-    Theta_dot_FL_SWH_Return = Theta_dot_FL_SWH[::-1, :]
-    Theta_dot_FR_SWH_Return = Theta_dot_FR_SWH[::-1, :]
-    Theta_dot_HL_SWH_Return = Theta_dot_HL_SWH[::-1, :]
-    Theta_dot_HR_SWH_Return = Theta_dot_HR_SWH[::-1, :]
+    Theta_dot_FL_SWH_Return = Theta_dot_FL_SWH[:, ::-1]
+    Theta_dot_FR_SWH_Return = Theta_dot_FR_SWH[:, ::-1]
+    Theta_dot_HL_SWH_Return = Theta_dot_HL_SWH[:, ::-1]
+    Theta_dot_HR_SWH_Return = Theta_dot_HR_SWH[:, ::-1]
 
     # Walk start to walk height
     Theta_FL_STW_Return = Theta_FL_STW[::-1, :]
     Theta_FR_STW_Return = Theta_FR_STW[::-1, :]
     Theta_HL_STW_Return = Theta_HL_STW[::-1, :]
     Theta_HR_STW_Return = Theta_HR_STW[::-1, :]
-    Theta_dot_FL_STW_Return = Theta_dot_FL_STW[::-1, :]
-    Theta_dot_FR_STW_Return = Theta_dot_FR_STW[::-1, :]
-    Theta_dot_HL_STW_Return = Theta_dot_HL_STW[::-1, :]
-    Theta_dot_HR_STW_Return = Theta_dot_HR_STW[::-1, :]
+    Theta_dot_FL_STW_Return = Theta_dot_FL_STW[:, ::-1]
+    Theta_dot_FR_STW_Return = Theta_dot_FR_STW[:, ::-1]
+    Theta_dot_HL_STW_Return = Theta_dot_HL_STW[:, ::-1]
+    Theta_dot_HR_STW_Return = Theta_dot_HR_STW[:, ::-1]
 
     ### PRE-LOOP ###   
     # Pre-loop sequence to move to initial walk position in a reasonable way
