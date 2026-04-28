@@ -312,49 +312,51 @@ Theta_dot_HR_SWH = np.abs(np.rad2deg(Theta_dot_HR_SWH))
 ### WALK HEIGHT TO WALK START GENERATION ###
 # ----------------------------- #
 
-STW_Swing_Time_Scalar = 0.4 # [s] duration of swing phase for transition from stand height to walk start
+STW_Swing_Time_Scalar = 2.5 # [s] duration of swing phase for transition from stand height to walk start
 t_swing_STW = np.linspace(0, STW_Swing_Time_Scalar - dt, int(STW_Swing_Time_Scalar / dt)) # Time array for swing phase
 STW_Swing_Time_Steps = len(t_swing_STW) 
 total_time_STW = 4 * STW_Swing_Time_Scalar
 t_STW = np.linspace(0, total_time_STW - dt, int(total_time_STW / dt)) # Full time array for transition from stand height to walk start
 
-# Trajectory generation (Bezier curve in body frame)
-FL_Stand_To_Walk, FR_Stand_To_Walk, HL_Stand_To_Walk, HR_Stand_To_Walk, FL_Stand_To_Walk_Velocities, FR_Stand_To_Walk_Velocities, HL_Stand_To_Walk_Velocities, HR_Stand_To_Walk_Velocities = Building_Stand_To_Walk_Trajectories(
+# Trajectory generation
+t_Stand_To_Walk_With_Transfer, FL_Stand_To_Walk, FR_Stand_To_Walk, HL_Stand_To_Walk, HR_Stand_To_Walk, FL_Stand_To_Walk_Velocities, FR_Stand_To_Walk_Velocities, HL_Stand_To_Walk_Velocities, HR_Stand_To_Walk_Velocities = Building_Stand_To_Walk_Trajectories(
                                     STW_Swing_Time_Scalar, 
-                                    STW_Swing_Time_Steps, 
+                                    STW_Swing_Time_Steps,
+                                    PHASE_OFFSET, 
                                     FL_Bezier_Trajectory_With_Transfer[0, 0], 
                                     FR_Bezier_Trajectory_With_Transfer[0, 0], 
                                     HL_Bezier_Trajectory_With_Transfer[0, 0], 
                                     HR_Bezier_Trajectory_With_Transfer[0, 0])
+total_time_STW_with_transfer = t_Stand_To_Walk_With_Transfer[-1]
 
 ### TRANSFORMATIONS ###
 # Transform the stand to walk trajectory from Body Frame to Leg Base Frames
-P_FL_Base_STW = np.array([T0_B(FL_Stand_To_Walk[:, i].reshape((3, 1)), 'FL') for i in range((len(t_STW)))])
-P_FR_Base_STW = np.array([T0_B(FR_Stand_To_Walk[:, i].reshape((3, 1)), 'FR') for i in range((len(t_STW)))])
-P_HL_Base_STW = np.array([T0_B(HL_Stand_To_Walk[:, i].reshape((3, 1)), 'HL') for i in range((len(t_STW)))])
-P_HR_Base_STW = np.array([T0_B(HR_Stand_To_Walk[:, i].reshape((3, 1)), 'HR') for i in range((len(t_STW)))])
+P_FL_Base_STW = np.array([T0_B(FL_Stand_To_Walk[:, i].reshape((3, 1)), 'FL') for i in range((len(t_Stand_To_Walk_With_Transfer)))])
+P_FR_Base_STW = np.array([T0_B(FR_Stand_To_Walk[:, i].reshape((3, 1)), 'FR') for i in range((len(t_Stand_To_Walk_With_Transfer)))])
+P_HL_Base_STW = np.array([T0_B(HL_Stand_To_Walk[:, i].reshape((3, 1)), 'HL') for i in range((len(t_Stand_To_Walk_With_Transfer)))])
+P_HR_Base_STW = np.array([T0_B(HR_Stand_To_Walk[:, i].reshape((3, 1)), 'HR') for i in range((len(t_Stand_To_Walk_With_Transfer)))])
 
 # Transform desired end-effector velocity from body frame to leg base frames
-V_FL_base_STW = np.array([R0_B(FL_Stand_To_Walk_Velocities[:, i].reshape((3, 1)), 'FL') for i in range((len(t_STW)))])
-V_FR_base_STW = np.array([R0_B(FR_Stand_To_Walk_Velocities[:, i].reshape((3, 1)), 'FR') for i in range((len(t_STW)))])
-V_HL_base_STW = np.array([R0_B(HL_Stand_To_Walk_Velocities[:, i].reshape((3, 1)), 'HL') for i in range((len(t_STW)))])
-V_HR_base_STW = np.array([R0_B(HR_Stand_To_Walk_Velocities[:, i].reshape((3, 1)), 'HR') for i in range((len(t_STW)))])
+V_FL_base_STW = np.array([R0_B(FL_Stand_To_Walk_Velocities[:, i].reshape((3, 1)), 'FL') for i in range((len(t_Stand_To_Walk_With_Transfer)))])
+V_FR_base_STW = np.array([R0_B(FR_Stand_To_Walk_Velocities[:, i].reshape((3, 1)), 'FR') for i in range((len(t_Stand_To_Walk_With_Transfer)))])
+V_HL_base_STW = np.array([R0_B(HL_Stand_To_Walk_Velocities[:, i].reshape((3, 1)), 'HL') for i in range((len(t_Stand_To_Walk_With_Transfer)))])
+V_HR_base_STW = np.array([R0_B(HR_Stand_To_Walk_Velocities[:, i].reshape((3, 1)), 'HR') for i in range((len(t_Stand_To_Walk_With_Transfer)))])
 
 ### Kinematics ###
 # Determine joint angles for all 4 legs using inverse kinematics
-Theta_FL_STW = np.array([Inverse_Kinematics(P_FL_Base_STW[i], 'FL') for i in range((len(t_STW)))]) # Shape (num_time_steps, 3), containing theta1, theta2, theta3 for each time step
-Theta_FR_STW = np.array([Inverse_Kinematics(P_FR_Base_STW[i], 'FR') for i in range((len(t_STW)))]) # Shape (num_time_steps, 3), containing theta1, theta2, theta3 for each time step
-Theta_HL_STW = np.array([Inverse_Kinematics(P_HL_Base_STW[i], 'HL') for i in range((len(t_STW)))]) # Shape (num_time_steps, 3), containing theta1, theta2, theta3 for each time step
-Theta_HR_STW = np.array([Inverse_Kinematics(P_HR_Base_STW[i], 'HR') for i in range((len(t_STW)))]) # Shape (num_time_steps, 3), containing theta1, theta2, theta3 for each time step
+Theta_FL_STW = np.array([Inverse_Kinematics(P_FL_Base_STW[i], 'FL') for i in range((len(t_Stand_To_Walk_With_Transfer)))]) # Shape (num_time_steps, 3), containing theta1, theta2, theta3 for each time step
+Theta_FR_STW = np.array([Inverse_Kinematics(P_FR_Base_STW[i], 'FR') for i in range((len(t_Stand_To_Walk_With_Transfer)))]) # Shape (num_time_steps, 3), containing theta1, theta2, theta3 for each time step
+Theta_HL_STW = np.array([Inverse_Kinematics(P_HL_Base_STW[i], 'HL') for i in range((len(t_Stand_To_Walk_With_Transfer)))]) # Shape (num_time_steps, 3), containing theta1, theta2, theta3 for each time step
+Theta_HR_STW = np.array([Inverse_Kinematics(P_HR_Base_STW[i], 'HR') for i in range((len(t_Stand_To_Walk_With_Transfer)))]) # Shape (num_time_steps, 3), containing theta1, theta2, theta3 for each time step
 
 # Determine joint velocities for all 4 legs using Jacobian
 # Damped least squares inverse to avoid singularities - theta_dot = (J^T*J + damp^2*I)^-1 * J^T * cartesian_velocity 
-Theta_dot_FL_STW = np.zeros((3, len(t_STW)))  # Initialize joint velocity array
-Theta_dot_FR_STW = np.zeros((3, len(t_STW)))  # Initialize joint velocity array
-Theta_dot_HL_STW = np.zeros((3, len(t_STW)))  # Initialize joint velocity array
-Theta_dot_HR_STW = np.zeros((3, len(t_STW)))  # Initialize joint velocity array
+Theta_dot_FL_STW = np.zeros((3, len(t_Stand_To_Walk_With_Transfer)))  # Initialize joint velocity array
+Theta_dot_FR_STW = np.zeros((3, len(t_Stand_To_Walk_With_Transfer)))  # Initialize joint velocity array
+Theta_dot_HL_STW = np.zeros((3, len(t_Stand_To_Walk_With_Transfer)))  # Initialize joint velocity array
+Theta_dot_HR_STW = np.zeros((3, len(t_Stand_To_Walk_With_Transfer)))  # Initialize joint velocity array
 damp = 0.001  # Damping factor
-for i in range((int(total_time_STW / dt))):
+for i in range((int(total_time_STW_with_transfer / dt))):
     Jac_i_FL = Jacobian(Theta_FL_STW[i, 0], Theta_FL_STW[i, 1], Theta_FL_STW[i, 2], 'FL')
     Jac_i_FR = Jacobian(Theta_FR_STW[i, 0], Theta_FR_STW[i, 1], Theta_FR_STW[i, 2], 'FR')
     Jac_i_HL = Jacobian(Theta_HL_STW[i, 0], Theta_HL_STW[i, 1], Theta_HL_STW[i, 2], 'HL')
@@ -538,12 +540,12 @@ while STW_Statement:
     # Time Management
     current_time = time.monotonic()
     elapsed_cycle = current_time - cycle_start
-    if elapsed_cycle >= total_time_STW:
+    if elapsed_cycle >= total_time_STW_with_transfer:
         STW_Statement = False
         continue
 
     # Find closest value in t to elapsed in current cycle
-    index = min(int(elapsed_cycle / dt), len(t_with_transfer) - 1)
+    index = min(int(elapsed_cycle / dt), len(t_Stand_To_Walk_With_Transfer) - 1)
 
     # Send position control commands to motors for current time step
     Position_Control(bus0, ID_1, Theta_FL_STW[index, 0], Theta_dot_FL_STW[0, index])
