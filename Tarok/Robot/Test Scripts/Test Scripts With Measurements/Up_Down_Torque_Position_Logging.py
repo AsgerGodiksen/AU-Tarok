@@ -1,5 +1,5 @@
-# Script for up/down movement with torque AND position data logging for all 12 motors.
-# Based on Up_Down_Torque_Logging.py.
+# Script for up/down movement with torque, position AND command data logging for all 12 motors.
+# Based on Up_Down_Torque_Position_Logging.py.
 #
 # Each motor step does two CAN round trips:
 #   1. 0xA4  — position command → torque decoded from reply bytes [2-3]
@@ -9,8 +9,9 @@
 #
 # CSV columns:
 #   Timestamp (s), Trajectory Index,
-#   FL_J1_Torque .. HR_J3_Torque  (Nm, from 0xA4 reply),
-#   FL_J1_Pos    .. HR_J3_Pos     (deg, output shaft, multi-turn, from 0x92 reply)
+#   FL_J1_Torque .. HR_J3_Torque  (Nm,  from 0xA4 reply),
+#   FL_J1_Pos    .. HR_J3_Pos     (deg, output shaft, multi-turn, from 0x92 reply),
+#   FL_J1_Cmd    .. HR_J3_Cmd     (deg, analytical trajectory command sent to motor)
 
 import sys
 import os
@@ -136,7 +137,7 @@ def safe_position(fb, i):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Pre-computations  (identical to Up_Down_Torque_Logging.py)
+# Pre-computations  (identical to Up_Down_Torque_Position_Logging.py)
 # ─────────────────────────────────────────────────────────────────────────────
 print("Performing pre-computations...")
 
@@ -237,27 +238,61 @@ for bus in [bus0, bus1, bus2, bus3]:
 # Data logging setup
 # ─────────────────────────────────────────────────────────────────────────────
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-log_dir = os.path.join(SCRIPT_DIR, "TEST_DATA_PID_UP_DOWN")
+log_dir = os.path.join(SCRIPT_DIR, "TEST_DATA_PID_UP_DOWN_28_04")
 os.makedirs(log_dir, exist_ok=True)
-log_filename = os.path.join(
-    log_dir, f"Up_Down_TorquePos_Log_Test_1_{time.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
-)
+timestamp_str = time.strftime('%Y-%m-%d_%H-%M-%S')
+log_filename = os.path.join(log_dir, f"Up_Down_TorquePos_Log_Test_3_{timestamp_str}.csv")
+pid_filename = os.path.join(log_dir, f"Up_Down_TorquePos_Log_Test_3_{timestamp_str}_PID.txt")
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Read and save PID parameters from all 12 motors
+# ─────────────────────────────────────────────────────────────────────────────
+print("Reading PID parameters from motors...")
+_LEG_BUSES  = [("FL", bus0), ("FR", bus1), ("HL", bus2), ("HR", bus3)]
+_JOINT_IDS  = [("J1", ID_1), ("J2", ID_2), ("J3", ID_3)]
+
+with open(pid_filename, 'w') as _pid_file:
+    _pid_file.write(f"PID Parameters — read {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
+    _pid_file.write("=" * 52 + "\n\n")
+    for leg, bus in _LEG_BUSES:
+        _pid_file.write(f"Leg {leg}\n")
+        _pid_file.write("-" * 30 + "\n")
+        for joint, motor_id in _JOINT_IDS:
+            result = Read_PID(bus, motor_id)
+            if result is not None:
+                pos_kp, pos_ki, spd_kp, spd_ki, torq_kp, torq_ki = result
+                _pid_file.write(f"  {joint} (ID 0x{motor_id:03X}):\n")
+                _pid_file.write(f"    Position Loop : Kp={pos_kp:5.0f}  Ki={pos_ki:5.0f}\n")
+                _pid_file.write(f"    Speed Loop    : Kp={spd_kp:5.0f}  Ki={spd_ki:5.0f}\n")
+                _pid_file.write(f"    Torque Loop   : Kp={torq_kp:5.0f}  Ki={torq_ki:5.0f}\n")
+            else:
+                _pid_file.write(f"  {joint} (ID 0x{motor_id:03X}): no response\n")
+        _pid_file.write("\n")
+
+print(f"PID parameters saved to {os.path.basename(pid_filename)}")
 
 with open(log_filename, 'w', newline='') as csvfile:
     csv.writer(csvfile).writerow([
         "Timestamp (s)", "Trajectory Index",
+        # 12 read torques
         "FL_J1_Torque", "FL_J2_Torque", "FL_J3_Torque",
         "FR_J1_Torque", "FR_J2_Torque", "FR_J3_Torque",
         "HL_J1_Torque", "HL_J2_Torque", "HL_J3_Torque",
         "HR_J1_Torque", "HR_J2_Torque", "HR_J3_Torque",
+        # 12 read positions
         "FL_J1_Pos (deg)", "FL_J2_Pos (deg)", "FL_J3_Pos (deg)",
         "FR_J1_Pos (deg)", "FR_J2_Pos (deg)", "FR_J3_Pos (deg)",
         "HL_J1_Pos (deg)", "HL_J2_Pos (deg)", "HL_J3_Pos (deg)",
         "HR_J1_Pos (deg)", "HR_J2_Pos (deg)", "HR_J3_Pos (deg)",
+        # 12 position commands (analytical trajectory setpoints)
+        "FL_J1_Cmd (deg)", "FL_J2_Cmd (deg)", "FL_J3_Cmd (deg)",
+        "FR_J1_Cmd (deg)", "FR_J2_Cmd (deg)", "FR_J3_Cmd (deg)",
+        "HL_J1_Cmd (deg)", "HL_J2_Cmd (deg)", "HL_J3_Cmd (deg)",
+        "HR_J1_Cmd (deg)", "HR_J2_Cmd (deg)", "HR_J3_Cmd (deg)",
     ])
 
-# Preallocate: timestamp + index + 12 torques + 12 positions = 26 columns
-data = np.zeros((1500000, 26))
+# Preallocate: timestamp + index + 12 torques + 12 positions + 12 commands = 38 columns
+data = np.zeros((1500000, 38))
 data_count = 0
 
 executor = concurrent.futures.ThreadPoolExecutor(max_workers=4)
@@ -278,17 +313,25 @@ for bus, angles in [(bus0, Theta_FL[0]), (bus1, Theta_FR[0]),
     Position_Control(bus, ID_1, angles[0], 30)
     Position_Control(bus, ID_2, angles[1], 30)
     Position_Control(bus, ID_3, angles[2], 30)
-time.sleep(6)
+time.sleep(3)
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Main loop — cyclic up/down trajectory with torque + position logging
+# Main loop — cyclic up/down trajectory with torque + position + command logging
 # ─────────────────────────────────────────────────────────────────────────────
 LOOP_PERIOD = 1.0 / 200.0
-loop_times = []
+NUM_CYCLES  = 3          # robot performs this many up/down cycles then holds still
+loop_times  = []
+cycle_count = 0
+print("SET IN POSITION")
+time.sleep(10)
+print("\nPre-loop sequence complete.")
+print(">>> STARTING in 0.5 seconds — remove your hands! <<<")
+time.sleep(0.5)
 
 print("Pre-loop sequence complete, starting loop...")
-print("Loop started - Press Ctrl+C in terminal for shutdown")
-time.sleep(5)
+print(f"Loop started — robot will complete {NUM_CYCLES} cycles then hold still.")
+print("Press Ctrl+C at any time to shut down.")
+#time.sleep(5)
 start_time = cycle_start = time.monotonic()
 
 try:
@@ -304,6 +347,31 @@ try:
 
         if elapsed_cycle >= total_time:
             cycle_start += total_time
+            cycle_count += 1
+
+            if cycle_count >= NUM_CYCLES:
+                # ── Test complete: logging stops, robot holds start position ──
+                print("\n" + "=" * 54)
+                print(f"  TEST COMPLETE — {NUM_CYCLES} cycles finished.")
+                print("  Data logging has stopped.")
+                print("  Robot is holding the start position.")
+                print("  It is now safe to lift the robot back into the holder.")
+                print("  Press Ctrl+C to shut down the motors.")
+                print("=" * 54 + "\n")
+
+                hold_angles = [
+                    (bus0, Theta_FL[0]),
+                    (bus1, Theta_FR[0]),
+                    (bus2, Theta_HL[0]),
+                    (bus3, Theta_HR[0]),
+                ]
+                while True:
+                    for bus, angles in hold_angles:
+                        Position_Control(bus, ID_1, angles[0], 30)
+                        Position_Control(bus, ID_2, angles[1], 30)
+                        Position_Control(bus, ID_3, angles[2], 30)
+                    time.sleep(0.1)
+
             continue
 
         index = min(int(elapsed_cycle / dt), len(t) - 1)
@@ -319,19 +387,24 @@ try:
         fb_HL = f_HL.result()
         fb_HR = f_HR.result()
 
-        # ── Log torque + position ───────────────────────────────────────────
+        # ── Log torque + position + command ────────────────────────────────
         data[data_count, :] = [
             elapsed_total, index,
-            # Torques (Nm)
+            # 12 read torques (Nm)
             safe_torque(fb_FL, 0), safe_torque(fb_FL, 1), safe_torque(fb_FL, 2),
             safe_torque(fb_FR, 0), safe_torque(fb_FR, 1), safe_torque(fb_FR, 2),
             safe_torque(fb_HL, 0), safe_torque(fb_HL, 1), safe_torque(fb_HL, 2),
             safe_torque(fb_HR, 0), safe_torque(fb_HR, 1), safe_torque(fb_HR, 2),
-            # Positions (deg, output shaft, from single-turn encoder reply)
+            # 12 read positions (deg, output shaft, multi-turn)
             safe_position(fb_FL, 0), safe_position(fb_FL, 1), safe_position(fb_FL, 2),
             safe_position(fb_FR, 0), safe_position(fb_FR, 1), safe_position(fb_FR, 2),
             safe_position(fb_HL, 0), safe_position(fb_HL, 1), safe_position(fb_HL, 2),
             safe_position(fb_HR, 0), safe_position(fb_HR, 1), safe_position(fb_HR, 2),
+            # 12 position commands (deg, analytical trajectory setpoints)
+            Theta_FL[index, 0], Theta_FL[index, 1], Theta_FL[index, 2],
+            Theta_FR[index, 0], Theta_FR[index, 1], Theta_FR[index, 2],
+            Theta_HL[index, 0], Theta_HL[index, 1], Theta_HL[index, 2],
+            Theta_HR[index, 0], Theta_HR[index, 1], Theta_HR[index, 2],
         ]
         data_count += 1
 

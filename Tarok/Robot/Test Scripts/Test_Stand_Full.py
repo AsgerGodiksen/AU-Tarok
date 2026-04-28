@@ -98,7 +98,7 @@ Position_Control(bus3,ID_1,0,30)
 Position_Control(bus3,ID_2,0,30)
 Position_Control(bus3,ID_3,0,30)
 
-time.sleep(6)
+time.sleep(10)
 
 # Move to initial position
 print("Moved to zero position, moving to initial trajectory position...")

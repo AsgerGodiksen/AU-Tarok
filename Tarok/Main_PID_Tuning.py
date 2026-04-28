@@ -60,40 +60,31 @@ Read_PID(bus0,ID_1)
 
 time.sleep(0.5)
 # Parameters for PID Tuning:
-pid_params_1_2 = {
-    'angle_kp':  110,
-    'angle_ki':  40,
-    'speed_kp':  55,
-    'speed_ki':  16,
-    'torque_kp': 55,
-    'torque_ki': 20
-}
-
-pid_params_3 = {
-    'angle_kp':  110,
-    'angle_ki':  40,
-    'speed_kp':  55,
-    'speed_ki':  16,
-    'torque_kp': 55,
-    'torque_ki': 20
+pid_params= {
+    'angle_kp':  120,
+    'angle_ki':  75,
+    'speed_kp':  60,
+    'speed_ki':  105,
+    'torque_kp': 60,
+    'torque_ki': 65
 }
 
 print("Update to new PID parameters USING RAM")
-PID_ROM_Control(bus0,ID_1, pid_params_1_2)
-PID_ROM_Control(bus0,ID_2, pid_params_1_2)
-PID_ROM_Control(bus0,ID_3, pid_params_3)
+PID_ROM_Control(bus0,ID_1, pid_params)
+PID_ROM_Control(bus0,ID_2, pid_params)
+PID_ROM_Control(bus0,ID_3, pid_params)
 
-PID_ROM_Control(bus1,ID_1, pid_params_1_2)
-PID_ROM_Control(bus1,ID_2, pid_params_1_2)
-PID_ROM_Control(bus1,ID_3, pid_params_3)
+PID_ROM_Control(bus1,ID_1, pid_params)
+PID_ROM_Control(bus1,ID_2, pid_params)
+PID_ROM_Control(bus1,ID_3, pid_params)
 
-PID_ROM_Control(bus2,ID_1, pid_params_1_2)
-PID_ROM_Control(bus2,ID_2, pid_params_1_2)
-PID_ROM_Control(bus2,ID_3, pid_params_3)
+PID_ROM_Control(bus2,ID_1, pid_params)
+PID_ROM_Control(bus2,ID_2, pid_params)
+PID_ROM_Control(bus2,ID_3, pid_params)
 
-PID_ROM_Control(bus3,ID_1, pid_params_1_2)
-PID_ROM_Control(bus3,ID_2, pid_params_1_2)
-PID_ROM_Control(bus3,ID_3, pid_params_3)
+PID_ROM_Control(bus3,ID_1, pid_params)
+PID_ROM_Control(bus3,ID_2, pid_params)
+PID_ROM_Control(bus3,ID_3, pid_params)
 time.sleep(1)
 
 

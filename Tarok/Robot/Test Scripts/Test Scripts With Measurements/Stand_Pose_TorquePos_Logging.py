@@ -180,11 +180,11 @@ for bus in [bus0, bus1, bus2, bus3]:
 # Data logging setup
 # ─────────────────────────────────────────────────────────────────────────────
 SCRIPT_DIR   = os.path.dirname(os.path.abspath(__file__))
-log_dir      = os.path.join(SCRIPT_DIR, "TEST_DATA_PID_20_04")
+log_dir      = os.path.join(SCRIPT_DIR, "TEST_DATA_PID_28_04")
 os.makedirs(log_dir, exist_ok=True)
 timestamp_str = time.strftime('%Y-%m-%d_%H-%M-%S')
-log_filename  = os.path.join(log_dir, f"Stand_Pose_TorquePos_Log_TEST_3_{timestamp_str}.csv")
-pid_filename  = os.path.join(log_dir, f"Stand_Pose_TorquePos_Log_TEST_3_{timestamp_str}_PID.txt")
+log_filename  = os.path.join(log_dir, f"Stand_Pose_TorquePos_Log_TEST_2_{timestamp_str}.csv")
+pid_filename  = os.path.join(log_dir, f"Stand_Pose_TorquePos_Log_TEST_2_{timestamp_str}_PID.txt")
 
 with open(log_filename, 'w', newline='') as csvfile:
     csv.writer(csvfile).writerow([
