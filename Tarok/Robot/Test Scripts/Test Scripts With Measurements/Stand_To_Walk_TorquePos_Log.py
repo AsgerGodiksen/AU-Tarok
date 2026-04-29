@@ -1,19 +1,40 @@
-# Test script for bezier trajectory with transfer phase before each swing phase
-# Moving COM away from upcoming swing leg
-# And with start in standing position
+# Script to perform stand to walk transistion and walk for x cycles while logging torque and position data
+# Used to update and tune PI parameters for walking
+# Used to log position and torque data
 
-# Imports
 import sys
 import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))) # Change level of path based on file location (the ../../)
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
 import can
 import time
 import numpy as np
-from Robot import*
+import struct
+import csv
+import concurrent.futures
+from Robot import *
+#from Logger_Functions import *
 
 # CAN initialization in terminal: "for i in 0 1 2 3; do sudo ip link set dev can$i up type can bitrate 1000000 && sudo ip link set can$i txqueuelen 1000; done"
 
-# PI Parameters:
+# Parameters From Tarok Dimensions
+Tarok = TarokDymensions()
+LEGS = Tarok.LEGS
+COLORS = Tarok.COLORS
+PHASE_OFFSET = Tarok.CRAWL_OFFSETS_Mixed
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PI Parameters 
+# ─────────────────────────────────────────────────────────────────────────────
+# Manufacturing parameters for walking
+PI_Walk = {
+    'angle_kp':  100,
+    'angle_ki':  100,
+    'speed_kp':  50,
+    'speed_ki':  40,
+    'torque_kp': 50,
+    'torque_ki': 50
+}
+
 # Parameters for standing
 PI_Stand = {
     'angle_kp':  120,
@@ -33,26 +54,20 @@ PI_UD = {
     'torque_ki': 25
 }
 
-# Manufacturing parameters for walking
-PI_Walk = {
-    'angle_kp':  100,
-    'angle_ki':  100,
-    'speed_kp':  50,
-    'speed_ki':  40,
-    'torque_kp': 50,
-    'torque_ki': 50
+# Manufacturing parameters (No?)
+PI_Params = {
+    #'angle_kp':  120,
+    #'angle_ki':  50,
+    #'speed_kp':  60,
+    #'speed_ki':  80,
+    #'torque_kp': 60,
+    #'torque_ki': 40
 }
 
-### SCRIPT START ###
-## PRECOMPUTATIONS ##
+# ─────────────────────────────────────────────────────────────────────────────
+# Pre-computations  
+# ─────────────────────────────────────────────────────────────────────────────
 print("Performing pre-computations...")
-
-# Parameters From Tarok Dimensions
-Tarok = TarokDymensions()
-LEGS = Tarok.LEGS
-COLORS = Tarok.COLORS
-PHASE_OFFSET = Tarok.CRAWL_OFFSETS_Mixed
-
 # Offsets for COM transfer during stand phase
 x_offset = 0.03 # [m] how much to move COM forward during transfer
 y_offset = 0.04 # [m] how much to move COM to the left during transfer
@@ -387,8 +402,9 @@ Theta_dot_HR_STW = np.abs(np.rad2deg(Theta_dot_HR_STW))
 
 print("Pre-computations complete.")
 
-## INITIALIZATION ##
-
+# ─────────────────────────────────────────────────────────────────────────────
+# Initialization
+# ─────────────────────────────────────────────────────────────────────────────
 print("Starting the Robot")
 print("Initializing CAN buses...")
 
@@ -414,42 +430,114 @@ print("Initialization complete, starting pre-loop sequence...")
 
 ## PRE-LOOP SEQUENCE ##
 
-# Write PI parameters to motors
-
-print("Writing PI parameters to motors...")
-PID_RAM_Control(bus0,ID_1, PI_Stand)
-PID_RAM_Control(bus0,ID_2, PI_Stand)
-PID_RAM_Control(bus0,ID_3, PI_Stand)
-PID_RAM_Control(bus1,ID_1, PI_Stand)
-PID_RAM_Control(bus1,ID_2, PI_Stand)
-PID_RAM_Control(bus1,ID_3, PI_Stand)
-PID_RAM_Control(bus2,ID_1, PI_Stand)  
-PID_RAM_Control(bus2,ID_2, PI_Stand)
-PID_RAM_Control(bus2,ID_3, PI_Stand)
-PID_RAM_Control(bus3,ID_1, PI_Stand)
-PID_RAM_Control(bus3,ID_2, PI_Stand)
-PID_RAM_Control(bus3,ID_3, PI_Stand)
+# Write Walk PI parameters to motors for data logging
+print("Writing Walk PI parameters to motors...")
+PID_RAM_Control(bus0,ID_1, PI_Walk)
+PID_RAM_Control(bus0,ID_2, PI_Walk)
+PID_RAM_Control(bus0,ID_3, PI_Walk)
+PID_RAM_Control(bus1,ID_1, PI_Walk)
+PID_RAM_Control(bus1,ID_2, PI_Walk)
+PID_RAM_Control(bus1,ID_3, PI_Walk)
+PID_RAM_Control(bus2,ID_1, PI_Walk)  
+PID_RAM_Control(bus2,ID_2, PI_Walk)
+PID_RAM_Control(bus2,ID_3, PI_Walk)
+PID_RAM_Control(bus3,ID_1, PI_Walk)
+PID_RAM_Control(bus3,ID_2, PI_Walk)
+PID_RAM_Control(bus3,ID_3, PI_Walk)
 
 time.sleep(0.2) # Sleep for a short time to ensure parameters are written before starting loop, adjust as needed
 
-# Move to zero position 
-print("Moving to zero position...")
-Position_Control(bus0,ID_1,0,30)
-Position_Control(bus0,ID_2,0,30)
-Position_Control(bus0,ID_3,0,30)
-Position_Control(bus1,ID_1,0,30)
-Position_Control(bus1,ID_2,0,30)
-Position_Control(bus1,ID_3,0,30)
-Position_Control(bus2,ID_1,0,30)
-Position_Control(bus2,ID_2,0,30)
-Position_Control(bus2,ID_3,0,30)
-Position_Control(bus3,ID_1,0,30)
-Position_Control(bus3,ID_2,0,30)
-Position_Control(bus3,ID_3,0,30)
+# ─────────────────────────────────────────────────────────────────────────────
+# Data logging setup
+# ─────────────────────────────────────────────────────────────────────────────
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+log_dir = os.path.join(SCRIPT_DIR, "TEST_DATA_PI_Stand_To_Walk")
+os.makedirs(log_dir, exist_ok=True)
+timestamp_str = time.strftime('%Y-%m-%d_%H-%M-%S')
+log_filename = os.path.join(log_dir, f"STW_TorquePos_Log_Test{timestamp_str}.csv")
+pid_filename = os.path.join(log_dir, f"STW_TorquePos_Log_Test{timestamp_str}_PID.txt")
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Read and save PID parameters from all 12 motors
+# ─────────────────────────────────────────────────────────────────────────────
+print("Reading PID parameters from motors...")
+_LEG_BUSES  = [("FL", bus0), ("FR", bus1), ("HL", bus2), ("HR", bus3)]
+_JOINT_IDS  = [("J1", ID_1), ("J2", ID_2), ("J3", ID_3)]
+
+with open(pid_filename, 'w') as _pid_file:
+    _pid_file.write(f"PID Parameters — read {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
+    _pid_file.write("=" * 52 + "\n\n")
+    for leg, bus in _LEG_BUSES:
+        _pid_file.write(f"Leg {leg}\n")
+        _pid_file.write("-" * 30 + "\n")
+        for joint, motor_id in _JOINT_IDS:
+            result = Read_PID(bus, motor_id)
+            if result is not None:
+                pos_kp, pos_ki, spd_kp, spd_ki, torq_kp, torq_ki = result
+                _pid_file.write(f"  {joint} (ID 0x{motor_id:03X}):\n")
+                _pid_file.write(f"    Position Loop : Kp={pos_kp:5.0f}  Ki={pos_ki:5.0f}\n")
+                _pid_file.write(f"    Speed Loop    : Kp={spd_kp:5.0f}  Ki={spd_ki:5.0f}\n")
+                _pid_file.write(f"    Torque Loop   : Kp={torq_kp:5.0f}  Ki={torq_ki:5.0f}\n")
+            else:
+                _pid_file.write(f"  {joint} (ID 0x{motor_id:03X}): no response\n")
+        _pid_file.write("\n")
+
+print(f"PID parameters saved to {os.path.basename(pid_filename)}")
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Prepare CSV file for logging and preallocate data array for efficient logging in the loop
+# ─────────────────────────────────────────────────────────────────────────────
+
+with open(log_filename, 'w', newline='') as csvfile:
+    csv.writer(csvfile).writerow([
+        "Timestamp (s)", "Trajectory Index",
+        # 12 read torques
+        "FL_J1_Torque", "FL_J2_Torque", "FL_J3_Torque",
+        "FR_J1_Torque", "FR_J2_Torque", "FR_J3_Torque",
+        "HL_J1_Torque", "HL_J2_Torque", "HL_J3_Torque",
+        "HR_J1_Torque", "HR_J2_Torque", "HR_J3_Torque",
+        # 12 read positions
+        "FL_J1_Pos (deg)", "FL_J2_Pos (deg)", "FL_J3_Pos (deg)",
+        "FR_J1_Pos (deg)", "FR_J2_Pos (deg)", "FR_J3_Pos (deg)",
+        "HL_J1_Pos (deg)", "HL_J2_Pos (deg)", "HL_J3_Pos (deg)",
+        "HR_J1_Pos (deg)", "HR_J2_Pos (deg)", "HR_J3_Pos (deg)",
+        # 12 position commands (analytical trajectory setpoints)
+        "FL_J1_Cmd (deg)", "FL_J2_Cmd (deg)", "FL_J3_Cmd (deg)",
+        "FR_J1_Cmd (deg)", "FR_J2_Cmd (deg)", "FR_J3_Cmd (deg)",
+        "HL_J1_Cmd (deg)", "HL_J2_Cmd (deg)", "HL_J3_Cmd (deg)",
+        "HR_J1_Cmd (deg)", "HR_J2_Cmd (deg)", "HR_J3_Cmd (deg)",
+    ])
+
+# Preallocate: timestamp + index  + 12 torques + 12 positions + 12 commands = 38 columns
+data = np.zeros((500000, 38))
+data_count = 0
+
+# Use a ThreadPoolExecutor to send commands and receive feedback from all 4 legs in parallel, minimizing latency and maximizing loop frequency
+executor = concurrent.futures.ThreadPoolExecutor(max_workers=4)
+
+time.sleep(0.2) # Sleep for a short time to ensure all setup is complete before starting pre-loop movements, adjust as needed
+
+### Pre-loop Movement ###
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Move to zero configuration
+# ─────────────────────────────────────────────────────────────────────────────
+print("Writing stand PI parameters and moving to zero position...")
+for bus in [bus0, bus1, bus2, bus3]:
+    PID_RAM_Control(bus, ID_1, PI_Stand)
+    PID_RAM_Control(bus, ID_2, PI_Stand)
+    PID_RAM_Control(bus, ID_3, PI_Stand)
+time.sleep(0.2) # Sleep for a short time to ensure parameters are written before sending position commands, adjust as needed
+
+for bus in [bus0, bus1, bus2, bus3]:
+    Position_Control(bus, ID_1, 0, 30)
+    Position_Control(bus, ID_2, 0, 30)
+    Position_Control(bus, ID_3, 0, 30)
 time.sleep(6)
 
-# Move to Stand position
+# ─────────────────────────────────────────────────────────────────────────────
+# Move to Stand Position
+# ─────────────────────────────────────────────────────────────────────────────
 print("Moved to zero position, moving to stand position...")
 Position_Control(bus0,ID_1,Theta_FL_stand[0],30)
 Position_Control(bus0,ID_2,Theta_FL_stand[1],30)
@@ -463,26 +551,17 @@ Position_Control(bus2,ID_3,Theta_HL_stand[2],30)
 Position_Control(bus3,ID_1,Theta_HR_stand[0],30)
 Position_Control(bus3,ID_2,Theta_HR_stand[1],30)
 Position_Control(bus3,ID_3,Theta_HR_stand[2],30)
-
 time.sleep(10)
 
-# Move to walk height position
-print("Moved to stand position, moving to walk height...")
-
-print("Writing PI parameters to motors...")
-PID_RAM_Control(bus0,ID_1, PI_UD)
-PID_RAM_Control(bus0,ID_2, PI_UD)
-PID_RAM_Control(bus0,ID_3, PI_UD)
-PID_RAM_Control(bus1,ID_1, PI_UD)
-PID_RAM_Control(bus1,ID_2, PI_UD)
-PID_RAM_Control(bus1,ID_3, PI_UD)
-PID_RAM_Control(bus2,ID_1, PI_UD)  
-PID_RAM_Control(bus2,ID_2, PI_UD)
-PID_RAM_Control(bus2,ID_3, PI_UD)
-PID_RAM_Control(bus3,ID_1, PI_UD)
-PID_RAM_Control(bus3,ID_2, PI_UD)
-PID_RAM_Control(bus3,ID_3, PI_UD)
-time.sleep(0.1) # Sleep for a short time to ensure parameters are written before starting loop, adjust as needed
+# ─────────────────────────────────────────────────────────────────────────────
+# Move to Walk Height
+# ─────────────────────────────────────────────────────────────────────────────
+print("Moved to stand position, writing up/down PI parameters and moving to walk height...")
+for bus in [bus0, bus1, bus2, bus3]:
+    PID_RAM_Control(bus, ID_1, PI_UD)
+    PID_RAM_Control(bus, ID_2, PI_UD)
+    PID_RAM_Control(bus, ID_3, PI_UD)
+time.sleep(0.2) # Sleep for a short time to ensure parameters are written before sending position commands, adjust as needed
 
 SWH_Statement = True
 # Note start time
@@ -513,25 +592,17 @@ while SWH_Statement:
     Position_Control(bus3, ID_2, Theta_HR_SWH[index, 1], Theta_dot_HR_SWH[1, index])
     Position_Control(bus3, ID_3, Theta_HR_SWH[index, 2], Theta_dot_HR_SWH[2, index])
 
-time.sleep(1) # Sleep for a short time to ensure transition to walk height is complete before continuing, adjust as needed
+time.sleep(0.5) # Sleep for a short time to ensure transition to walk height is complete before continuing, adjust as needed
 
-# Move to walk start position
-print("Moved to walk height, moving to walk start position...")
-
-print("Writing PI parameters to motors...")
-PID_RAM_Control(bus0,ID_1, PI_Walk)
-PID_RAM_Control(bus0,ID_2, PI_Walk)
-PID_RAM_Control(bus0,ID_3, PI_Walk)
-PID_RAM_Control(bus1,ID_1, PI_Walk)
-PID_RAM_Control(bus1,ID_2, PI_Walk)
-PID_RAM_Control(bus1,ID_3, PI_Walk)
-PID_RAM_Control(bus2,ID_1, PI_Walk)  
-PID_RAM_Control(bus2,ID_2, PI_Walk)
-PID_RAM_Control(bus2,ID_3, PI_Walk)
-PID_RAM_Control(bus3,ID_1, PI_Walk)
-PID_RAM_Control(bus3,ID_2, PI_Walk)
-PID_RAM_Control(bus3,ID_3, PI_Walk)
-time.sleep(0.1) # Sleep for a short time to ensure parameters are written before starting loop, adjust as needed
+# ─────────────────────────────────────────────────────────────────────────────
+# Move to Walk Start Position
+# ─────────────────────────────────────────────────────────────────────────────
+print("Moved to walk height, writing walk PI parameters and moving to walk start position...")
+for bus in [bus0, bus1, bus2, bus3]:
+    PID_RAM_Control(bus, ID_1, PI_Walk)
+    PID_RAM_Control(bus, ID_2, PI_Walk)
+    PID_RAM_Control(bus, ID_3, PI_Walk)
+time.sleep(0.2) # Sleep for a short time to ensure parameters are written before sending position commands, adjust as needed
 
 STW_Statement = True
 # Note start time
@@ -566,65 +637,150 @@ time.sleep(1) # Sleep for a short time to ensure transition to walk start positi
 
 print("Pre-loop sequence complete, starting loop...")
 
-## MAIN LOOP ##
+time.sleep(1) # Sleep for a short time to ensure all transitions are complete before starting loop, adjust as needed
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Main loop — cyclic Bezier walk trajectory with torque + position + command logging
+# ─────────────────────────────────────────────────────────────────────────────
+LOOP_PERIOD = 1.0 / 200.0   # Minimum loop period (200 Hz)
+NUM_CYCLES  = 3             # robot performs this many Walk cycles then holds still
+loop_times  = []
+cycle_count = 0
+#print("SET IN POSITION")
+#time.sleep(10)
+#print("\nPre-loop sequence complete.")
+#print(">>> STARTING in 0.5 seconds — remove your hands! <<<")
+#time.sleep(0.5)
+
+#print("Pre-loop sequence complete, starting loop...")
+print(f"Loop started — robot will complete {NUM_CYCLES} cycles then hold still.")
+print("Press Ctrl+C at any time to shut down.")
 print("Loop started - Press ctrl+c in terminal for shutdown")
 
 # Note start time
-start_time = cycle_start = current_time = time.monotonic()
+start_time = cycle_start  = time.monotonic()
 
 try:
     while True:
-            # Loop time managment (if needed)
-            current_time = time.monotonic()
-            elapsed_cycle = current_time - cycle_start # Elapsed time in current cycle
-            elapsed_total = current_time - start_time  # Elapsed time since start of program
-            # Check if current cycle is over -> start new cycle
-            if elapsed_cycle >= total_time_with_transfer:
-                cycle_start += total_time_with_transfer # Force next cycle start time to be exactly total trajectory time after previous cycle start time to avoid drift
-                continue
+        # Loop time management
+        loop_start = time.monotonic()
+        elapsed_total = loop_start - start_time
+        elapsed_cycle = loop_start - cycle_start
 
-            # Find closest value in t to elapsed in current cycle
-            index = min(int(elapsed_cycle / dt), len(t_with_transfer) - 1)
-            
-            # Send position control commands to motors for current time step
-            Position_Control(bus0, ID_1, Theta_FL[index, 0], Theta_dot_FL[0, index])
-            Position_Control(bus0, ID_2, Theta_FL[index, 1], Theta_dot_FL[1, index])
-            Position_Control(bus0, ID_3, Theta_FL[index, 2], Theta_dot_FL[2, index])
-            Position_Control(bus1, ID_1, Theta_FR[index, 0], Theta_dot_FR[0, index])
-            Position_Control(bus1, ID_2, Theta_FR[index, 1], Theta_dot_FR[1, index])
-            Position_Control(bus1, ID_3, Theta_FR[index, 2], Theta_dot_FR[2, index])
-            Position_Control(bus2, ID_1, Theta_HL[index, 0], Theta_dot_HL[0, index])
-            Position_Control(bus2, ID_2, Theta_HL[index, 1], Theta_dot_HL[1, index])
-            Position_Control(bus2, ID_3, Theta_HL[index, 2], Theta_dot_HL[2, index])
-            Position_Control(bus3, ID_1, Theta_HR[index, 0], Theta_dot_HR[0, index])
-            Position_Control(bus3, ID_2, Theta_HR[index, 1], Theta_dot_HR[1, index])
-            Position_Control(bus3, ID_3, Theta_HR[index, 2], Theta_dot_HR[2, index])
+        #loop_elapsed = time.monotonic() - loop_start
+        #loop_times.append(loop_elapsed)
+        #sleep_time = LOOP_PERIOD - loop_elapsed
+        #time.sleep(max(sleep_time, 0.001))
 
-# Stop loop with Ctrl+C in terminal
+        # Check if current cycle is complete -> Start new cycle or end test if all cycles complete
+        if elapsed_cycle >= total_time_with_transfer:
+            cycle_start += total_time_with_transfer
+            cycle_count += 1
+
+            # If all cycles complete, print message and hold position
+            if cycle_count >= NUM_CYCLES:
+                # ── Test complete: logging stops, robot holds start position ──
+                print("\n" + "=" * 54)
+                print(f"  TEST COMPLETE — {NUM_CYCLES} cycles finished.")
+                print("  Data logging has stopped.")
+                print("  Robot is holding the walk start position.")
+                print("  It is now safe to lift the robot back into the holder.")
+                print("  Press Ctrl+C to shut down the motors when in the holder.")
+                print("=" * 54 + "\n")
+
+                hold_angles = [
+                    (bus0, Theta_FL[0]),
+                    (bus1, Theta_FR[0]),
+                    (bus2, Theta_HL[0]),
+                    (bus3, Theta_HR[0]),
+                ]
+                while True:
+                    for bus, angles in hold_angles:
+                        Position_Control(bus, ID_1, angles[0], 30)
+                        Position_Control(bus, ID_2, angles[1], 30)
+                        Position_Control(bus, ID_3, angles[2], 30)
+                    time.sleep(0.5) # Sleep to reduce CPU usage while holding position
+            continue
+
+        # Find closest value in t to elapsed in current cycle
+        index = min(int(elapsed_cycle / dt), len(t_with_transfer) - 1)
+
+        # ── Send + receive all 4 legs in parallel ──────────────────────────
+        motor_ids = [ID_1, ID_2, ID_3]
+        f_FL = executor.submit(send_leg, bus0, Theta_FL[index], Theta_dot_FL[:, index],motor_ids)
+        f_FR = executor.submit(send_leg, bus1, Theta_FR[index], Theta_dot_FR[:, index],motor_ids)
+        f_HL = executor.submit(send_leg, bus2, Theta_HL[index], Theta_dot_HL[:, index],motor_ids)
+        f_HR = executor.submit(send_leg, bus3, Theta_HR[index], Theta_dot_HR[:, index],motor_ids)
+
+        # Extract feedback results
+        fb_FL = f_FL.result()
+        fb_FR = f_FR.result()
+        fb_HL = f_HL.result()
+        fb_HR = f_HR.result()
+
+        # ── Log torque + position + command ────────────────────────────────
+        data[data_count, :] = [
+            elapsed_total, index,
+            # 12 read torques (Nm)
+            safe_torque(fb_FL, 0), safe_torque(fb_FL, 1), safe_torque(fb_FL, 2),
+            safe_torque(fb_FR, 0), safe_torque(fb_FR, 1), safe_torque(fb_FR, 2),
+            safe_torque(fb_HL, 0), safe_torque(fb_HL, 1), safe_torque(fb_HL, 2),
+            safe_torque(fb_HR, 0), safe_torque(fb_HR, 1), safe_torque(fb_HR, 2),
+            # 12 read positions (deg, output shaft, multi-turn)
+            safe_position(fb_FL, 0), safe_position(fb_FL, 1), safe_position(fb_FL, 2),
+            safe_position(fb_FR, 0), safe_position(fb_FR, 1), safe_position(fb_FR, 2),
+            safe_position(fb_HL, 0), safe_position(fb_HL, 1), safe_position(fb_HL, 2),
+            safe_position(fb_HR, 0), safe_position(fb_HR, 1), safe_position(fb_HR, 2),
+            # 12 position commands (deg, analytical trajectory setpoints)
+            Theta_FL[index, 0], Theta_FL[index, 1], Theta_FL[index, 2],
+            Theta_FR[index, 0], Theta_FR[index, 1], Theta_FR[index, 2],
+            Theta_HL[index, 0], Theta_HL[index, 1], Theta_HL[index, 2],
+            Theta_HR[index, 0], Theta_HR[index, 1], Theta_HR[index, 2],
+        ]
+        data_count += 1
+
+        # Loop time management
+        loop_elapsed = time.monotonic() - loop_start
+        loop_times.append(loop_elapsed)
+        sleep_time = LOOP_PERIOD - loop_elapsed
+        if sleep_time > 0:
+            time.sleep(sleep_time)# Stop loop with Ctrl+C in terminal
+    
 except KeyboardInterrupt:
-    print("KeyboardInterrupt received, shutting down...")
+    print("\nKeyboardInterrupt received, shutting down...")
+    executor.shutdown(wait=False)
 
-    # Stop motors
+    # ── Loop timing diagnostic ──────────────────────────────────────────────
+    if loop_times:
+        arr = np.array(loop_times) * 1000
+        print(f"\nLoop timing over {len(arr)} cycles:")
+        print(f"  Mean:  {arr.mean():.2f} ms  ({1000/arr.mean():.1f} Hz)")
+        print(f"  Min:   {arr.min():.2f} ms")
+        print(f"  Max:   {arr.max():.2f} ms")
+        print(f"  >5 ms: {(arr > 5).sum()} cycles ({100*(arr>5).mean():.1f}%)\n")
+
+    # ── Stop motors ─────────────────────────────────────────────────────────
     print("Stopping motors...")
-    Motor_Stop(bus0,ID_1)
-    Motor_Stop(bus0,ID_2)
-    Motor_Stop(bus0,ID_3)
-    Motor_Stop(bus1,ID_1)
-    Motor_Stop(bus1,ID_2)
-    Motor_Stop(bus1,ID_3)
-    Motor_Stop(bus2,ID_1)
-    Motor_Stop(bus2,ID_2)
-    Motor_Stop(bus2,ID_3)
-    Motor_Stop(bus3,ID_1)
-    Motor_Stop(bus3,ID_2)
-    Motor_Stop(bus3,ID_3)
-    print("Motors stopped")
+    for bus in [bus0, bus1, bus2, bus3]:
+        while bus.recv(timeout=0.001) is not None:
+            pass
+    for bus in [bus0, bus1, bus2, bus3]:
+        for motor_id in [ID_1, ID_2, ID_3]:
+            try:
+                Motor_Stop(bus, motor_id)
+            except RuntimeError as e:
+                print(f"  Warning: {e}")
+    print("Motors stopped.")
 
-    # Shutdown CAN buses
     print("Shutting down CAN buses...")
-    bus0.shutdown()
-    bus1.shutdown()
-    bus2.shutdown()
-    bus3.shutdown()
-    print("CAN buses shut down")
+    for bus in [bus0, bus1, bus2, bus3]:
+        bus.shutdown()
+    print("CAN buses shut down.")
+
+    # ── Write logged data ────────────────────────────────────────────────────
+    print("Storing logged data to file...")
+    with open(log_filename, "a") as file:
+        for i in range(data_count):
+            file.write(",".join(f"{v:.4f}" for v in data[i, :]) + "\n")
+    print(f"Logged {data_count} rows to {log_filename}")
     print("Shutdown complete.")
