@@ -90,7 +90,7 @@ pi_bezier_walk = {
     'torque_ki': 20
 }
 '''
-
+'''
 # Bezier walk state PI parameters - Manufacturing - the ones used in Test_Bezier_Transfer_With_Stand.py
 pi_bezier_walk = {
     'angle_kp':  100,
@@ -99,6 +99,16 @@ pi_bezier_walk = {
     'speed_ki':  40,
     'torque_kp': 50,
     'torque_ki': 50
+}
+'''
+# Bezier walk state PI parameters - Tuned parameters from tuning 30/4 2026
+pi_bezier_walk = {
+    'angle_kp':  120,
+    'angle_ki':  90,
+    'speed_kp':  60,
+    'speed_ki':  80,
+    'torque_kp': 60,
+    'torque_ki': 60
 }
 
 ### FUNCTION DEFINITIONS ###
@@ -717,7 +727,7 @@ def Bezier_Walk_State(bus0, bus1, bus2, bus3, ID_1, ID_2, ID_3, Direction = "For
 
     Swing_Time_Scalar = 0.8    # [s] swing phase duration
     Stand_Time_Scalar  = 3 * Swing_Time_Scalar # [s] stand phase duration
-    Transfer_Time_Scalar = 1 # [s] duration of the COM transfer
+    Transfer_Time_Scalar = 1.2 # [s] duration of the COM transfer
 
     total_time = Swing_Time_Scalar + Stand_Time_Scalar
     Total_Time_Steps = int(total_time / dt)

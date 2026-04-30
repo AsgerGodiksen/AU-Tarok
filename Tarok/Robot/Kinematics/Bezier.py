@@ -581,7 +581,7 @@ def Bezier_Add_Transfer_Phase(t, t_transfer, t_with_transfer, Total_Time_Steps, 
         HR_Bezier_Trajectory_With_Transfer, HR_Bezier_Velocities_With_Transfer = Apply_Phase_Offset(HR_Bezier_Trajectory_With_Transfer, HR_Bezier_Velocities_With_Transfer, Roll_amount)
     return FL_Bezier_Trajectory_With_Transfer, FR_Bezier_Trajectory_With_Transfer, HL_Bezier_Trajectory_With_Transfer, HR_Bezier_Trajectory_With_Transfer, FL_Bezier_Velocities_With_Transfer, FR_Bezier_Velocities_With_Transfer, HL_Bezier_Velocities_With_Transfer, HR_Bezier_Velocities_With_Transfer
 
-def OLD_Building_Stand_To_Walk_Trajectories(Swing_Time_Scalar, Swing_Time_Steps, Phase_Offset, FL_walk_start_x, FR_walk_start_x, HL_walk_start_x, HR_walk_start_x):
+def Building_Stand_To_Walk_Trajectories(Swing_Time_Scalar, Swing_Time_Steps, Phase_Offset, FL_walk_start_x, FR_walk_start_x, HL_walk_start_x, HR_walk_start_x):
     """
     Building the trajectories for the transition from stand to walk.
     Specific for each leg.
@@ -859,7 +859,7 @@ def OLD_Building_Stand_To_Walk_Trajectories(Swing_Time_Scalar, Swing_Time_Steps,
 
 
 ##### CHANGED SEQUENCE FOR TESTING IF IT HAS IMPACT ON WHICH SHOULDERS THAT DROP DOWN DURING SWING
-def Building_Stand_To_Walk_Trajectories(Swing_Time_Scalar, Swing_Time_Steps, Phase_Offset, FL_walk_start_x, FR_walk_start_x, HL_walk_start_x, HR_walk_start_x):
+def NEW_Building_Stand_To_Walk_Trajectories(Swing_Time_Scalar, Swing_Time_Steps, Phase_Offset, FL_walk_start_x, FR_walk_start_x, HL_walk_start_x, HR_walk_start_x):
     """
     Building the trajectories for the transition from stand to walk.
     Specific for each leg.
