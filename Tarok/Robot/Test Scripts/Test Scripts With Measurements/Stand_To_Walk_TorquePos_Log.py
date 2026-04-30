@@ -22,17 +22,39 @@ LEGS = Tarok.LEGS
 COLORS = Tarok.COLORS
 PHASE_OFFSET = Tarok.CRAWL_OFFSETS_Mixed
 
+# Floating manufacturing: test 1
+
+# Manufacturing: Test 2
+
+# Tuning af torque: Test 3 - Test 8
+# Højere p og i sideløbende gav mindre fejl indtil den kom over 60/60
+# Derfor fortsættes med 60/60 til næste loop
+
+# Tuning af speed: Test 9 - Test 20
+# Øge begge gjorde fejlen mindre, Gøre i lidt større end p gjorde fejlen endnu mindre
+# 60/80 (test 15) gav laveste fejl men måske lidt for stivt set visuelt. 
+
+# Tuning af position: Test 21 - Test 29
+# Torque og speed var meget kvantitativt efter at minimere error (hvilket ofte krævede øgede værdier)
+# Position er delvist at minimere error men også rimelig kvalitativt, at den skal gå visuelt stabilt
+# 120/90 (test 26) gav næstmindst fejl men bedste stabilitet.
+# (130/90 (test 28) gav minimalt mindre fejl, men ikke nær så stabil som test 26)
+
+# Ændring af offset: Test 30
+
+test_number = 30
+
 # ─────────────────────────────────────────────────────────────────────────────
 # PI Parameters 
 # ─────────────────────────────────────────────────────────────────────────────
 # Manufacturing parameters for walking
 PI_Walk = {
-    'angle_kp':  100,
-    'angle_ki':  100,
-    'speed_kp':  50,
-    'speed_ki':  40,
-    'torque_kp': 50,
-    'torque_ki': 50
+    'angle_kp':  120,
+    'angle_ki':  90,
+    'speed_kp':  60,
+    'speed_ki':  80,
+    'torque_kp': 60,
+    'torque_ki': 60
 }
 
 # Parameters for standing
@@ -72,12 +94,12 @@ print("Performing pre-computations...")
 x_offset = 0.03 # [m] how much to move COM forward during transfer
 y_offset = 0.04 # [m] how much to move COM to the left during transfer
 
-# Time parameters
+# Time parameters                                                                                                               
 dt = 0.005 # seconds (200 Hz)
 
 Swing_Time_Scalar = 1    # [s] swing phase duration
 Stand_Time_Scalar  = 3 * Swing_Time_Scalar # [s] stand phase duration
-Transfer_Time_Scalar = 1.25 # [s] duration of the COM transfer
+Transfer_Time_Scalar = 1.5 # [s] duration of the COM transfer
 
 total_time = Swing_Time_Scalar + Stand_Time_Scalar
 Total_Time_Steps = int(total_time / dt)
@@ -454,8 +476,8 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 log_dir = os.path.join(SCRIPT_DIR, "TEST_DATA_PI_Stand_To_Walk")
 os.makedirs(log_dir, exist_ok=True)
 timestamp_str = time.strftime('%Y-%m-%d_%H-%M-%S')
-log_filename = os.path.join(log_dir, f"STW_TorquePos_Log_Test{timestamp_str}.csv")
-pid_filename = os.path.join(log_dir, f"STW_TorquePos_Log_Test{timestamp_str}_PID.txt")
+log_filename = os.path.join(log_dir, f"STW_TorquePos_Log_Test_{test_number}_{timestamp_str}.csv")
+pid_filename = os.path.join(log_dir, f"STW_TorquePos_Log_Test_{test_number}_{timestamp_str}_PID.txt")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Read and save PID parameters from all 12 motors

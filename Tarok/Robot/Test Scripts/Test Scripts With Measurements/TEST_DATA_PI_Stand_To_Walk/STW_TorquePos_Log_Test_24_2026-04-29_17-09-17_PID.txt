@@ -1,0 +1,63 @@
+PID Parameters — read 2026-04-29 17:09:17
+====================================================
+
+Leg FL
+------------------------------
+  J1 (ID 0x141):
+    Position Loop : Kp=  110  Ki=   90
+    Speed Loop    : Kp=   60  Ki=   80
+    Torque Loop   : Kp=   60  Ki=   60
+  J2 (ID 0x142):
+    Position Loop : Kp=  110  Ki=   90
+    Speed Loop    : Kp=   60  Ki=   80
+    Torque Loop   : Kp=   60  Ki=   60
+  J3 (ID 0x143):
+    Position Loop : Kp=  110  Ki=   90
+    Speed Loop    : Kp=   60  Ki=   80
+    Torque Loop   : Kp=   60  Ki=   60
+
+Leg FR
+------------------------------
+  J1 (ID 0x141):
+    Position Loop : Kp=  110  Ki=   90
+    Speed Loop    : Kp=   60  Ki=   80
+    Torque Loop   : Kp=   60  Ki=   60
+  J2 (ID 0x142):
+    Position Loop : Kp=  110  Ki=   90
+    Speed Loop    : Kp=   60  Ki=   80
+    Torque Loop   : Kp=   60  Ki=   60
+  J3 (ID 0x143):
+    Position Loop : Kp=  110  Ki=   90
+    Speed Loop    : Kp=   60  Ki=   80
+    Torque Loop   : Kp=   60  Ki=   60
+
+Leg HL
+------------------------------
+  J1 (ID 0x141):
+    Position Loop : Kp=  110  Ki=   90
+    Speed Loop    : Kp=   60  Ki=   80
+    Torque Loop   : Kp=   60  Ki=   60
+  J2 (ID 0x142):
+    Position Loop : Kp=  110  Ki=   90
+    Speed Loop    : Kp=   60  Ki=   80
+    Torque Loop   : Kp=   60  Ki=   60
+  J3 (ID 0x143):
+    Position Loop : Kp=  110  Ki=   90
+    Speed Loop    : Kp=   60  Ki=   80
+    Torque Loop   : Kp=   60  Ki=   60
+
+Leg HR
+------------------------------
+  J1 (ID 0x141):
+    Position Loop : Kp=  110  Ki=   90
+    Speed Loop    : Kp=   60  Ki=   80
+    Torque Loop   : Kp=   60  Ki=   60
+  J2 (ID 0x142):
+    Position Loop : Kp=  110  Ki=   90
+    Speed Loop    : Kp=   60  Ki=   80
+    Torque Loop   : Kp=   60  Ki=   60
+  J3 (ID 0x143):
+    Position Loop : Kp=  110  Ki=   90
+    Speed Loop    : Kp=   60  Ki=   80
+    Torque Loop   : Kp=   60  Ki=   60
+
