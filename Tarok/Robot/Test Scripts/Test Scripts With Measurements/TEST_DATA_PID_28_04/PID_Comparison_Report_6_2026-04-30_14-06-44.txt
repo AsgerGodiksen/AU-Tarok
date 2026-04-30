@@ -1,0 +1,92 @@
+============================================================
+  PID Comparison Report
+  Generated : 2026-04-30 14:06:44
+  Tests     : 6
+============================================================
+
+PID PARAMETERS
+────────────────────────────────────────────────────────────
+
+  Test 6  —  Stand_Pose_TorquePos_Log_TEST_6_2026-04-30_14-05-23.csv
+  PID Parameters — read 2026-04-30 14:05:23
+  ====================================================
+  
+  Leg FL
+  ------------------------------
+    J1 (ID 0x141):
+      Position Loop : Kp=  120  Ki=   25
+      Speed Loop    : Kp=   60  Ki=   10
+      Torque Loop   : Kp=   60  Ki=   13
+    J2 (ID 0x142):
+      Position Loop : Kp=  120  Ki=   25
+      Speed Loop    : Kp=   60  Ki=   10
+      Torque Loop   : Kp=   60  Ki=   13
+    J3 (ID 0x143):
+      Position Loop : Kp=  120  Ki=   25
+      Speed Loop    : Kp=   60  Ki=   10
+      Torque Loop   : Kp=   60  Ki=   13
+  
+  Leg FR
+  ------------------------------
+    J1 (ID 0x141):
+      Position Loop : Kp=  120  Ki=   25
+      Speed Loop    : Kp=   60  Ki=   10
+      Torque Loop   : Kp=   60  Ki=   13
+    J2 (ID 0x142):
+      Position Loop : Kp=  120  Ki=   25
+      Speed Loop    : Kp=   60  Ki=   10
+      Torque Loop   : Kp=   60  Ki=   13
+    J3 (ID 0x143):
+      Position Loop : Kp=  120  Ki=   25
+      Speed Loop    : Kp=   60  Ki=   10
+      Torque Loop   : Kp=   60  Ki=   13
+  
+  Leg HL
+  ------------------------------
+    J1 (ID 0x141):
+      Position Loop : Kp=  120  Ki=   25
+      Speed Loop    : Kp=   60  Ki=   10
+      Torque Loop   : Kp=   60  Ki=   13
+    J2 (ID 0x142):
+      Position Loop : Kp=  120  Ki=   25
+      Speed Loop    : Kp=   60  Ki=   10
+      Torque Loop   : Kp=   60  Ki=   13
+    J3 (ID 0x143):
+      Position Loop : Kp=  120  Ki=   25
+      Speed Loop    : Kp=   60  Ki=   10
+      Torque Loop   : Kp=   60  Ki=   13
+  
+  Leg HR
+  ------------------------------
+    J1 (ID 0x141):
+      Position Loop : Kp=  120  Ki=   25
+      Speed Loop    : Kp=   60  Ki=   10
+      Torque Loop   : Kp=   60  Ki=   13
+    J2 (ID 0x142):
+      Position Loop : Kp=  120  Ki=   25
+      Speed Loop    : Kp=   60  Ki=   10
+      Torque Loop   : Kp=   60  Ki=   13
+    J3 (ID 0x143):
+      Position Loop : Kp=  120  Ki=   25
+      Speed Loop    : Kp=   60  Ki=   10
+      Torque Loop   : Kp=   60  Ki=   13
+  
+
+
+STATISTICS
+────────────────────────────────────────────────────────────
+Test    Leg   Joint    RMS error (deg)   Max |error| (deg)
+────────────────────────────────────────────────────────────
+6       FL    J1                 0.000               0.001
+6       FL    J2                 0.066               0.070
+6       FL    J3                 0.001               0.002
+6       FR    J1                 0.000               0.001
+6       FR    J2                 0.003               0.005
+6       FR    J3                 0.001               0.002
+6       HL    J1                 0.000               0.001
+6       HL    J2                 0.002               0.003
+6       HL    J3                 0.001               0.002
+6       HR    J1                 0.000               0.000
+6       HR    J2                 0.064               0.067
+6       HR    J3                 0.001               0.002
+────────────────────────────────────────────────────────────

@@ -47,7 +47,7 @@ test_number = 30
 # ─────────────────────────────────────────────────────────────────────────────
 # PI Parameters 
 # ─────────────────────────────────────────────────────────────────────────────
-# Manufacturing parameters for walking
+# parameters for walking
 PI_Walk = {
     'angle_kp':  120,
     'angle_ki':  90,
