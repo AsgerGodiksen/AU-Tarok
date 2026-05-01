@@ -61,12 +61,12 @@ Read_PID(bus0,ID_1)
 time.sleep(0.5)
 # Parameters for PID Tuning:
 pid_params= {
-    'angle_kp':  120,
-    'angle_ki':  25,
-    'speed_kp':  60,
-    'speed_ki':  10,
-    'torque_kp': 60,
-    'torque_ki': 13
+    'angle_kp':  100,
+    'angle_ki':  100,
+    'speed_kp':  50,
+    'speed_ki':  40,
+    'torque_kp': 50,
+    'torque_ki': 50
 }
 
 print("Update to new PID parameters USING RAM")

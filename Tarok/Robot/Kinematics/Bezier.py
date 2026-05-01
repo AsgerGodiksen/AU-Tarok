@@ -719,6 +719,8 @@ def Building_Stand_To_Walk_Trajectories(Swing_Time_Scalar, Swing_Time_Steps, Pha
     # offsets for stand to walk phase
     x_offset = 0.05
     y_offset = 0.045
+    #x_offset = 0.04
+    #y_offset = 0.035
 
     # Preallocate new trajectory arrays with transfer
     FL_Stand_To_Walk_With_Transfer = np.zeros((3, Stand_To_Walk_Time_Steps_With_Transfer))

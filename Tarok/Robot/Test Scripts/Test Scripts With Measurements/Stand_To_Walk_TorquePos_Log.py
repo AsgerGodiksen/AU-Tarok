@@ -93,6 +93,8 @@ print("Performing pre-computations...")
 # Offsets for COM transfer during stand phase
 x_offset = 0.03 # [m] how much to move COM forward during transfer
 y_offset = 0.04 # [m] how much to move COM to the left during transfer
+x_offset = 0.025 # [m] how much to move COM forward during transfer
+y_offset = 0.035 # [m] how much to move COM to the left during transfer
 
 # Time parameters                                                                                                               
 dt = 0.005 # seconds (200 Hz)
