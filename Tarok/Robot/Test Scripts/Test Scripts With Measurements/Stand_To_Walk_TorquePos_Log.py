@@ -40,9 +40,13 @@ PHASE_OFFSET = Tarok.CRAWL_OFFSETS_Mixed
 # 120/90 (test 26) gav næstmindst fejl men bedste stabilitet.
 # (130/90 (test 28) gav minimalt mindre fejl, men ikke nær så stabil som test 26)
 
-# Ændring af offset: Test 30
+# Rykket alt masse mod midten! Samt ændring af offset fra 0.3 og 0.4 til 0.25 og 0.35 samt rekalibrering med kalibreringsholdere: Test 30
+# Med alle 6 parametre svarende til test 26
 
-test_number = 30
+# Tabel: 2, x, 15, 26 og 30
+
+
+test_number = 31
 
 # ─────────────────────────────────────────────────────────────────────────────
 # PI Parameters 

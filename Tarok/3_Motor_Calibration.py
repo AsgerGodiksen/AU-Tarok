@@ -8,7 +8,7 @@ from ASGER_METHODS import*
 
 if __name__ == "__main__":
     try:
-        bus0 = can.interface.Bus(channel="can3", interface="socketcan")
+        bus0 = can.interface.Bus(channel="can1", interface="socketcan")
         #bus0.flush_tx_buffer()		# Clean any CAN signals on the line
         for i in range(100):		# Now Listens for any signals 100 times with 0,001 s in between. Prints if any.
             msg = bus0.recv(0.01)
