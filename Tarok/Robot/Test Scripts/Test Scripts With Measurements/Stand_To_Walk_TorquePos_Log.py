@@ -45,6 +45,8 @@ PHASE_OFFSET = Tarok.CRAWL_OFFSETS_Mixed
 
 # Tabel: 2, x, 15, 26 og 30
 
+#_______________
+# Test 31 er efter vi har 'alinged' 6 motorer mere for at se om dette gjrode en forskel i torque measurement
 
 test_number = 31
 
