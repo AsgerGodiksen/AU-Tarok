@@ -45,10 +45,12 @@ PHASE_OFFSET = Tarok.CRAWL_OFFSETS_Mixed
 
 # Tabel: 2, x, 15, 26 og 30
 
-#_______________
+#______________
 # Test 31 er efter vi har 'alinged' 6 motorer mere for at se om dette gjrode en forskel i torque measurement
 
-test_number = 31
+# Test 32-41 er med tunede parametre for at undersøge usikkerhed - så altså helt identiske tests på papiret
+
+test_number = 33
 
 # ─────────────────────────────────────────────────────────────────────────────
 # PI Parameters 
@@ -97,8 +99,6 @@ PI_Params = {
 # ─────────────────────────────────────────────────────────────────────────────
 print("Performing pre-computations...")
 # Offsets for COM transfer during stand phase
-x_offset = 0.03 # [m] how much to move COM forward during transfer
-y_offset = 0.04 # [m] how much to move COM to the left during transfer
 x_offset = 0.025 # [m] how much to move COM forward during transfer
 y_offset = 0.035 # [m] how much to move COM to the left during transfer
 
