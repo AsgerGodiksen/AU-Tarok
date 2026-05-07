@@ -243,7 +243,7 @@ for leg, ax in leg_axes2.items():
     ax.axhline(0, color="black", linewidth=0.8, linestyle=":", zorder=2)
     ax.set_title(f"{leg} Leg", fontsize=11)
     ax.set_ylabel("Error (deg)")
-    ax.set_ylim(-0.1, 0.1)
+    ax.set_ylim(-0.15, 0.15)
     ax.set_xlim(left=0)
     ax.grid(True, alpha=0.3)
     ax.legend(loc="upper right", fontsize=7,

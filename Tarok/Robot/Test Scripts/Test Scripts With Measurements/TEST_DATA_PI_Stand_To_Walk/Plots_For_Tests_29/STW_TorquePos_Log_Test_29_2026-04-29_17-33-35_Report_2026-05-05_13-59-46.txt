@@ -1,0 +1,43 @@
+==============================================================
+  Bezier Walk — Position Tracking Report
+  Generated : 2026-05-05 13:59:46
+  CSV       : STW_TorquePos_Log_Test_29_2026-04-29_17-33-35.csv
+  Duration  : 30.0 s  (3 cycles)
+==============================================================
+
+Leg   Joint    RMS error (deg)   Max |error| (deg)   RMS torque (Nm)
+────────────────────────────────────────────────────────────────────
+FL    J1                 0.105               0.444
+FL    J2                 0.315               1.685
+FL    J3                 0.454               2.962
+FR    J1                 0.106               0.436
+FR    J2                 0.320               1.696
+FR    J3                 0.482               2.757
+HL    J1                 2.820               5.977
+HL    J2                28.843              48.301
+HL    J3                43.395              79.932
+HR    J1                 0.113               0.433
+HR    J2                 0.363               2.385
+HR    J3                 0.489               3.013
+────────────────────────────────────────────────────────────────────
+Sum of 12 RMS position errors: 77.803 deg
+────────────────────────────────────────────────────────────────────
+
+PI Parameters (FL leg)
+────────────────────────────────────────────────────────────────────
+PID Parameters — read 2026-04-29 17:33:35
+Leg FL
+------------------------------
+  J1 (ID 0x141):
+    Position Loop : Kp=  120  Ki=  100
+    Speed Loop    : Kp=   60  Ki=   80
+    Torque Loop   : Kp=   60  Ki=   60
+  J2 (ID 0x142):
+    Position Loop : Kp=  120  Ki=  100
+    Speed Loop    : Kp=   60  Ki=   80
+    Torque Loop   : Kp=   60  Ki=   60
+  J3 (ID 0x143):
+    Position Loop : Kp=  120  Ki=  100
+    Speed Loop    : Kp=   60  Ki=   80
+    Torque Loop   : Kp=   60  Ki=   60
+
