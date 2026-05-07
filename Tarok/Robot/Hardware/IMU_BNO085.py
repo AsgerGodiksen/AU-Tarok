@@ -4,7 +4,10 @@ import smbus2
 from adafruit_bno08x.i2c import BNO08X_I2C
 from adafruit_bno08x import BNO_REPORT_ROTATION_VECTOR
 from numpy.typing import NDArray
-from .SMBUS2I2C import SMBus2I2C
+try:
+    from .SMBUS2I2C import SMBus2I2C   # when imported as package member
+except ImportError:
+    from SMBUS2I2C import SMBus2I2C    # when run directly
 
 
 def skew(v: NDArray) -> NDArray:

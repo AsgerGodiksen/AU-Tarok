@@ -51,7 +51,7 @@ def load_csv(arg: str | None = None) -> tuple[pd.DataFrame, str]:
             return df, raw
         test_num = int(raw)
 
-    pattern = os.path.join(DATA_DIR, f"TEST_DATA_IMU_Stand_To_Walk", f"STW_IMU_Log_{test_num}_*.csv")
+    pattern = os.path.join(DATA_DIR, f"STW_IMU_Log_{test_num}_*.csv")
     matches = sorted(glob.glob(pattern))
     if not matches:
         print(f"  [ERROR] No CSV found for test {test_num} in {DATA_DIR}")

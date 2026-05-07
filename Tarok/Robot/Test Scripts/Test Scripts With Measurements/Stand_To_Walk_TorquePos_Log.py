@@ -22,6 +22,8 @@ LEGS = Tarok.LEGS
 COLORS = Tarok.COLORS
 PHASE_OFFSET = Tarok.CRAWL_OFFSETS_Mixed
 
+# All of these test are done with x_scaling = 0.15 and y_scaling = 0.4 as well as other parameters from 1/5 in txt file
+
 # Floating manufacturing: test 1
 
 # Manufacturing: Test 2
@@ -50,7 +52,7 @@ PHASE_OFFSET = Tarok.CRAWL_OFFSETS_Mixed
 
 # Test 32-41 er med tunede parametre for at undersøge usikkerhed - så altså helt identiske tests på papiret
 
-test_number = 33
+test_number = 42
 
 # ─────────────────────────────────────────────────────────────────────────────
 # PI Parameters 

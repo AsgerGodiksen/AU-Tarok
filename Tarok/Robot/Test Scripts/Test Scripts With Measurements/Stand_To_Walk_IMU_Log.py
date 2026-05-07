@@ -20,9 +20,11 @@ from Robot import *
 Tarok = TarokDymensions()
 PHASE_OFFSET = Tarok.CRAWL_OFFSETS_Mixed
 
+# Test 1: Floating in test stand
+# Test 2 & 3: Test on the ground
 
 # Test number for file naming
-test_number = 1
+test_number = 3
 
 # ─────────────────────────────────────────────────────────────────────────────
 # PI Parameters 
@@ -470,7 +472,7 @@ for bus in [bus0, bus1, bus2, bus3]:
     Position_Control(bus, ID_1, 0, 30)
     Position_Control(bus, ID_2, 0, 30)
     Position_Control(bus, ID_3, 0, 30)
-time.sleep(6)
+time.sleep(10)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Move to Stand Position
@@ -488,7 +490,7 @@ Position_Control(bus2,ID_3,Theta_HL_stand[2],30)
 Position_Control(bus3,ID_1,Theta_HR_stand[0],30)
 Position_Control(bus3,ID_2,Theta_HR_stand[1],30)
 Position_Control(bus3,ID_3,Theta_HR_stand[2],30)
-time.sleep(10)
+time.sleep(15)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Move to Walk Height
