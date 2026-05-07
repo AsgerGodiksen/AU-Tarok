@@ -12,6 +12,7 @@
 # Press "S" to switch to standing pose state, which is the basis state that every other state starts and ends in. This is also the initial state when starting the script, so it will start in standing pose.
 # Press "U" to switch to up/down state, press "S" to switch back to standing pose state
 # Press "W" to switch to walking gait state, press "S" to switch back to standing pose state
+# Press "R" to switch to reverse walking gait state, press "S" to switch back to standing pose state
 
 # Additional states can be added as needed
 
@@ -33,7 +34,6 @@ State = "STAND"             # Define state variable, initial state is standing p
 
 ### PARAMETER IMPORTS ###
 Tarok = TarokDymensions()
-#PHASE_OFFSET = Tarok.CRAWL_OFFSETS
 PHASE_OFFSET = Tarok.CRAWL_OFFSETS_Mixed
 
 ## PI PARAMETERS ## 
@@ -57,18 +57,6 @@ pi_low_battery = {
     'torque_ki': 25
 }
 
-'''
-# Up/Down state PI parameters (Manufacturing parameters)
-pi_up_down = {
-    'angle_kp':  100,
-    'angle_ki':  100,
-    'speed_kp':  50,
-    'speed_ki':  40,
-    'torque_kp': 50,
-    'torque_ki': 50
-}
-'''
-
 # Up/Down state PI parameters (compromise parameters)
 pi_up_down = {
     'angle_kp':  110,
@@ -79,29 +67,7 @@ pi_up_down = {
     'torque_ki': 25
 }
 
-'''
-# Bezier walk state PI parameters - currently the ones tuned for up/down (Test 19)
-pi_bezier_walk = {
-    'angle_kp':  110,
-    'angle_ki':  40,
-    'speed_kp':  55,
-    'speed_ki':  16,
-    'torque_kp': 55,
-    'torque_ki': 20
-}
-'''
-'''
-# Bezier walk state PI parameters - Manufacturing - the ones used in Test_Bezier_Transfer_With_Stand.py
-pi_bezier_walk = {
-    'angle_kp':  100,
-    'angle_ki':  100,
-    'speed_kp':  50,
-    'speed_ki':  40,
-    'torque_kp': 50,
-    'torque_ki': 50
-}
-'''
-# Bezier walk state PI parameters - Tuned parameters from tuning 30/4 2026
+# Bezier walk state PI parameters - Tuned parameters (from tuning 30/4 2026)
 pi_bezier_walk = {
     'angle_kp':  120,
     'angle_ki':  90,
@@ -518,15 +484,15 @@ def Bezier_Walk_State(bus0, bus1, bus2, bus3, ID_1, ID_2, ID_3, Direction = "For
     print("Performing pre-computations for BEZIER WALK GAIT state...")
 
     # Offsets for COM transfer during stand phase
-    x_offset = 0.03 # [m] how much to move COM forward/backward during transfer
-    y_offset = 0.04 # [m] how much to move COM to the left/right during transfer
+    x_offset = 0.025 # [m] how much to move COM forward/backward during transfer
+    y_offset = 0.035 # [m] how much to move COM to the left/right during transfer
 
     # Time parameters
     dt = 0.005 # seconds (200 Hz)
 
-    Swing_Time_Scalar = 0.8    # [s] swing phase duration
+    Swing_Time_Scalar = 1    # [s] swing phase duration
     Stand_Time_Scalar  = 3 * Swing_Time_Scalar # [s] stand phase duration
-    Transfer_Time_Scalar = 1.2 # [s] duration of the COM transfer
+    Transfer_Time_Scalar = 1.5 # [s] duration of the COM transfer
 
     total_time = Swing_Time_Scalar + Stand_Time_Scalar
     Total_Time_Steps = int(total_time / dt)
