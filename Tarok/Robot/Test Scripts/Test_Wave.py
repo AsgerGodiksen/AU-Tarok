@@ -60,10 +60,6 @@ pi_bezier_walk = {
 ## PRECOMPUTATIONS ##
 print("Performing pre-computations...")
 
-# Parameters From Tarok Dimensions
-Tarok = TarokDymensions()
-PHASE_OFFSET = Tarok.CRAWL_OFFSETS_Mixed
-
 # Offsets for COM transfer during stand phase
 x_offset = 0.06 # [m] how much to move COM forward during transfer
 y_offset = 0.05 # [m] how much to move COM to the left during transfer
@@ -80,7 +76,6 @@ t_Offset_Transfer = np.linspace(0, Offset_Transfer_Time, Offset_Transfer_Steps)
 Wave_Time = 10 # Seconds
 Wave_Time_Steps = int(Wave_Time / dt) 
 t_Wave = np.linspace(0, Wave_Time, Wave_Time_Steps)
-
 
 # ----------------------------- #
 ### STAND GENERATION ###
