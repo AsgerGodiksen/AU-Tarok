@@ -207,7 +207,7 @@ V_HL_body_Wave = np.zeros((3, len(t_Wave))) # Shape (3, len(t_Wave)), where each
 V_HR_body_Wave = np.zeros((3, len(t_Wave))) # Shape (3, len(t_Wave)), where each column is zero velocity
 
 # Generate wave trajectory for front right leg
-# Move foot 20 cm forward and 10 cm up  in 3 seconds using cos interpolation
+# Move foot 25 cm forward and 15 cm up  in 3 seconds using cos interpolation
 # Then move foot 5 cm up and 5 down  2 times using cos interpolation with a period of 2 seonds 
 # Then move foot back to offset position in 3 seconds using cos interpolation
 
@@ -216,17 +216,17 @@ t_Stand_To_Wave = np.linspace(0, 3, int(3 / dt))
 t_Wave_Up_Down = np.linspace(0, 1, int(1 / dt))
 
 # Compute wave trajectory for front right leg
-P_FR_body_Stand_To_Wave = cos_interp(t_Stand_To_Wave, P_FR_body_Offset[:, -1].reshape((3, 1)), P_FR_body_Offset[:, -1].reshape((3, 1)) + np.array([[0.2], [0], [0.1]]), 0, 3)
-P_FR_body_Wave_Up = cos_interp(t_Wave_Up_Down, P_FR_body_Stand_To_Wave[:, -1].reshape((3, 1)), P_FR_body_Offset[:, -1].reshape((3, 1)) + np.array([[0.2], [0], [0.2]]), 0, 1)
-P_FR_body_Wave_Down = cos_interp(t_Wave_Up_Down, P_FR_body_Wave_Up[:, -1].reshape((3, 1)), P_FR_body_Offset[:, -1].reshape((3, 1)) + np.array([[0.2], [0], [0.1]]), 0, 1)
+P_FR_body_Stand_To_Wave = cos_interp(t_Stand_To_Wave, P_FR_body_Offset[:, -1].reshape((3, 1)), P_FR_body_Offset[:, -1].reshape((3, 1)) + np.array([[0.25], [0], [0.15]]), 0, 3)
+P_FR_body_Wave_Up = cos_interp(t_Wave_Up_Down, P_FR_body_Stand_To_Wave[:, -1].reshape((3, 1)), P_FR_body_Offset[:, -1].reshape((3, 1)) + np.array([[0.25], [0], [0.25]]), 0, 1)
+P_FR_body_Wave_Down = cos_interp(t_Wave_Up_Down, P_FR_body_Wave_Up[:, -1].reshape((3, 1)), P_FR_body_Offset[:, -1].reshape((3, 1)) + np.array([[0.25], [0], [0.15]]), 0, 1)
 P_FR_body_Wave_To_Stand = cos_interp(t_Stand_To_Wave, P_FR_body_Wave_Down[:, -1].reshape((3, 1)), P_FR_body_Offset[:, -1].reshape((3, 1)), 0, 3)
 # Combine wave trajectory segments for front right leg
 P_FR_body_Wave = np.hstack((P_FR_body_Stand_To_Wave, P_FR_body_Wave_Up, P_FR_body_Wave_Down, P_FR_body_Wave_Up, P_FR_body_Wave_Down, P_FR_body_Wave_To_Stand))
 
 # Compute wave velocities for front right leg
-V_FR_body_Stand_To_Wave = cos_interp_dot(t_Stand_To_Wave, P_FR_body_Offset[:, -1].reshape((3, 1)), P_FR_body_Offset[:, -1].reshape((3, 1)) + np.array([[0.2], [0], [0.1]]), 0, 3)
-V_FR_body_Wave_Up = cos_interp_dot(t_Wave_Up_Down, P_FR_body_Stand_To_Wave[:, -1].reshape((3, 1)), P_FR_body_Offset[:, -1].reshape((3, 1)) + np.array([[0.2], [0], [0.2]]), 0, 1)
-V_FR_body_Wave_Down = cos_interp_dot(t_Wave_Up_Down, P_FR_body_Wave_Up[:, -1].reshape((3, 1)), P_FR_body_Offset[:, -1].reshape((3, 1)) + np.array([[0.2], [0], [0.1]]), 0, 1)
+V_FR_body_Stand_To_Wave = cos_interp_dot(t_Stand_To_Wave, P_FR_body_Offset[:, -1].reshape((3, 1)), P_FR_body_Offset[:, -1].reshape((3, 1)) + np.array([[0.25], [0], [0.15]]), 0, 3)
+V_FR_body_Wave_Up = cos_interp_dot(t_Wave_Up_Down, P_FR_body_Stand_To_Wave[:, -1].reshape((3, 1)), P_FR_body_Offset[:, -1].reshape((3, 1)) + np.array([[0.25], [0], [0.25]]), 0, 1)
+V_FR_body_Wave_Down = cos_interp_dot(t_Wave_Up_Down, P_FR_body_Wave_Up[:, -1].reshape((3, 1)), P_FR_body_Offset[:, -1].reshape((3, 1)) + np.array([[0.25], [0], [0.15]]), 0, 1)
 V_FR_body_Wave_To_Stand = cos_interp_dot(t_Stand_To_Wave, P_FR_body_Wave_Down[:, -1].reshape((3, 1)), P_FR_body_Offset[:, -1].reshape((3, 1)), 0, 3)
 # Combine wave velocity segments for front right leg
 V_FR_body_Wave = np.hstack((V_FR_body_Stand_To_Wave, V_FR_body_Wave_Up, V_FR_body_Wave_Down, V_FR_body_Wave_Up, V_FR_body_Wave_Down, V_FR_body_Wave_To_Stand))
