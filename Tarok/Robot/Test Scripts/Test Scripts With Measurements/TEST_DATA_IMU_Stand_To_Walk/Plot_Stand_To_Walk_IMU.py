@@ -15,11 +15,14 @@ import glob
 import datetime
 import re
 
+import matplotlib
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
-
+import matplotlib.patches as mpatches
+    
+matplotlib.rcParams["font.family"] = "Liberation Serif"
 # ─────────────────────────────────────────────────────────────────────────────
 # Configuration
 # ─────────────────────────────────────────────────────────────────────────────
@@ -30,6 +33,18 @@ SWING_TIME    = 1.0
 STAND_TIME    = 3.0
 TRANSFER_TIME = 1.5
 CYCLE_TIME    = SWING_TIME + STAND_TIME + 4 * TRANSFER_TIME  # 8 s
+
+LABEL_SIZE  = 17
+TICK_SIZE   = 13
+LEGEND_SIZE = 13
+
+# Swing-phase intervals within one 10 s gait cycle (start, end) in seconds
+SWING_INTERVALS = {
+    "HL": (0.75, 1.75),
+    "FL": (3.25, 4.25),
+    "HR": (5.75, 6.75),
+    "FR": (8.25, 9.25),
+}
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -88,35 +103,55 @@ cycle_boundaries = [i * CYCLE_TIME for i in range(1, num_cycles + 1)
 # ─────────────────────────────────────────────────────────────────────────────
 # Helper: shared axis formatting
 # ─────────────────────────────────────────────────────────────────────────────
-def format_ax(ax, title, ylabel):
+def add_swing_spans(ax, t_start, t_end):
+    """Draw light-gray boxes for every swing phase of all legs across all cycles."""
+    for s0, s1 in SWING_INTERVALS.values():
+        cycle = 0
+        while True:
+            x0 = t_start + cycle * CYCLE_TIME + s0
+            x1 = t_start + cycle * CYCLE_TIME + s1
+            if x0 >= t_end:
+                break
+            ax.axvspan(x0, min(x1, t_end), color="lightgray", alpha=0.6, zorder=0)
+            cycle += 1
+
+
+def format_ax(ax, ylabel):
     for tb in cycle_boundaries:
         ax.axvline(tb, color="grey", linewidth=0.9, linestyle="--", alpha=0.5)
     ax.axhline(0, color="grey", linewidth=0.8, linestyle=":")
-    ax.set_title(title, fontsize=11)
-    ax.set_ylabel(ylabel)
-    ax.set_xlabel("Time (s)")
+    ax.set_ylabel(ylabel, fontsize=LABEL_SIZE)
+    ax.set_xlabel("Time (s)", fontsize=LABEL_SIZE)
     ax.set_xlim(t[0], t[-1])
     ax.grid(True, alpha=0.3)
+    ax.tick_params(labelsize=TICK_SIZE)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
 # Figure — Pitch and Roll
 # ══════════════════════════════════════════════════════════════════════════════
 fig, (ax_pitch, ax_roll) = plt.subplots(1, 2, figsize=(14, 5))
-fig.suptitle("IMU Orientation — Bezier Walk  (Pitch & Roll)",
-             fontsize=13, fontweight="bold")
-plt.subplots_adjust(left=0.07, right=0.97, top=0.88, bottom=0.12, wspace=0.30)
 
-ax_pitch.plot(t, pitch, color="black",  linewidth=1.3, label="Pitch")
-ax_roll.plot( t, roll,  color="purple", linewidth=1.3, label="Roll")
+add_swing_spans(ax_pitch, t[0], t[-1])
+add_swing_spans(ax_roll,  t[0], t[-1])
 
-format_ax(ax_pitch, "Pitch", "Pitch (deg)")
-format_ax(ax_roll,  "Roll",  "Roll (deg)")
+ax_pitch.plot(t, pitch, color="black",  linewidth=1.3)
+ax_roll.plot( t, roll,  color="purple", linewidth=1.3)
 
-ax_pitch.legend(fontsize=9)
-ax_roll.legend(fontsize=9)
+format_ax(ax_pitch, "Pitch (°)")
+format_ax(ax_roll,  "Roll (°)")
 
+pitch_handle = mlines.Line2D([], [], color="black",  linewidth=1.3, label="Pitch")
+roll_handle  = mlines.Line2D([], [], color="purple", linewidth=1.3, label="Roll")
+cycle_handle = mlines.Line2D([], [], color="grey", linewidth=0.9,
+                              linestyle="--", alpha=0.5, label="New Cycle")
+swing_handle = mpatches.Patch(facecolor="lightgray", alpha=0.6, label="Swing Phase")
+
+fig.legend(handles=[pitch_handle, roll_handle, cycle_handle, swing_handle],
+           loc="lower center", ncol=4, fontsize=LEGEND_SIZE,
+           framealpha=0.9, bbox_to_anchor=(0.5, -0.03))
 fig.tight_layout()
+fig.subplots_adjust(bottom=0.18)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -134,7 +169,7 @@ emit(f"  Generated : {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 emit(f"  CSV       : {os.path.basename(csv_path)}")
 emit(f"  Duration  : {t_duration:.1f} s  ({num_cycles} cycles)")
 emit("=" * 54)
-emit(f"\n{'Channel':<10}{'Mean (deg)':>12}{'Std (deg)':>12}{'Min (deg)':>12}{'Max (deg)':>12}")
+emit(f"\n{'Channel':<10}{'Mean (°)':>12}{'Std (°)':>12}{'Min (°)':>12}{'Max (°)':>12}")
 emit("─" * 58)
 for label, arr in [("Pitch", pitch), ("Roll", roll)]:
     valid = arr[~np.isnan(arr)]
