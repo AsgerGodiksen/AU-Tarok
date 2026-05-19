@@ -21,8 +21,11 @@ import datetime
 
 import numpy as np
 import pandas as pd
+import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
+
+matplotlib.rcParams["font.family"] = "Liberation Serif"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Configuration
@@ -32,8 +35,13 @@ DATA_DIR = os.path.dirname(os.path.abspath(__file__))
 LEGS         = ["FL", "FR", "HL", "HR"]
 JOINTS       = ["J1", "J2", "J3"]
 JOINT_COLORS = ["tab:blue", "tab:orange", "tab:green"]
-JOINT_LABELS = [r"$\theta_1$ (Hip)", r"$\theta_2$ (Upper)", r"$\theta_3$ (Lower)"]
+JOINT_LABELS = ["θ1", "θ2", "θ3"]
 LEG_POS      = {"FL": (0, 0), "FR": (0, 1), "HL": (1, 0), "HR": (1, 1)}
+
+LABEL_SIZE  = 17
+TICK_SIZE   = 13
+TITLE_SIZE  = 13
+LEGEND_SIZE = 13
 
 SWING_TIME    = 1.0
 STAND_TIME    = 3.0
@@ -52,10 +60,11 @@ joint_handles = [
 def format_ax(ax, leg, ylabel, t, cycle_boundaries):
     for tb in cycle_boundaries:
         ax.axvline(tb, color="grey", linewidth=0.9, linestyle="--", alpha=0.5)
-    ax.set_title(f"{leg} Leg", fontsize=11)
-    ax.set_ylabel(ylabel)
+    ax.set_title(f"{leg} Leg", fontsize=TITLE_SIZE, fontweight="bold")
+    ax.set_ylabel(ylabel, fontsize=LABEL_SIZE)
     ax.set_xlim(t[0], t[-1])
     ax.grid(True, alpha=0.3)
+    ax.tick_params(labelsize=TICK_SIZE)
 
 
 def process_file(csv_path: str) -> None:
@@ -75,42 +84,42 @@ def process_file(csv_path: str) -> None:
         format_ax(ax, leg, ylabel, t, cycle_boundaries)
 
     # ── Figure 1 — Desired Positions ─────────────────────────────────────────
-    fig1, axes1 = plt.subplots(2, 2, figsize=(15, 9))
-    fig1.suptitle("Desired (Commanded) Joint Positions — Bezier Walk",
-                  fontsize=13, fontweight="bold")
+    fig1, axes1 = plt.subplots(2, 2, figsize=(14, 8), sharex=True)
     for leg, (r, c) in LEG_POS.items():
         ax = axes1[r, c]
         for jname, jcol in zip(JOINTS, JOINT_COLORS):
             ax.plot(t, df[f"{leg}_{jname}_Cmd (deg)"].values, color=jcol, linewidth=1.3)
         ax.set_ylim(-80, 80)
         fmt(ax, leg, "Position (deg)")
-    axes1[1, 0].set_xlabel("Time (s)")
-    axes1[1, 1].set_xlabel("Time (s)")
-    axes1[0, 0].set_ylabel("Position (deg)")
-    axes1[1, 0].set_ylabel("Position (deg)")
+    for ax in [axes1[0, 1], axes1[1, 1]]:
+        ax.tick_params(labelleft=False)
+        ax.set_ylabel("")
+    axes1[1, 0].set_xlabel("Time (s)", fontsize=LABEL_SIZE)
+    axes1[1, 1].set_xlabel("Time (s)", fontsize=LABEL_SIZE)
     fig1.legend(handles=joint_handles, loc="lower center",
-                ncol=3, fontsize=9, framealpha=0.9, bbox_to_anchor=(0.5, -0.01))
-    fig1.tight_layout(rect=[0, 0.04, 1, 1])
+                ncol=3, fontsize=LEGEND_SIZE, framealpha=0.9, bbox_to_anchor=(0.5, -0.03))
+    fig1.tight_layout()
+    fig1.subplots_adjust(bottom=0.1)
 
     # ── Figure 2 — Measured Positions ────────────────────────────────────────
-    fig2, axes2 = plt.subplots(2, 2, figsize=(15, 9))
-    fig2.suptitle("Measured Joint Positions — Bezier Walk",
-                  fontsize=13, fontweight="bold")
+    fig2, axes2 = plt.subplots(2, 2, figsize=(14, 8), sharex=True)
     for leg, (r, c) in LEG_POS.items():
         ax = axes2[r, c]
         for jname, jcol in zip(JOINTS, JOINT_COLORS):
             ax.plot(t, df[f"{leg}_{jname}_Pos (deg)"].values, color=jcol, linewidth=1.3)
         fmt(ax, leg, "Position (deg)")
-    axes2[1, 0].set_xlabel("Time (s)")
-    axes2[1, 1].set_xlabel("Time (s)")
+    for ax in [axes2[0, 1], axes2[1, 1]]:
+        ax.tick_params(labelleft=False)
+        ax.set_ylabel("")
+    axes2[1, 0].set_xlabel("Time (s)", fontsize=LABEL_SIZE)
+    axes2[1, 1].set_xlabel("Time (s)", fontsize=LABEL_SIZE)
     fig2.legend(handles=joint_handles, loc="lower center",
-                ncol=3, fontsize=9, framealpha=0.9, bbox_to_anchor=(0.5, -0.01))
-    fig2.tight_layout(rect=[0, 0.04, 1, 1])
+                ncol=3, fontsize=LEGEND_SIZE, framealpha=0.9, bbox_to_anchor=(0.5, -0.03))
+    fig2.tight_layout()
+    fig2.subplots_adjust(bottom=0.1)
 
     # ── Figure 3 — Position Error ─────────────────────────────────────────────
-    fig3, axes3 = plt.subplots(2, 2, figsize=(15, 9))
-    fig3.suptitle("Position Error (Measured − Desired) — Bezier Walk",
-                  fontsize=13, fontweight="bold")
+    fig3, axes3 = plt.subplots(2, 2, figsize=(14, 8), sharex=True)
     for leg, (r, c) in LEG_POS.items():
         ax = axes3[r, c]
         for jname, jcol in zip(JOINTS, JOINT_COLORS):
@@ -119,18 +128,20 @@ def process_file(csv_path: str) -> None:
         ax.axhline(0, color="black", linewidth=0.8, linestyle=":", zorder=1)
         ax.set_ylim(-3, 3)
         fmt(ax, leg, "Error (deg)")
-    axes3[1, 0].set_xlabel("Time (s)")
-    axes3[1, 1].set_xlabel("Time (s)")
+    for ax in [axes3[0, 1], axes3[1, 1]]:
+        ax.tick_params(labelleft=False)
+        ax.set_ylabel("")
+    axes3[1, 0].set_xlabel("Time (s)", fontsize=LABEL_SIZE)
+    axes3[1, 1].set_xlabel("Time (s)", fontsize=LABEL_SIZE)
     fig3.legend(handles=joint_handles, loc="lower center",
-                ncol=3, fontsize=9, framealpha=0.9, bbox_to_anchor=(0.5, -0.01))
-    fig3.tight_layout(rect=[0, 0.04, 1, 1])
+                ncol=3, fontsize=LEGEND_SIZE, framealpha=0.9, bbox_to_anchor=(0.5, -0.03))
+    fig3.tight_layout()
+    fig3.subplots_adjust(bottom=0.1)
 
     # ── Figure 4 — Torques ────────────────────────────────────────────────────
     torque_cols = [f"{leg}_{jname}_Torque" for leg in LEGS for jname in JOINTS]
     torque_ylim = int(np.ceil(df[torque_cols].abs().values.max()))
-    fig4, axes4 = plt.subplots(2, 2, figsize=(15, 9))
-    fig4.suptitle("Measured Joint Torques — Bezier Walk",
-                  fontsize=13, fontweight="bold")
+    fig4, axes4 = plt.subplots(2, 2, figsize=(14, 8), sharex=True)
     t_ds = t[::2]
     for leg, (r, c) in LEG_POS.items():
         ax = axes4[r, c]
@@ -140,16 +151,18 @@ def process_file(csv_path: str) -> None:
         ax.axhline(0, color="black", linewidth=0.8, linestyle=":", zorder=1)
         ax.set_ylim(-torque_ylim, torque_ylim)
         fmt(ax, leg, "Torque (Nm)")
-    axes4[1, 0].set_xlabel("Time (s)")
-    axes4[1, 1].set_xlabel("Time (s)")
+    for ax in [axes4[0, 1], axes4[1, 1]]:
+        ax.tick_params(labelleft=False)
+        ax.set_ylabel("")
+    axes4[1, 0].set_xlabel("Time (s)", fontsize=LABEL_SIZE)
+    axes4[1, 1].set_xlabel("Time (s)", fontsize=LABEL_SIZE)
     fig4.legend(handles=joint_handles, loc="lower center",
-                ncol=3, fontsize=9, framealpha=0.9, bbox_to_anchor=(0.5, -0.01))
-    fig4.tight_layout(rect=[0, 0.04, 1, 1])
+                ncol=3, fontsize=LEGEND_SIZE, framealpha=0.9, bbox_to_anchor=(0.5, -0.03))
+    fig4.tight_layout()
+    fig4.subplots_adjust(bottom=0.1)
 
     # ── Figure 5 — Zoomed Position Error ──────────────────────────────────────
-    fig5, axes5 = plt.subplots(2, 2, figsize=(15, 9))
-    fig5.suptitle("Zoomed Position Error (Measured − Desired) — Bezier Walk",
-                  fontsize=13, fontweight="bold")
+    fig5, axes5 = plt.subplots(2, 2, figsize=(14, 8), sharex=True)
     for leg, (r, c) in LEG_POS.items():
         ax = axes5[r, c]
         for jname, jcol in zip(JOINTS, JOINT_COLORS):
@@ -158,11 +171,15 @@ def process_file(csv_path: str) -> None:
         ax.axhline(0, color="black", linewidth=0.8, linestyle=":", zorder=1)
         ax.set_ylim(-0.5, 0.5)
         fmt(ax, leg, "Error (deg)")
-    axes5[1, 0].set_xlabel("Time (s)")
-    axes5[1, 1].set_xlabel("Time (s)")
+    for ax in [axes5[0, 1], axes5[1, 1]]:
+        ax.tick_params(labelleft=False)
+        ax.set_ylabel("")
+    axes5[1, 0].set_xlabel("Time (s)", fontsize=LABEL_SIZE)
+    axes5[1, 1].set_xlabel("Time (s)", fontsize=LABEL_SIZE)
     fig5.legend(handles=joint_handles, loc="lower center",
-                ncol=3, fontsize=9, framealpha=0.9, bbox_to_anchor=(0.5, -0.01))
-    fig5.tight_layout(rect=[0, 0.04, 1, 1])
+                ncol=3, fontsize=LEGEND_SIZE, framealpha=0.9, bbox_to_anchor=(0.5, -0.03))
+    fig5.tight_layout()
+    fig5.subplots_adjust(bottom=0.1)
 
     # ── Statistics report ─────────────────────────────────────────────────────
     lines: list[str] = []
@@ -249,8 +266,28 @@ def process_file(csv_path: str) -> None:
 # ─────────────────────────────────────────────────────────────────────────────
 # Main — process all CSV files
 # ─────────────────────────────────────────────────────────────────────────────
+
+# Discover all available test CSV files sorted by test number
+all_csv_files = sorted(
+    glob.glob(os.path.join(DATA_DIR, "STW_TorquePos_Log_Test_*.csv")),
+    key=lambda p: int(m.group(1)) if (m := re.search(r"_Test_(\d+)_", p)) else 0,
+)
+
+if not all_csv_files:
+    print("[ERROR] No CSV files found in the directory.")
+    sys.exit(1)
+
+# Determine available test numbers
+test_numbers = []
+for p in all_csv_files:
+    m = re.search(r"_Test_(\d+)_", p)
+    if m:
+        test_numbers.append(int(m.group(1)))
+
+print(f"\nAvailable tests: {test_numbers}")
+
 if len(sys.argv) > 1:
-    # Accept explicit file paths or test numbers as arguments
+    # Command-line mode: accept individual test numbers or file paths
     csv_files = []
     for arg in sys.argv[1:]:
         if os.path.isfile(arg):
@@ -261,13 +298,35 @@ if len(sys.argv) > 1:
         else:
             print(f"[WARN] Skipping unrecognised argument: {arg}")
 else:
-    csv_files = sorted(
-        glob.glob(os.path.join(DATA_DIR, "STW_TorquePos_Log_Test_*.csv")),
-        key=lambda p: int(m.group(1)) if (m := re.search(r"_Test_(\d+)_", p)) else 0,
+    # Interactive mode: ask for start and stop test numbers
+    def prompt_test_number(prompt_text: str, available: list[int]) -> int:
+        while True:
+            raw = input(prompt_text).strip()
+            if raw == "":
+                return available[0] if "start" in prompt_text.lower() else available[-1]
+            if raw.isdigit() and int(raw) in available:
+                return int(raw)
+            print(f"  Please enter one of: {available}")
+
+    start_num = prompt_test_number(
+        f"Start from test number [{test_numbers[0]}]: ", test_numbers
+    )
+    stop_num = prompt_test_number(
+        f"Stop at test number [{test_numbers[-1]}]: ", test_numbers
     )
 
+    if start_num > stop_num:
+        print(f"[ERROR] Start test ({start_num}) is greater than stop test ({stop_num}).")
+        sys.exit(1)
+
+    csv_files = [
+        p for p, n in zip(all_csv_files, test_numbers)
+        if start_num <= n <= stop_num
+    ]
+    print(f"Processing tests {start_num} to {stop_num} ({len(csv_files)} file(s)).")
+
 if not csv_files:
-    print("[ERROR] No CSV files found.")
+    print("[ERROR] No matching CSV files found for the selected range.")
     sys.exit(1)
 
 print(f"\nFound {len(csv_files)} CSV file(s) to process.")

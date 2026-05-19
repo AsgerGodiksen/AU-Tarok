@@ -3,12 +3,21 @@ import glob
 import sys
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib
+
+matplotlib.rcParams["font.family"] = "Liberation Serif"
 
 DATA_DIR = os.path.dirname(os.path.abspath(__file__))
 
 LEGS   = ["FL", "FR", "HL", "HR"]
-JOINTS = ["J1", "J2", "J3"]
+JOINTS       = ["J1", "J2", "J3"]
+JOINT_LABELS = ["θ1", "θ2", "θ3"]
 COLORS = ["tab:blue", "tab:orange", "tab:green"]
+
+LABEL_SIZE  = 17
+TICK_SIZE   = 13
+TITLE_SIZE  = 13
+LEGEND_SIZE = 13
 
 # --- Get test number ---
 if len(sys.argv) > 1:
@@ -41,26 +50,34 @@ title_base = os.path.splitext(os.path.basename(csv_path))[0].replace("_", " ")
 
 # ── Figure 1: Torque ──────────────────────────────────────────────────────────
 fig1, axes1 = plt.subplots(2, 2, figsize=(14, 8), sharex=True)
-#fig1.suptitle(f"Torque — {title_base}", fontsize=13, fontweight="bold")
 
 leg_axes1 = {"FL": axes1[0, 0], "FR": axes1[0, 1],
              "HL": axes1[1, 0], "HR": axes1[1, 1]}
 
 for leg, ax in leg_axes1.items():
-    for joint, color in zip(JOINTS, COLORS):
+    for joint, lbl, color in zip(JOINTS, JOINT_LABELS, COLORS):
         col = f"{leg}_{joint}_Torque"
         if col in df.columns:
-            ax.plot(time, df[col], label=joint, color=color, linewidth=1.2)
-    ax.set_title(f"{leg} Leg", fontsize=11)
-    ax.set_ylabel("Torque (Nm)")
+            ax.plot(time, df[col], label=lbl, color=color, linewidth=1.2)
+    ax.set_title(f"{leg} Leg", fontsize=TITLE_SIZE, fontweight="bold")
     ax.set_xlim(t_min, t_max)
     ax.set_ylim(-11, 11)
-    ax.legend(loc="upper right", fontsize=8)
     ax.grid(True, alpha=0.3)
+    ax.tick_params(labelsize=TICK_SIZE)
 
-axes1[1, 0].set_xlabel("Time (s)")
-axes1[1, 1].set_xlabel("Time (s)")
+for ax in [axes1[0, 1], axes1[1, 1]]:
+    ax.tick_params(labelleft=False)
+
+axes1[0, 0].set_ylabel("Torque (Nm)", fontsize=LABEL_SIZE)
+axes1[1, 0].set_ylabel("Torque (Nm)", fontsize=LABEL_SIZE)
+axes1[1, 0].set_xlabel("Time (s)", fontsize=LABEL_SIZE)
+axes1[1, 1].set_xlabel("Time (s)", fontsize=LABEL_SIZE)
+
+handles1, labels1 = axes1[0, 0].get_legend_handles_labels()
+fig1.legend(handles1, labels1, loc="lower center", ncol=len(JOINTS),
+            fontsize=LEGEND_SIZE, bbox_to_anchor=(0.5, 0.0))
 fig1.tight_layout()
+fig1.subplots_adjust(bottom=0.08)
 
 # ── Figure 2: Position ────────────────────────────────────────────────────────
 fig2, axes2 = plt.subplots(2, 2, figsize=(14, 8), sharex=True)

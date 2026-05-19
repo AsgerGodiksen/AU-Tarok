@@ -28,11 +28,20 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
 
+import matplotlib
+matplotlib.rcParams["font.family"] = "Liberation Serif"
+
 DATA_DIR = os.path.dirname(os.path.abspath(__file__))
 
 LEGS         = ["FL", "FR", "HL", "HR"]
 JOINTS       = ["J1", "J2", "J3"]
+JOINT_LABELS = ["θ1", "θ2", "θ3"]
 JOINT_COLORS = ["tab:blue", "tab:orange", "tab:green"]
+
+LABEL_SIZE  = 17
+TICK_SIZE   = 13
+TITLE_SIZE  = 13
+LEGEND_SIZE = 13
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -222,9 +231,7 @@ fig1.tight_layout(rect=[0, 0.05, 1, 1])
 # ══════════════════════════════════════════════════════════════════════════════
 # 4.  Figure 2 — Position Error (Measured − Reference)
 # ══════════════════════════════════════════════════════════════════════════════
-fig2, axes2 = plt.subplots(2, 2, figsize=(15, 9))
-fig2.suptitle("Position Error: Measured − Reference Command",
-              fontsize=13, fontweight="bold")
+fig2, axes2 = plt.subplots(2, 2, figsize=(14, 8), sharex=True)
 
 leg_axes2 = {"FL": axes2[0, 0], "FR": axes2[0, 1],
              "HL": axes2[1, 0], "HR": axes2[1, 1]}
@@ -237,21 +244,42 @@ for leg, ax in leg_axes2.items():
         for j, (jname, jcol) in enumerate(zip(JOINTS, JOINT_COLORS)):
             error = df[f"{leg}_{jname}_Pos (deg)"].values - get_ref_vals(leg, df, j)
             ax.plot(t_meas, error,
-                    color=jcol, linestyle=mstyle, linewidth=1.3,
-                    label=f"T{num} {jname}")
+                    color=jcol, linestyle=mstyle, linewidth=1.3)
 
     ax.axhline(0, color="black", linewidth=0.8, linestyle=":", zorder=2)
-    ax.set_title(f"{leg} Leg", fontsize=11)
-    ax.set_ylabel("Error (deg)")
+    ax.set_title(f"{leg} Leg", fontsize=TITLE_SIZE, fontweight="bold")
     ax.set_ylim(-0.1, 0.1)
     ax.set_xlim(left=0)
     ax.grid(True, alpha=0.3)
-    ax.legend(loc="upper right", fontsize=7,
-              ncol=max(1, len(tests)), framealpha=0.85)
+    ax.tick_params(labelsize=TICK_SIZE)
 
-axes2[1, 0].set_xlabel("Time (s)")
-axes2[1, 1].set_xlabel("Time (s)")
+for ax in [axes2[0, 1], axes2[1, 1]]:
+    ax.tick_params(labelleft=False)
+
+axes2[0, 0].set_ylabel("Error (deg)", fontsize=LABEL_SIZE)
+axes2[1, 0].set_ylabel("Error (deg)", fontsize=LABEL_SIZE)
+axes2[1, 0].set_xlabel("Time (s)", fontsize=LABEL_SIZE)
+axes2[1, 1].set_xlabel("Time (s)", fontsize=LABEL_SIZE)
+
+joint_handles2 = [
+    mlines.Line2D([], [], color=c, linewidth=2, label=lbl)
+    for lbl, c in zip(JOINT_LABELS, JOINT_COLORS)
+]
+test_handles2 = [
+    mlines.Line2D([], [], color="black", linestyle=mstyles[k % len(mstyles)],
+                  linewidth=1.5, label=f"Test {num}")
+    for k, num in enumerate(tests)
+] if len(tests) > 1 else []
+fig2.legend(
+    handles=joint_handles2 + test_handles2,
+    loc="lower center",
+    ncol=len(joint_handles2) + len(test_handles2),
+    fontsize=LEGEND_SIZE,
+    framealpha=0.9,
+    bbox_to_anchor=(0.5, 0.0),
+)
 fig2.tight_layout()
+fig2.subplots_adjust(bottom=0.09)
 
 
 # ══════════════════════════════════════════════════════════════════════════════

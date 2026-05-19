@@ -27,12 +27,20 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
+import matplotlib
+matplotlib.rcParams["font.family"] = "Liberation Serif"
 
 DATA_DIR = os.path.dirname(os.path.abspath(__file__))
 
 LEGS         = ["FL", "FR", "HL", "HR"]
 JOINTS       = ["J1", "J2", "J3"]
+JOINT_LABELS = ["θ1", "θ2", "θ3"]
 JOINT_COLORS = ["tab:blue", "tab:orange", "tab:green"]
+
+LABEL_SIZE  = 17
+TICK_SIZE   = 13
+TITLE_SIZE  = 13
+LEGEND_SIZE = 13
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -159,9 +167,7 @@ print()
 # ══════════════════════════════════════════════════════════════════════════════
 # 3.  Figure 1 — Measured vs Reference Joint Position
 # ══════════════════════════════════════════════════════════════════════════════
-fig1, axes1 = plt.subplots(2, 2, figsize=(15, 9))
-fig1.suptitle("Joint Position: Measured vs Reference Command",
-              fontsize=13, fontweight="bold")
+fig1, axes1 = plt.subplots(2, 2, figsize=(14, 8), sharex=True)
 
 leg_axes1 = {"FL": axes1[0, 0], "FR": axes1[0, 1],
              "HL": axes1[1, 0], "HR": axes1[1, 1]}
@@ -169,13 +175,10 @@ leg_axes1 = {"FL": axes1[0, 0], "FR": axes1[0, 1],
 mstyles = ["-", ":", "-."]
 
 for leg, ax in leg_axes1.items():
-    # Reference — dashed, one color per joint
     for j, (jname, jcol) in enumerate(zip(JOINTS, JOINT_COLORS)):
         ax.plot(t_ref_plot, analytical_plot[leg][:, j],
                 color=jcol, linestyle="--", linewidth=1.4, alpha=0.75,
                 zorder=2)
-
-    # Measured — solid/dotted/dash-dot per test, same joint colors
     for k, (num, df) in enumerate(tests.items()):
         t_meas = df["Timestamp (s)"].values
         mstyle = mstyles[k % len(mstyles)]
@@ -183,19 +186,22 @@ for leg, ax in leg_axes1.items():
             ax.plot(t_meas, df[f"{leg}_{jname}_Pos (deg)"].values,
                     color=jcol, linestyle=mstyle, linewidth=1.5,
                     zorder=3)
-
-    ax.set_title(f"{leg} Leg", fontsize=11)
-    ax.set_ylabel("Position (deg)")
+    ax.set_title(f"{leg} Leg", fontsize=TITLE_SIZE, fontweight="bold")
+    ax.set_ylabel("Position (deg)", fontsize=LABEL_SIZE)
     ax.set_xlim(left=0)
     ax.grid(True, alpha=0.3)
+    ax.tick_params(labelsize=TICK_SIZE)
 
-axes1[1, 0].set_xlabel("Time (s)")
-axes1[1, 1].set_xlabel("Time (s)")
+for ax in [axes1[0, 1], axes1[1, 1]]:
+    ax.tick_params(labelleft=False)
+    ax.set_ylabel("")
 
-# Shared legend
-joint_handles = [
-    mlines.Line2D([], [], color=c, linewidth=2, label=j)
-    for j, c in zip(JOINTS, JOINT_COLORS)
+axes1[1, 0].set_xlabel("Time (s)", fontsize=LABEL_SIZE)
+axes1[1, 1].set_xlabel("Time (s)", fontsize=LABEL_SIZE)
+
+joint_handles1 = [
+    mlines.Line2D([], [], color=c, linewidth=2, label=lbl)
+    for lbl, c in zip(JOINT_LABELS, JOINT_COLORS)
 ]
 source_handles = [
     mlines.Line2D([], [], color="black", linestyle="--", linewidth=1.4,
@@ -207,24 +213,22 @@ for k, num in enumerate(tests):
                       linestyle=mstyles[k % len(mstyles)],
                       linewidth=1.5, label=f"Test {num}")
     )
-
 fig1.legend(
-    handles=joint_handles + source_handles,
+    handles=joint_handles1 + source_handles,
     loc="lower center",
-    ncol=len(joint_handles) + len(source_handles),
-    fontsize=9,
+    ncol=len(joint_handles1) + len(source_handles),
+    fontsize=LEGEND_SIZE,
     framealpha=0.9,
-    bbox_to_anchor=(0.5, -0.02),
+    bbox_to_anchor=(0.5, -0.03),
 )
-fig1.tight_layout(rect=[0, 0.05, 1, 1])
+fig1.tight_layout()
+fig1.subplots_adjust(bottom=0.08)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 4.  Figure 2 — Position Error (Measured − Reference)
 # ══════════════════════════════════════════════════════════════════════════════
-fig2, axes2 = plt.subplots(2, 2, figsize=(15, 9))
-fig2.suptitle("Position Error: Measured − Reference Command",
-              fontsize=13, fontweight="bold")
+fig2, axes2 = plt.subplots(2, 2, figsize=(14, 8), sharex=True)
 
 leg_axes2 = {"FL": axes2[0, 0], "FR": axes2[0, 1],
              "HL": axes2[1, 0], "HR": axes2[1, 1]}
@@ -233,33 +237,49 @@ for leg, ax in leg_axes2.items():
     for k, (num, df) in enumerate(tests.items()):
         t_meas = df["Timestamp (s)"].values
         mstyle = mstyles[k % len(mstyles)]
-
         for j, (jname, jcol) in enumerate(zip(JOINTS, JOINT_COLORS)):
             error = df[f"{leg}_{jname}_Pos (deg)"].values - get_ref_vals(leg, df, j)
-            ax.plot(t_meas, error,
-                    color=jcol, linestyle=mstyle, linewidth=1.3,
-                    label=f"T{num} {jname}")
-
+            ax.plot(t_meas, error, color=jcol, linestyle=mstyle, linewidth=1.3)
     ax.axhline(0, color="black", linewidth=0.8, linestyle=":", zorder=2)
-    ax.set_title(f"{leg} Leg", fontsize=11)
-    ax.set_ylabel("Error (deg)")
+    ax.set_title(f"{leg} Leg", fontsize=TITLE_SIZE, fontweight="bold")
+    ax.set_ylabel("Error (deg)", fontsize=LABEL_SIZE)
     ax.set_ylim(-0.15, 0.15)
     ax.set_xlim(left=0)
     ax.grid(True, alpha=0.3)
-    ax.legend(loc="upper right", fontsize=7,
-              ncol=max(1, len(tests)), framealpha=0.85)
+    ax.tick_params(labelsize=TICK_SIZE)
 
-axes2[1, 0].set_xlabel("Time (s)")
-axes2[1, 1].set_xlabel("Time (s)")
+for ax in [axes2[0, 1], axes2[1, 1]]:
+    ax.tick_params(labelleft=False)
+    ax.set_ylabel("")
+
+axes2[1, 0].set_xlabel("Time (s)", fontsize=LABEL_SIZE)
+axes2[1, 1].set_xlabel("Time (s)", fontsize=LABEL_SIZE)
+
+joint_handles2 = [
+    mlines.Line2D([], [], color=c, linewidth=2, label=lbl)
+    for lbl, c in zip(JOINT_LABELS, JOINT_COLORS)
+]
+test_handles2 = [
+    mlines.Line2D([], [], color="black", linestyle=mstyles[k % len(mstyles)],
+                  linewidth=1.5, label=f"Test {num}")
+    for k, num in enumerate(tests)
+] if len(tests) > 1 else []
+fig2.legend(
+    handles=joint_handles2 + test_handles2,
+    loc="lower center",
+    ncol=len(joint_handles2) + len(test_handles2),
+    fontsize=LEGEND_SIZE,
+    framealpha=0.9,
+    bbox_to_anchor=(0.5, -0.0),
+)
 fig2.tight_layout()
+fig2.subplots_adjust(bottom=0.08)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 5.  Figure 3 — Measured Torque over Time
 # ══════════════════════════════════════════════════════════════════════════════
-fig3, axes3 = plt.subplots(2, 2, figsize=(15, 9))
-fig3.suptitle("Measured Joint Torque over Time",
-              fontsize=13, fontweight="bold")
+fig3, axes3 = plt.subplots(2, 2, figsize=(14, 8), sharex=True)
 
 leg_axes3 = {"FL": axes3[0, 0], "FR": axes3[0, 1],
              "HL": axes3[1, 0], "HR": axes3[1, 1]}
@@ -272,20 +292,41 @@ for leg, ax in leg_axes3.items():
             col = f"{leg}_{jname}_Torque"
             if col in df.columns:
                 ax.plot(t_meas, df[col].values,
-                        color=jcol, linestyle=mstyle, linewidth=1.3,
-                        label=f"T{num} {jname}")
-    ax.set_title(f"{leg} Leg", fontsize=11)
-    ax.set_ylabel("Torque (Nm)")
+                        color=jcol, linestyle=mstyle, linewidth=1.3)
+    ax.set_title(f"{leg} Leg", fontsize=TITLE_SIZE, fontweight="bold")
+    ax.set_ylabel("Torque (Nm)", fontsize=LABEL_SIZE)
     ax.set_ylim(-10, 10)
     ax.set_xlim(left=0)
     ax.axhline(0, color="black", linewidth=0.6, linestyle=":", zorder=2)
     ax.grid(True, alpha=0.3)
-    ax.legend(loc="upper right", fontsize=7,
-              ncol=max(1, len(tests)), framealpha=0.85)
+    ax.tick_params(labelsize=TICK_SIZE)
 
-axes3[1, 0].set_xlabel("Time (s)")
-axes3[1, 1].set_xlabel("Time (s)")
+for ax in [axes3[0, 1], axes3[1, 1]]:
+    ax.tick_params(labelleft=False)
+    ax.set_ylabel("")
+
+axes3[1, 0].set_xlabel("Time (s)", fontsize=LABEL_SIZE)
+axes3[1, 1].set_xlabel("Time (s)", fontsize=LABEL_SIZE)
+
+joint_handles3 = [
+    mlines.Line2D([], [], color=c, linewidth=2, label=lbl)
+    for lbl, c in zip(JOINT_LABELS, JOINT_COLORS)
+]
+test_handles3 = [
+    mlines.Line2D([], [], color="black", linestyle=mstyles[k % len(mstyles)],
+                  linewidth=1.5, label=f"Test {num}")
+    for k, num in enumerate(tests)
+] if len(tests) > 1 else []
+fig3.legend(
+    handles=joint_handles3 + test_handles3,
+    loc="lower center",
+    ncol=len(joint_handles3) + len(test_handles3),
+    fontsize=LEGEND_SIZE,
+    framealpha=0.9,
+    bbox_to_anchor=(0.5, -0.00),
+)
 fig3.tight_layout()
+fig3.subplots_adjust(bottom=0.08)
 
 
 # ══════════════════════════════════════════════════════════════════════════════

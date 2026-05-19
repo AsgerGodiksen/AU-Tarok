@@ -247,7 +247,28 @@ def process_file(csv_path: str) -> None:
 # ─────────────────────────────────────────────────────────────────────────────
 # Main
 # ─────────────────────────────────────────────────────────────────────────────
+
+# Discover all available test CSV files sorted by test number
+all_csv_files = sorted(
+    glob.glob(os.path.join(DATA_DIR, "STW_TorquePos_Log_Test_*.csv")),
+    key=lambda p: int(m.group(1)) if (m := re.search(r"_Test_(\d+)_", p)) else 0,
+)
+
+if not all_csv_files:
+    print("[ERROR] No CSV files found in the directory.")
+    sys.exit(1)
+
+# Determine available test numbers
+test_numbers = []
+for p in all_csv_files:
+    m = re.search(r"_Test_(\d+)_", p)
+    if m:
+        test_numbers.append(int(m.group(1)))
+
+print(f"\nAvailable tests: {test_numbers}")
+
 if len(sys.argv) > 1:
+    # Command-line mode: accept individual test numbers or file paths
     csv_files = []
     for arg in sys.argv[1:]:
         if os.path.isfile(arg):
@@ -258,13 +279,35 @@ if len(sys.argv) > 1:
         else:
             print(f"[WARN] Skipping unrecognised argument: {arg}")
 else:
-    csv_files = sorted(
-        glob.glob(os.path.join(DATA_DIR, "STW_TorquePos_Log_Test_*.csv")),
-        key=lambda p: int(m.group(1)) if (m := re.search(r"_Test_(\d+)_", p)) else 0,
+    # Interactive mode: ask for start and stop test numbers
+    def prompt_test_number(prompt_text: str, available: list[int]) -> int:
+        while True:
+            raw = input(prompt_text).strip()
+            if raw == "":
+                return available[0] if "start" in prompt_text.lower() else available[-1]
+            if raw.isdigit() and int(raw) in available:
+                return int(raw)
+            print(f"  Please enter one of: {available}")
+
+    start_num = prompt_test_number(
+        f"Start from test number [{test_numbers[0]}]: ", test_numbers
+    )
+    stop_num = prompt_test_number(
+        f"Stop at test number [{test_numbers[-1]}]: ", test_numbers
     )
 
+    if start_num > stop_num:
+        print(f"[ERROR] Start test ({start_num}) is greater than stop test ({stop_num}).")
+        sys.exit(1)
+
+    csv_files = [
+        p for p, n in zip(all_csv_files, test_numbers)
+        if start_num <= n <= stop_num
+    ]
+    print(f"Processing tests {start_num} to {stop_num} ({len(csv_files)} file(s)).")
+
 if not csv_files:
-    print("[ERROR] No CSV files found. Pass a test number, e.g.:  python3 Stand_To_Walk_Data_Analysis.py 1")
+    print("[ERROR] No matching CSV files found for the selected range.")
     sys.exit(1)
 
 print(f"\nFound {len(csv_files)} CSV file(s) to process.")

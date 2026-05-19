@@ -6,12 +6,19 @@ import matplotlib.pyplot as plt
 import matplotlib
 
 matplotlib.use("Agg")
+matplotlib.rcParams["font.family"] = "Liberation Serif"
 
 DATA_DIR = os.path.dirname(os.path.abspath(__file__))
 
 LEGS = ["FL", "FR", "HL", "HR"]
-JOINTS = ["J1", "J2", "J3"]
+JOINTS       = ["J1", "J2", "J3"]
+JOINT_LABELS = ["θ1", "θ2", "θ3"]
 COLORS = ["tab:blue", "tab:orange", "tab:green"]
+
+LABEL_SIZE = 17
+TICK_SIZE = 13
+TITLE_SIZE = 13
+LEGEND_SIZE = 13
 
 
 def plot_test(csv_path, output_name):
@@ -20,27 +27,32 @@ def plot_test(csv_path, output_name):
 
     # --- Torque figure ---
     fig_t, axes_t = plt.subplots(2, 2, figsize=(14, 8), sharex=True)
-    fig_t.suptitle(f"Stand Pose — Torque With Manufacturing PI", fontsize=14, fontweight="bold")
 
     leg_axes = {"FL": axes_t[0, 0], "FR": axes_t[0, 1], "HL": axes_t[1, 0], "HR": axes_t[1, 1]}
 
     for leg, ax in leg_axes.items():
-        for joint, color in zip(JOINTS, COLORS):
+        for joint, lbl, color in zip(JOINTS, JOINT_LABELS, COLORS):
             col = f"{leg}_{joint}_Torque"
             if col in df.columns:
-                ax.plot(time, df[col], label=joint, color=color, linewidth=1.2)
-        ax.set_title(f"{leg} Leg", fontsize=11)
+                ax.plot(time, df[col], label=lbl, color=color, linewidth=1.2)
+        ax.set_title(f"{leg} Leg", fontsize=TITLE_SIZE, fontweight="bold")
         ax.set_ylim(-8, 8)
-        ax.legend(loc="upper right", fontsize=8)
         ax.grid(True, alpha=0.3)
+        ax.tick_params(labelsize=TICK_SIZE)
 
+    for ax in [axes_t[0, 1], axes_t[1, 1]]:
+        ax.tick_params(labelleft=False)
 
-    axes_t[1, 0].set_xlabel("Time (s)")
-    axes_t[1, 1].set_xlabel("Time (s)")
-    axes_t[0, 0].set_ylabel("Torque (Nm)")
-    axes_t[1, 0].set_ylabel("Torque (Nm)")
-    
+    axes_t[1, 0].set_xlabel("Time (s)", fontsize=LABEL_SIZE)
+    axes_t[1, 1].set_xlabel("Time (s)", fontsize=LABEL_SIZE)
+    axes_t[0, 0].set_ylabel("Torque (Nm)", fontsize=LABEL_SIZE)
+    axes_t[1, 0].set_ylabel("Torque (Nm)", fontsize=LABEL_SIZE)
+
+    handles, labels = axes_t[0, 0].get_legend_handles_labels()
+    fig_t.legend(handles, labels, loc="lower center", ncol=len(JOINTS), fontsize=LEGEND_SIZE, bbox_to_anchor=(0.5, 0.0))
+
     plt.tight_layout()
+    fig_t.subplots_adjust(bottom=0.08)
     out_t = os.path.join(DATA_DIR, f"{output_name}_Torque.png")
     fig_t.savefig(out_t, dpi=150)
     plt.close(fig_t)
@@ -48,26 +60,34 @@ def plot_test(csv_path, output_name):
 
     # --- Position figure (actual vs commanded) ---
     fig_p, axes_p = plt.subplots(2, 2, figsize=(14, 8), sharex=True)
-    fig_p.suptitle(f"{output_name.replace('_', ' ')} — Position", fontsize=14, fontweight="bold")
 
     leg_axes_p = {"FL": axes_p[0, 0], "FR": axes_p[0, 1], "HL": axes_p[1, 0], "HR": axes_p[1, 1]}
 
     for leg, ax in leg_axes_p.items():
-        for joint, color in zip(JOINTS, COLORS):
+        for joint, lbl, color in zip(JOINTS, JOINT_LABELS, COLORS):
             col_pos = f"{leg}_{joint}_Pos (deg)"
             col_cmd = f"{leg}_{joint}_Cmd (deg)"
             if col_pos in df.columns:
-                ax.plot(time, df[col_pos], label=f"{joint} actual", color=color, linewidth=1.2)
+                ax.plot(time, df[col_pos], label=f"{lbl} actual", color=color, linewidth=1.2)
             if col_cmd in df.columns:
-                ax.plot(time, df[col_cmd], label=f"{joint} cmd", color=color, linewidth=1.2, linestyle="--", alpha=0.6)
-        ax.set_title(f"{leg} Leg", fontsize=11)
-        ax.set_ylabel("Position (deg)")
-        ax.legend(loc="upper right", fontsize=7)
+                ax.plot(time, df[col_cmd], label=f"{lbl} cmd", color=color, linewidth=1.2, linestyle="--", alpha=0.6)
+        ax.set_title(f"{leg} Leg", fontsize=TITLE_SIZE, fontweight="bold")
+        ax.set_ylabel("Position (deg)", fontsize=LABEL_SIZE)
         ax.grid(True, alpha=0.3)
+        ax.tick_params(labelsize=TICK_SIZE)
 
-    axes_p[1, 0].set_xlabel("Time (s)")
-    axes_p[1, 1].set_xlabel("Time (s)")
+    for ax in [axes_p[0, 1], axes_p[1, 1]]:
+        ax.tick_params(labelleft=False)
+        ax.set_ylabel("")
+
+    axes_p[1, 0].set_xlabel("Time (s)", fontsize=LABEL_SIZE)
+    axes_p[1, 1].set_xlabel("Time (s)", fontsize=LABEL_SIZE)
+
+    handles, labels = axes_p[0, 0].get_legend_handles_labels()
+    fig_p.legend(handles, labels, loc="lower center", ncol=len(JOINTS) * 2, fontsize=LEGEND_SIZE, bbox_to_anchor=(0.5, 0.0))
+
     plt.tight_layout()
+    fig_p.subplots_adjust(bottom=0.08)
     out_p = os.path.join(DATA_DIR, f"{output_name}_Position.png")
     fig_p.savefig(out_p, dpi=150)
     plt.close(fig_p)
