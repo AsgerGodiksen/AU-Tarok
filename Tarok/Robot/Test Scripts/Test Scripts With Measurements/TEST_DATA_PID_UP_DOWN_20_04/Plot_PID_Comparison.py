@@ -34,7 +34,7 @@ DATA_DIR = os.path.dirname(os.path.abspath(__file__))
 
 LEGS         = ["FL", "FR", "HL", "HR"]
 JOINTS       = ["J1", "J2", "J3"]
-JOINT_LABELS = ["θ1", "θ2", "θ3"]
+JOINT_LABELS = [r"$\theta_1$", r"$\theta_2$", r"$\theta_3$"]
 JOINT_COLORS = ["tab:blue", "tab:orange", "tab:green"]
 
 LABEL_SIZE  = 17
@@ -255,8 +255,8 @@ for leg, ax in leg_axes2.items():
 for ax in [axes2[0, 1], axes2[1, 1]]:
     ax.tick_params(labelleft=False)
 
-axes2[0, 0].set_ylabel("Error (deg)", fontsize=LABEL_SIZE)
-axes2[1, 0].set_ylabel("Error (deg)", fontsize=LABEL_SIZE)
+axes2[0, 0].set_ylabel(r"Error ($^\circ$)", fontsize=LABEL_SIZE)
+axes2[1, 0].set_ylabel(r"Error ($^\circ$)", fontsize=LABEL_SIZE)
 axes2[1, 0].set_xlabel("Time (s)", fontsize=LABEL_SIZE)
 axes2[1, 1].set_xlabel("Time (s)", fontsize=LABEL_SIZE)
 
@@ -278,7 +278,7 @@ fig2.legend(
     bbox_to_anchor=(0.5, 0.0),
 )
 fig2.tight_layout()
-fig2.subplots_adjust(bottom=0.08)
+fig2.subplots_adjust(bottom=0.09)
 
 
 # ══════════════════════════════════════════════════════════════════════════════

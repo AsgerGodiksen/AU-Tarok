@@ -12,7 +12,7 @@ DATA_DIR = os.path.dirname(os.path.abspath(__file__))
 
 LEGS = ["FL", "FR", "HL", "HR"]
 JOINTS       = ["J1", "J2", "J3"]
-JOINT_LABELS = ["θ1", "θ2", "θ3"]
+JOINT_LABELS = [r"$\theta_1$", r"$\theta_2$", r"$\theta_3$"]
 COLORS = ["tab:blue", "tab:orange", "tab:green"]
 
 LABEL_SIZE = 17
@@ -52,7 +52,7 @@ def plot_test(csv_path, output_name):
     fig_t.legend(handles, labels, loc="lower center", ncol=len(JOINTS), fontsize=LEGEND_SIZE, bbox_to_anchor=(0.5, 0.0))
 
     plt.tight_layout()
-    fig_t.subplots_adjust(bottom=0.08)
+    fig_t.subplots_adjust(bottom=0.1)
     out_t = os.path.join(DATA_DIR, f"{output_name}_Torque.png")
     fig_t.savefig(out_t, dpi=150)
     plt.close(fig_t)

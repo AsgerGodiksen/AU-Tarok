@@ -34,7 +34,7 @@ DATA_DIR = os.path.dirname(os.path.abspath(__file__))
 
 LEGS         = ["FL", "FR", "HL", "HR"]
 JOINTS       = ["J1", "J2", "J3"]
-JOINT_LABELS = ["θ1", "θ2", "θ3"]
+JOINT_LABELS = [r"$\theta_1$", r"$\theta_2$", r"$\theta_3$"]
 JOINT_COLORS = ["tab:blue", "tab:orange", "tab:green"]
 
 LABEL_SIZE  = 17
@@ -242,7 +242,7 @@ for leg, ax in leg_axes2.items():
             ax.plot(t_meas, error, color=jcol, linestyle=mstyle, linewidth=1.3)
     ax.axhline(0, color="black", linewidth=0.8, linestyle=":", zorder=2)
     ax.set_title(f"{leg} Leg", fontsize=TITLE_SIZE, fontweight="bold")
-    ax.set_ylabel("Error (deg)", fontsize=LABEL_SIZE)
+    ax.set_ylabel(r"Error ($^\circ$)", fontsize=LABEL_SIZE)
     ax.set_ylim(-0.15, 0.15)
     ax.set_xlim(left=0)
     ax.grid(True, alpha=0.3)
@@ -273,7 +273,7 @@ fig2.legend(
     bbox_to_anchor=(0.5, -0.0),
 )
 fig2.tight_layout()
-fig2.subplots_adjust(bottom=0.08)
+fig2.subplots_adjust(bottom=0.09)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -326,7 +326,7 @@ fig3.legend(
     bbox_to_anchor=(0.5, -0.00),
 )
 fig3.tight_layout()
-fig3.subplots_adjust(bottom=0.08)
+fig3.subplots_adjust(bottom=0.09)
 
 
 # ══════════════════════════════════════════════════════════════════════════════

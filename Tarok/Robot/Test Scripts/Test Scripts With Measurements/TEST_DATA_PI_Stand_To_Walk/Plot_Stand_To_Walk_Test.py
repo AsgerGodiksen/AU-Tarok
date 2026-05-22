@@ -24,6 +24,7 @@ import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
+import matplotlib.patches as mpatches
 
 matplotlib.rcParams["font.family"] = "Liberation Serif"
 
@@ -35,7 +36,7 @@ DATA_DIR = os.path.dirname(os.path.abspath(__file__))
 LEGS         = ["FL", "FR", "HL", "HR"]
 JOINTS       = ["J1", "J2", "J3"]
 JOINT_COLORS = ["tab:blue", "tab:orange", "tab:green"]
-JOINT_LABELS = ["θ1", "θ2", "θ3"]
+JOINT_LABELS = [r"$\theta_1$", r"$\theta_2$", r"$\theta_3$"]
 LEG_POS      = {"FL": (0, 0), "FR": (0, 1), "HL": (1, 0), "HR": (1, 1)}
 
 LABEL_SIZE  = 17
@@ -48,10 +49,22 @@ STAND_TIME    = 3.0
 TRANSFER_TIME = 1.5
 CYCLE_TIME    = SWING_TIME + STAND_TIME + 4 * TRANSFER_TIME  # 8 s
 
+# Swing-phase intervals within one 10 s gait cycle (start, end) in seconds
+SWING_INTERVALS = {
+    "HL": (0.75,  1.75),
+    "FL": (3.25,  4.25),
+    "HR": (5.75,  6.75),
+    "FR": (8.25,  9.25),
+}
+
 joint_handles = [
     mlines.Line2D([], [], color=c, linewidth=2, label=lbl)
     for c, lbl in zip(JOINT_COLORS, JOINT_LABELS)
 ]
+
+cycle_handle = mlines.Line2D([], [], color="grey", linewidth=0.9,
+                              linestyle="--", alpha=0.5, label="New Cycle")
+swing_handle = mpatches.Patch(facecolor="lightgray", alpha=0.6, label="Swing Phase")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -65,6 +78,19 @@ def format_ax(ax, leg, ylabel, t, cycle_boundaries):
     ax.set_xlim(t[0], t[-1])
     ax.grid(True, alpha=0.3)
     ax.tick_params(labelsize=TICK_SIZE)
+
+
+def add_swing_spans(ax, leg, t_start, t_end):
+    """Draw light-gray boxes for every swing phase of *leg* across all cycles."""
+    s0, s1 = SWING_INTERVALS[leg]
+    cycle = 0
+    while True:
+        x0 = t_start + cycle * CYCLE_TIME + s0
+        x1 = t_start + cycle * CYCLE_TIME + s1
+        if x0 >= t_end:
+            break
+        ax.axvspan(x0, min(x1, t_end), color="lightgray", alpha=0.6, zorder=0)
+        cycle += 1
 
 
 def process_file(csv_path: str) -> None:
@@ -97,9 +123,9 @@ def process_file(csv_path: str) -> None:
     axes1[1, 0].set_xlabel("Time (s)", fontsize=LABEL_SIZE)
     axes1[1, 1].set_xlabel("Time (s)", fontsize=LABEL_SIZE)
     fig1.legend(handles=joint_handles, loc="lower center",
-                ncol=3, fontsize=LEGEND_SIZE, framealpha=0.9, bbox_to_anchor=(0.5, -0.03))
+                ncol=3, fontsize=LEGEND_SIZE, framealpha=0.9, bbox_to_anchor=(0.5, -0.0))
     fig1.tight_layout()
-    fig1.subplots_adjust(bottom=0.1)
+    fig1.subplots_adjust(bottom=0.09)
 
     # ── Figure 2 — Measured Positions ────────────────────────────────────────
     fig2, axes2 = plt.subplots(2, 2, figsize=(14, 8), sharex=True)
@@ -114,29 +140,30 @@ def process_file(csv_path: str) -> None:
     axes2[1, 0].set_xlabel("Time (s)", fontsize=LABEL_SIZE)
     axes2[1, 1].set_xlabel("Time (s)", fontsize=LABEL_SIZE)
     fig2.legend(handles=joint_handles, loc="lower center",
-                ncol=3, fontsize=LEGEND_SIZE, framealpha=0.9, bbox_to_anchor=(0.5, -0.03))
+                ncol=3, fontsize=LEGEND_SIZE, framealpha=0.9, bbox_to_anchor=(0.5, -0.0))
     fig2.tight_layout()
-    fig2.subplots_adjust(bottom=0.1)
+    fig2.subplots_adjust(bottom=0.09)
 
     # ── Figure 3 — Position Error ─────────────────────────────────────────────
     fig3, axes3 = plt.subplots(2, 2, figsize=(14, 8), sharex=True)
     for leg, (r, c) in LEG_POS.items():
         ax = axes3[r, c]
+        add_swing_spans(ax, leg, t[0], t[-1])
         for jname, jcol in zip(JOINTS, JOINT_COLORS):
             error = df[f"{leg}_{jname}_Pos (deg)"].values - df[f"{leg}_{jname}_Cmd (deg)"].values
             ax.plot(t[::2], error[::2], color=jcol, linewidth=1.3)
         ax.axhline(0, color="black", linewidth=0.8, linestyle=":", zorder=1)
-        ax.set_ylim(-3, 3)
-        fmt(ax, leg, "Error (deg)")
+        ax.set_ylim(-2, 2)
+        fmt(ax, leg, r"Error ($^\circ$)")
     for ax in [axes3[0, 1], axes3[1, 1]]:
         ax.tick_params(labelleft=False)
         ax.set_ylabel("")
     axes3[1, 0].set_xlabel("Time (s)", fontsize=LABEL_SIZE)
     axes3[1, 1].set_xlabel("Time (s)", fontsize=LABEL_SIZE)
-    fig3.legend(handles=joint_handles, loc="lower center",
-                ncol=3, fontsize=LEGEND_SIZE, framealpha=0.9, bbox_to_anchor=(0.5, -0.03))
+    fig3.legend(handles=joint_handles + [cycle_handle, swing_handle], loc="lower center",
+                ncol=5, fontsize=LEGEND_SIZE, framealpha=0.9, bbox_to_anchor=(0.5, -0.03))
     fig3.tight_layout()
-    fig3.subplots_adjust(bottom=0.1)
+    fig3.subplots_adjust(bottom=0.09)
 
     # ── Figure 4 — Torques ────────────────────────────────────────────────────
     torque_cols = [f"{leg}_{jname}_Torque" for leg in LEGS for jname in JOINTS]
@@ -145,6 +172,7 @@ def process_file(csv_path: str) -> None:
     t_ds = t[::2]
     for leg, (r, c) in LEG_POS.items():
         ax = axes4[r, c]
+        add_swing_spans(ax, leg, t[0], t[-1])
         for jname, jcol in zip(JOINTS, JOINT_COLORS):
             ax.plot(t_ds, df[f"{leg}_{jname}_Torque"].values[::2],
                     color=jcol, linewidth=1.0, alpha=0.85)
@@ -156,10 +184,10 @@ def process_file(csv_path: str) -> None:
         ax.set_ylabel("")
     axes4[1, 0].set_xlabel("Time (s)", fontsize=LABEL_SIZE)
     axes4[1, 1].set_xlabel("Time (s)", fontsize=LABEL_SIZE)
-    fig4.legend(handles=joint_handles, loc="lower center",
-                ncol=3, fontsize=LEGEND_SIZE, framealpha=0.9, bbox_to_anchor=(0.5, -0.03))
+    fig4.legend(handles=joint_handles + [cycle_handle, swing_handle], loc="lower center",
+                ncol=5, fontsize=LEGEND_SIZE, framealpha=0.9, bbox_to_anchor=(0.5, -0.03))
     fig4.tight_layout()
-    fig4.subplots_adjust(bottom=0.1)
+    fig4.subplots_adjust(bottom=0.09)
 
     # ── Figure 5 — Zoomed Position Error ──────────────────────────────────────
     fig5, axes5 = plt.subplots(2, 2, figsize=(14, 8), sharex=True)
@@ -177,9 +205,9 @@ def process_file(csv_path: str) -> None:
     axes5[1, 0].set_xlabel("Time (s)", fontsize=LABEL_SIZE)
     axes5[1, 1].set_xlabel("Time (s)", fontsize=LABEL_SIZE)
     fig5.legend(handles=joint_handles, loc="lower center",
-                ncol=3, fontsize=LEGEND_SIZE, framealpha=0.9, bbox_to_anchor=(0.5, -0.03))
+                ncol=3, fontsize=LEGEND_SIZE, framealpha=0.9, bbox_to_anchor=(0.5, -0.0))
     fig5.tight_layout()
-    fig5.subplots_adjust(bottom=0.1)
+    fig5.subplots_adjust(bottom=0.09)
 
     # ── Statistics report ─────────────────────────────────────────────────────
     lines: list[str] = []

@@ -11,7 +11,7 @@ DATA_DIR = os.path.dirname(os.path.abspath(__file__))
 
 LEGS   = ["FL", "FR", "HL", "HR"]
 JOINTS       = ["J1", "J2", "J3"]
-JOINT_LABELS = ["θ1", "θ2", "θ3"]
+JOINT_LABELS = [r"$\theta_1$", r"$\theta_2$", r"$\theta_3$"]
 COLORS = ["tab:blue", "tab:orange", "tab:green"]
 
 LABEL_SIZE  = 17
@@ -77,7 +77,7 @@ handles1, labels1 = axes1[0, 0].get_legend_handles_labels()
 fig1.legend(handles1, labels1, loc="lower center", ncol=len(JOINTS),
             fontsize=LEGEND_SIZE, bbox_to_anchor=(0.5, 0.0))
 fig1.tight_layout()
-fig1.subplots_adjust(bottom=0.08)
+fig1.subplots_adjust(bottom=0.09)
 
 # ── Figure 2: Position ────────────────────────────────────────────────────────
 fig2, axes2 = plt.subplots(2, 2, figsize=(14, 8), sharex=True)
