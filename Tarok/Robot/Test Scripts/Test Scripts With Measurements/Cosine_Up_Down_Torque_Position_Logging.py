@@ -42,6 +42,8 @@ def Position_Control_With_Feedback(bus, motor_id, new_position, max_speed, timeo
     # ── Step 1: send 0xA4 position command, read torque from reply ────────────
     data = [0xA4, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
 
+    # Enforce minimum speed of 0.66 dps to avoid starving the motor with near-zero speed limits
+    max_speed = max(abs(max_speed), 0.66)
     speed_raw = int(max_speed * 9)
     speed_bytes = struct.pack('<h', speed_raw)
     data[2] = speed_bytes[0]
@@ -156,28 +158,28 @@ l_k = 0.7048
 w_k = 0.220
 
 dt = 0.005  # 200 Hz
-total_time = 6  # seconds
+total_time = 10  # seconds
 num_time_steps = int(total_time / dt) + 1
 t = np.linspace(0, total_time, num_time_steps)
 
-# Segment boundaries: 0->3s (down), 3->6s (up), >=6s (hold)
-conditions = [(t >= 0) & (t < 3),
-              (t >= 3) & (t < 6),
-              (t >= 6)]
+# Segment boundaries: 0->5s (down), 5->10s (up), >=10s (hold)
+conditions = [(t >= 0) & (t < 5),
+              (t >= 5) & (t < 10),
+              (t >= 10)]
 
 x_FL = x_FR = (l_k / 2) * np.ones_like(t)
 x_HL = x_HR = (-l_k / 2) * np.ones_like(t)
 y_FL = y_HL = (w_k / 2 + 0.078) * np.ones_like(t)
 y_FR = y_HR = (-w_k / 2 - 0.078) * np.ones_like(t)
 
-z = np.piecewise(t, conditions, [lambda t: cos_interp(t, -0.36, -0.46, 0, 3),
-                                 lambda t: cos_interp(t, -0.46, -0.36, 3, 6),
+z = np.piecewise(t, conditions, [lambda t: cos_interp(t, -0.36, -0.46, 0, 5),
+                                 lambda t: cos_interp(t, -0.46, -0.36, 5, 10),
                                  lambda t: -0.36 * np.ones_like(t)])
 
 x_dot = np.zeros_like(t)
 y_dot = np.zeros_like(t)
-z_dot = np.piecewise(t, conditions, [lambda t: cos_interp_dot(t, -0.36, -0.46, 0, 3),
-                                     lambda t: cos_interp_dot(t, -0.46, -0.36, 3, 6),
+z_dot = np.piecewise(t, conditions, [lambda t: cos_interp_dot(t, -0.36, -0.46, 0, 5),
+                                     lambda t: cos_interp_dot(t, -0.46, -0.36, 5, 10),
                                      lambda t: np.zeros_like(t)])
 
 P_FL_body = np.vstack((x_FL, y_FL, z))
