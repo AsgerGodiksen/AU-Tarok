@@ -270,12 +270,12 @@ for bus in [bus0, bus1, bus2, bus3]:
 # Write PI parameters to all 12 motors
 # ─────────────────────────────────────────────────────────────────────────────
 PI_Params = {
-    'angle_kp':  110,
-    'angle_ki':  50,
-    'speed_kp':  55,
-    'speed_ki':  20,
-    'torque_kp': 55,
-    'torque_ki': 25
+    'angle_kp':  100,
+    'angle_ki':  100,
+    'speed_kp':  50,
+    'speed_ki':  40,
+    'torque_kp': 50,
+    'torque_ki': 50
 }
 
 print("Writing PI parameters to motors...")
@@ -289,11 +289,11 @@ time.sleep(0.2)
 # Data logging setup
 # ─────────────────────────────────────────────────────────────────────────────
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-log_dir = os.path.join(SCRIPT_DIR, "TEST_DATA_COSINE_UP_DOWN")
+log_dir = os.path.join(SCRIPT_DIR, "TEST_DATA_COSINE_UP_DOWN_22_05")
 os.makedirs(log_dir, exist_ok=True)
 timestamp_str = time.strftime('%Y-%m-%d_%H-%M-%S')
-log_filename = os.path.join(log_dir, f"Cosine_Up_Down_TorquePos_Log_{timestamp_str}.csv")
-pid_filename = os.path.join(log_dir, f"Cosine_Up_Down_TorquePos_Log_{timestamp_str}_PID.txt")
+log_filename = os.path.join(log_dir, f"Cosine_Up_Down_TorquePos_Log_1_{timestamp_str}.csv")
+pid_filename = os.path.join(log_dir, f"Cosine_Up_Down_TorquePos_Log_1_{timestamp_str}_PID.txt")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Read and save PID parameters from all 12 motors
