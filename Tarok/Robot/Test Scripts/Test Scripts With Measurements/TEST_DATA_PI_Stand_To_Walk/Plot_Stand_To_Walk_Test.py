@@ -24,6 +24,7 @@ import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
+import matplotlib.colors as mcolors
 import matplotlib.patches as mpatches
 
 matplotlib.rcParams["font.family"] = "Liberation Serif"
@@ -36,6 +37,8 @@ DATA_DIR = os.path.dirname(os.path.abspath(__file__))
 LEGS         = ["FL", "FR", "HL", "HR"]
 JOINTS       = ["J1", "J2", "J3"]
 JOINT_COLORS = ["tab:blue", "tab:orange", "tab:green"]
+DARK_COLORS  = [tuple(x * 0.65 for x in mcolors.to_rgb(c)) for c in JOINT_COLORS]
+LIGHT_COLORS = [tuple(x + (1 - x) * 0.5 for x in mcolors.to_rgb(c)) for c in JOINT_COLORS]
 JOINT_LABELS = [r"$\theta_1$", r"$\theta_2$", r"$\theta_3$"]
 LEG_POS      = {"FL": (0, 0), "FR": (0, 1), "HL": (1, 0), "HR": (1, 1)}
 
@@ -198,7 +201,7 @@ def process_file(csv_path: str) -> None:
             ax.plot(t[::2], error[::2], color=jcol, linewidth=1.3)
         ax.axhline(0, color="black", linewidth=0.8, linestyle=":", zorder=1)
         ax.set_ylim(-0.5, 0.5)
-        fmt(ax, leg, "Error (deg)")
+        fmt(ax, leg, r"Error ($^\circ$)")
     for ax in [axes5[0, 1], axes5[1, 1]]:
         ax.tick_params(labelleft=False)
         ax.set_ylabel("")
@@ -208,6 +211,31 @@ def process_file(csv_path: str) -> None:
                 ncol=3, fontsize=LEGEND_SIZE, framealpha=0.9, bbox_to_anchor=(0.5, -0.0))
     fig5.tight_layout()
     fig5.subplots_adjust(bottom=0.09)
+
+    # ── Figure 6 — Desired (darker solid) vs Measured (dashed) Positions ────────
+    fig6, axes6 = plt.subplots(2, 2, figsize=(14, 8), sharex=True)
+    for leg, (r, c) in LEG_POS.items():
+        ax = axes6[r, c]
+        for jname, dcol, lcol in zip(JOINTS, DARK_COLORS, LIGHT_COLORS):
+            ax.plot(t, df[f"{leg}_{jname}_Cmd (deg)"].values,
+                    color=dcol, linewidth=2.0, linestyle="-")
+            ax.plot(t, df[f"{leg}_{jname}_Pos (deg)"].values,
+                    color=lcol, linewidth=1.3, linestyle="--")
+        ax.set_ylim(-80, 80)
+        fmt(ax, leg, r"Position ($^\circ$)")
+    for ax in [axes6[0, 1], axes6[1, 1]]:
+        ax.tick_params(labelleft=False)
+        ax.set_ylabel("")
+    axes6[1, 0].set_xlabel("Time (s)", fontsize=LABEL_SIZE)
+    axes6[1, 1].set_xlabel("Time (s)", fontsize=LABEL_SIZE)
+    style_handles = [
+        mlines.Line2D([], [], color="black", linewidth=1.5, linestyle="-",  label="Desired"),
+        mlines.Line2D([], [], color="black", linewidth=1.5, linestyle="--", label="Measured"),
+    ]
+    fig6.legend(handles=joint_handles + style_handles, loc="lower center",
+                ncol=5, fontsize=LEGEND_SIZE, framealpha=0.9, bbox_to_anchor=(0.5, -0.0))
+    fig6.tight_layout()
+    fig6.subplots_adjust(bottom=0.13)
 
     # ── Statistics report ─────────────────────────────────────────────────────
     lines: list[str] = []
@@ -278,6 +306,7 @@ def process_file(csv_path: str) -> None:
         (fig3, "Position_Error"),
         (fig4, "Torques"),
         (fig5, "Zoomed_Position_Error"),
+        (fig6, "Desired_vs_Measured"),
     ]:
         fig_path = os.path.join(output_dir, f"{base_name}_{label}_{timestamp}.png")
         fig.savefig(fig_path, dpi=150, bbox_inches="tight")

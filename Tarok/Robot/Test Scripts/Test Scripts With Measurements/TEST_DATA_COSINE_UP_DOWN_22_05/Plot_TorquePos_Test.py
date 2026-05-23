@@ -2,13 +2,23 @@ import os
 import glob
 import sys
 import pandas as pd
+import matplotlib
 import matplotlib.pyplot as plt
+import matplotlib.lines as mlines
+
+matplotlib.rcParams["font.family"] = "Liberation Serif"
 
 DATA_DIR = os.path.dirname(os.path.abspath(__file__))
 
-LEGS   = ["FL", "FR", "HL", "HR"]
-JOINTS = ["J1", "J2", "J3"]
-COLORS = ["tab:blue", "tab:orange", "tab:green"]
+LEGS         = ["FL", "FR", "HL", "HR"]
+JOINTS       = ["J1", "J2", "J3"]
+JOINT_LABELS = [r"$\theta_1$", r"$\theta_2$", r"$\theta_3$"]
+COLORS       = ["tab:blue", "tab:orange", "tab:green"]
+
+LABEL_SIZE  = 17
+TICK_SIZE   = 13
+TITLE_SIZE  = 13
+LEGEND_SIZE = 13
 
 # --- Get test number ---
 if len(sys.argv) > 1:
@@ -41,49 +51,65 @@ title_base = os.path.splitext(os.path.basename(csv_path))[0].replace("_", " ")
 
 # ── Figure 1: Torque ──────────────────────────────────────────────────────────
 fig1, axes1 = plt.subplots(2, 2, figsize=(14, 8), sharex=True)
-#fig1.suptitle(f"Torque — {title_base}", fontsize=13, fontweight="bold")
 
 leg_axes1 = {"FL": axes1[0, 0], "FR": axes1[0, 1],
              "HL": axes1[1, 0], "HR": axes1[1, 1]}
 
 for leg, ax in leg_axes1.items():
-    for joint, color in zip(JOINTS, COLORS):
+    for joint, lbl, color in zip(JOINTS, JOINT_LABELS, COLORS):
         col = f"{leg}_{joint}_Torque"
         if col in df.columns:
-            ax.plot(time, df[col], label=joint, color=color, linewidth=1.2)
-    ax.set_title(f"{leg} Leg", fontsize=11)
-    ax.set_ylabel("Torque (Nm)")
+            ax.plot(time, df[col], label=lbl, color=color, linewidth=1.2)
+    ax.set_title(f"{leg} Leg", fontsize=TITLE_SIZE, fontweight="bold")
     ax.set_xlim(t_min, t_max)
     ax.set_ylim(-11, 11)
-    ax.legend(loc="upper right", fontsize=8)
     ax.grid(True, alpha=0.3)
+    ax.tick_params(labelsize=TICK_SIZE)
 
-axes1[1, 0].set_xlabel("Time (s)")
-axes1[1, 1].set_xlabel("Time (s)")
+for ax in [axes1[0, 1], axes1[1, 1]]:
+    ax.tick_params(labelleft=False)
+
+axes1[0, 0].set_ylabel("Torque (Nm)", fontsize=LABEL_SIZE)
+axes1[1, 0].set_ylabel("Torque (Nm)", fontsize=LABEL_SIZE)
+axes1[1, 0].set_xlabel("Time (s)", fontsize=LABEL_SIZE)
+axes1[1, 1].set_xlabel("Time (s)", fontsize=LABEL_SIZE)
+
+handles1, labels1 = axes1[0, 0].get_legend_handles_labels()
+fig1.legend(handles1, labels1, loc="lower center", ncol=len(JOINTS),
+            fontsize=LEGEND_SIZE, bbox_to_anchor=(0.5, -0.0))
 fig1.tight_layout()
+fig1.subplots_adjust(bottom=0.09)
 
 # ── Figure 2: Position ────────────────────────────────────────────────────────
 fig2, axes2 = plt.subplots(2, 2, figsize=(14, 8), sharex=True)
-#fig2.suptitle(f"Position — {title_base}", fontsize=13, fontweight="bold")
 
 leg_axes2 = {"FL": axes2[0, 0], "FR": axes2[0, 1],
              "HL": axes2[1, 0], "HR": axes2[1, 1]}
 
 for leg, ax in leg_axes2.items():
-    for joint, color in zip(JOINTS, COLORS):
+    for joint, lbl, color in zip(JOINTS, JOINT_LABELS, COLORS):
         col = f"{leg}_{joint}_Pos (deg)"
         if col in df.columns:
-            ax.plot(time, df[col], label=joint, color=color, linewidth=1.2)
-    ax.set_title(f"{leg} Leg", fontsize=11)
-    ax.set_ylabel("Position (deg)")
+            ax.plot(time, df[col], label=lbl, color=color, linewidth=1.2)
+    ax.set_title(f"{leg} Leg", fontsize=TITLE_SIZE, fontweight="bold")
     ax.set_xlim(t_min, t_max)
     ax.set_ylim(-100, 100)
-    ax.legend(loc="upper right", fontsize=8)
     ax.grid(True, alpha=0.3)
+    ax.tick_params(labelsize=TICK_SIZE)
 
-axes2[1, 0].set_xlabel("Time (s)")
-axes2[1, 1].set_xlabel("Time (s)")
+for ax in [axes2[0, 1], axes2[1, 1]]:
+    ax.tick_params(labelleft=False)
+
+axes2[0, 0].set_ylabel(r"Position ($^\circ$)", fontsize=LABEL_SIZE)
+axes2[1, 0].set_ylabel(r"Position ($^\circ$)", fontsize=LABEL_SIZE)
+axes2[1, 0].set_xlabel("Time (s)", fontsize=LABEL_SIZE)
+axes2[1, 1].set_xlabel("Time (s)", fontsize=LABEL_SIZE)
+
+handles2, labels2 = axes2[0, 0].get_legend_handles_labels()
+fig2.legend(handles2, labels2, loc="lower center", ncol=len(JOINTS),
+            fontsize=LEGEND_SIZE, bbox_to_anchor=(0.5, -0.0))
 fig2.tight_layout()
+fig2.subplots_adjust(bottom=0.09)
 
 base_name = os.path.splitext(os.path.basename(csv_path))[0]
 fig1.savefig(os.path.join(DATA_DIR, f"{base_name}_Torque.png"), dpi=150, bbox_inches="tight")
