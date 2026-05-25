@@ -13,12 +13,24 @@ from Robot import*
 
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+import matplotlib
+
+matplotlib.rcParams["font.family"] = "Liberation Serif"
 
 # CAN initialization in terminal: "for i in 0 1 2 3; do sudo ip link set dev can$i up type can bitrate 1000000 && sudo ip link set can$i txqueuelen 1000; done"
 
 ### SCRIPT START ###
 ## PRECOMPUTATIONS ##
 print("Performing pre-computations...")
+
+LABEL_SIZE  = 17
+TICK_SIZE   = 13
+TITLE_SIZE  = 13
+LEGEND_SIZE = 13
+
+SWING_TIME    = 1.0
+STAND_TIME    = 3.0
+TRANSFER_TIME = 1.
 
 # Parameters From Tarok Dimensions
 Tarok = TarokDymensions()
@@ -358,24 +370,10 @@ Theta_dot_HL_STW = np.abs(np.rad2deg(Theta_dot_HL_STW))
 Theta_dot_HR_STW = np.abs(np.rad2deg(Theta_dot_HR_STW))
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #### PLOTTING ####
 
 # Plot FL_stand_to_walk trajectory for verification
+##### FIGURE 1 ##########
 plt.subplot(3, 1, 1)
 plt.plot(t_Stand_To_Walk_With_Transfer, FL_Stand_To_Walk[0, :], label='FL Stand to Walk X')
 plt.title('FL Stand to Walk Trajectory X Coordinate')
@@ -393,12 +391,13 @@ plt.plot(t_Stand_To_Walk_With_Transfer, FL_Stand_To_Walk[2, :], label='FL Stand 
 plt.title('FL Stand to Walk Trajectory Z Coordinate')
 plt.xlabel('Time (s)')
 plt.ylabel('Z Position (m)')
-plt.legend()
+#plt.legend()
 
 
 
 
 # Plot_FL_Stand_To_Walk_Velocities for verification
+##### FIGURE 2 ##########
 plt.figure(figsize=(10, 8))
 plt.subplot(3, 1, 1)
 plt.plot(t_Stand_To_Walk_With_Transfer, FL_Stand_To_Walk_Velocities[0, :], label='FL Stand to Walk X Velocity')
@@ -418,7 +417,7 @@ plt.title('FL Stand to Walk Trajectory Z Velocity')
 plt.xlabel('Time (s)')
 plt.ylabel('Z Velocity (m/s)')
 plt.legend()
-plt.show()
+#plt.show()
 
 
 # print shape of P_FL_body_stand = np.array([x_FL_stand, y_FL_stand, z_stand])
@@ -444,6 +443,8 @@ HR_Trajectory_Stacked = np.hstack((P_HR_body_stand.reshape(3, 1), P_HR_body_SWH,
 print("Shape of FL_Trajectory_Stacked:", FL_Trajectory_Stacked.shape)
 
 
+
+##### FIGURE 3 ##########
 # Plot stacked trajectory for all legs
 # With a thin vertical line a transition point between each of the 4 trajectory segments (stand height, stand to walk height, walk height to walk start, walk start to walk with transfer)
 t_stacked = np.linspace(0, dt + total_time_SWH + total_time_STW_with_transfer + total_time_with_transfer, FL_Trajectory_Stacked.shape[1]) # Create time array for stacked trajectory
@@ -486,7 +487,7 @@ plt.axvline(x=dt, color='k', linestyle='--', linewidth=0.5)
 plt.axvline(x=dt + total_time_SWH, color='k', linestyle='--', linewidth=0.5)
 plt.axvline(x=dt + total_time_SWH + total_time_STW_with_transfer, color='k', linestyle='--', linewidth=0.5)
 plt.axvline(x=dt + total_time_SWH + total_time_STW_with_transfer + total_time_with_transfer, color='k', linestyle='--', linewidth=0.5)
-plt.show()
+#plt.show()
 
 
 
@@ -497,6 +498,8 @@ Theta_FR_Stacked = np.vstack((Theta_FR_stand, Theta_FR_SWH, Theta_FR_STW, Theta_
 Theta_HL_Stacked = np.vstack((Theta_HL_stand, Theta_HL_SWH, Theta_HL_STW, Theta_HL))
 Theta_HR_Stacked = np.vstack((Theta_HR_stand, Theta_HR_SWH, Theta_HR_STW, Theta_HR))
 
+
+##### FIGURE 4 ##########
 # Plot stacked joint angle time series for all legs
 # With a thin vertical line a transition point between each of the 4 trajectory segments (stand height, stand to walk height, walk height to walk start, walk start to walk with transfer)
 plt.subplot(3, 1, 1)
@@ -538,7 +541,7 @@ plt.axvline(x=dt, color='k', linestyle='--', linewidth=0.5)
 plt.axvline(x=dt + total_time_SWH, color='k', linestyle='--', linewidth=0.5)
 plt.axvline(x=dt + total_time_SWH + total_time_STW_with_transfer, color='k', linestyle='--', linewidth=0.5)
 plt.axvline(x=dt + total_time_SWH + total_time_STW_with_transfer + total_time_with_transfer, color='k', linestyle='--', linewidth=0.5)
-plt.show()
+#plt.show()
 
 
 
@@ -551,54 +554,85 @@ FR_Trajectory_Stacked_Return = np.hstack((P_FR_body_stand.reshape(3, 1), P_FR_bo
 HL_Trajectory_Stacked_Return = np.hstack((P_HL_body_stand.reshape(3, 1), P_HL_body_SWH, HL_Stand_To_Walk, HL_Bezier_Trajectory_With_Transfer, HL_Stand_To_Walk[:, ::-1], P_HL_body_SWH[:, ::-1], P_HL_body_stand.reshape(3, 1)))
 HR_Trajectory_Stacked_Return = np.hstack((P_HR_body_stand.reshape(3, 1), P_HR_body_SWH, HR_Stand_To_Walk, HR_Bezier_Trajectory_With_Transfer, HR_Stand_To_Walk[:, ::-1], P_HR_body_SWH[:, ::-1], P_HR_body_stand.reshape(3, 1)))
 
+
+
+###################
+###################
 # Plot stacked trajectory for all legs
 # With a thin vertical line a transition point between each of the 4 trajectory segments (stand height, stand to walk height, walk height to walk start, walk start to walk with transfer)
 t_stacked_Return = np.linspace(0, dt + total_time_SWH + total_time_STW_with_transfer + total_time_with_transfer + total_time_STW_with_transfer + total_time_SWH + dt, FL_Trajectory_Stacked_Return.shape[1]) # Create time array for stacked trajectory with return
-plt.subplot(3, 1, 1)
+plt.figure(figsize=(14, 8))
 plt.plot(t_stacked_Return, FL_Trajectory_Stacked_Return[0, :], label='FL')
 plt.plot(t_stacked_Return, FR_Trajectory_Stacked_Return[0, :], label='FR')
 plt.plot(t_stacked_Return, HL_Trajectory_Stacked_Return[0, :], label='HL')
 plt.plot(t_stacked_Return, HR_Trajectory_Stacked_Return[0, :], label='HR')
-plt.title('Stand to Walk to Stand Trajectory')
-plt.xlabel('Time (s)')
-plt.ylabel('X Position (m)')
-plt.legend()
+#plt.title('Stand to Walk to Stand Trajectory')
+plt.xlabel('Time (s)', fontsize=LABEL_SIZE)
+plt.ylabel('X Position (m)', fontsize=LABEL_SIZE)
+plt.axvspan(0, 1, color="lightgray", alpha=1, zorder=0, label="Change of Height")
+plt.axvspan(t_stacked_Return[-1] - 1, t_stacked_Return[-1], color="lightgray", alpha=1, zorder=0)
+plt.axvspan(1, dt + total_time_SWH + total_time_STW_with_transfer, color="lightgray", alpha=0.4, zorder=0, label="Stand to Walk Transition")
+plt.axvspan(t_stacked_Return[-1] - (dt + total_time_SWH + total_time_STW_with_transfer), t_stacked_Return[-1] - 1, color="lightgray", alpha=0.4, zorder=0)
 plt.axvline(x=dt, color='k', linestyle='--', linewidth=0.5)
 plt.axvline(x=dt + total_time_SWH, color='k', linestyle='--', linewidth=0.5)
 plt.axvline(x=dt + total_time_SWH + total_time_STW_with_transfer, color='k', linestyle='--', linewidth=0.5)
 plt.axvline(x=dt + total_time_SWH + total_time_STW_with_transfer + total_time_with_transfer, color='k', linestyle='--', linewidth=0.5)
 plt.axvline(x=dt + total_time_SWH + total_time_STW_with_transfer + total_time_with_transfer + total_time_STW_with_transfer, color='k', linestyle='--', linewidth=0.5)
 plt.axvline(x=dt + total_time_SWH + total_time_STW_with_transfer + total_time_with_transfer + total_time_STW_with_transfer + total_time_SWH, color='k', linestyle='--', linewidth=0.5)
+plt.tick_params(axis='both', labelsize=LABEL_SIZE)
+plt.legend(loc="lower center", ncol=6, fontsize=LEGEND_SIZE, framealpha=0.9, bbox_to_anchor=(0.5, -0.15))
+plt.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.savefig(os.path.join(os.path.dirname(__file__), 'X_Position_Return.png'), dpi=300, bbox_inches='tight')
 
-plt.subplot(3, 1, 2)
-plt.plot(t_stacked_Return, FL_Trajectory_Stacked_Return[1, :], label='FL')
-plt.plot(t_stacked_Return, FR_Trajectory_Stacked_Return[1, :], label='FR')
-plt.plot(t_stacked_Return, HL_Trajectory_Stacked_Return[1, :], label='HL')
-plt.plot(t_stacked_Return, HR_Trajectory_Stacked_Return[1, :], label='HR')
-plt.xlabel('Time (s)')
-plt.ylabel('Y Position (m)')
-plt.legend()
+
+
+
+plt.figure(figsize=(14, 8))
+plt.plot(t_stacked_Return, FL_Trajectory_Stacked_Return[1, :], label='FL',linewidth=3)
+plt.plot(t_stacked_Return, FR_Trajectory_Stacked_Return[1, :], label='FR',linewidth=3)
+plt.plot(t_stacked_Return, HL_Trajectory_Stacked_Return[1, :], label='HL',linestyle='--')
+plt.plot(t_stacked_Return, HR_Trajectory_Stacked_Return[1, :], label='HR',linestyle='--')
+plt.xlabel('Time (s)', fontsize=LABEL_SIZE)
+plt.ylabel('Y Position (m)', fontsize=LABEL_SIZE)
+plt.axvspan(0, 1, color="lightgray", alpha=0.9, zorder=0, label="Change of Height")
+plt.axvspan(t_stacked_Return[-1] - 1, t_stacked_Return[-1], color="lightgray", alpha=0.9, zorder=0)
+plt.axvspan(1, dt + total_time_SWH + total_time_STW_with_transfer, color="lightgray", alpha=0.2, zorder=0, label="Stand to Walk Transition")
+plt.axvspan(t_stacked_Return[-1] - (dt + total_time_SWH + total_time_STW_with_transfer), t_stacked_Return[-1] - 1, color="lightgray", alpha=0.2, zorder=0)
 plt.axvline(x=dt, color='k', linestyle='--', linewidth=0.5)
 plt.axvline(x=dt + total_time_SWH, color='k', linestyle='--', linewidth=0.5)
 plt.axvline(x=dt + total_time_SWH + total_time_STW_with_transfer, color='k', linestyle='--', linewidth=0.5)
 plt.axvline(x=dt + total_time_SWH + total_time_STW_with_transfer + total_time_with_transfer, color='k', linestyle='--', linewidth=0.5)
 plt.axvline(x=dt + total_time_SWH + total_time_STW_with_transfer + total_time_with_transfer + total_time_STW_with_transfer, color='k', linestyle='--', linewidth=0.5)
 plt.axvline(x=dt + total_time_SWH + total_time_STW_with_transfer + total_time_with_transfer + total_time_STW_with_transfer + total_time_SWH, color='k', linestyle='--', linewidth=0.5)
+plt.tick_params(axis='both', labelsize=LABEL_SIZE)
+plt.legend(loc="lower center", ncol=6, fontsize=LEGEND_SIZE, framealpha=0.9, bbox_to_anchor=(0.5, -0.15))
+plt.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.savefig(os.path.join(os.path.dirname(__file__), 'Y_Position_Return.png'), dpi=300, bbox_inches='tight')
 
-plt.subplot(3, 1, 3)
+plt.figure(figsize=(14, 8))
 plt.plot(t_stacked_Return, FL_Trajectory_Stacked_Return[2, :], label='FL')
 plt.plot(t_stacked_Return, FR_Trajectory_Stacked_Return[2, :], label='FR')
 plt.plot(t_stacked_Return, HL_Trajectory_Stacked_Return[2, :], label='HL')
 plt.plot(t_stacked_Return, HR_Trajectory_Stacked_Return[2, :], label='HR')
-plt.xlabel('Time (s)')
-plt.ylabel('Z Position (m)')
-plt.legend()
+plt.xlabel('Time (s)', fontsize=LABEL_SIZE)
+plt.ylabel('Z Position (m)', fontsize=LABEL_SIZE)
+plt.axvspan(0, 1, color="lightgray", alpha=0.9, zorder=0, label="Change of Height")
+plt.axvspan(t_stacked_Return[-1] - 1, t_stacked_Return[-1], color="lightgray", alpha=0.9, zorder=0)
+plt.axvspan(1, dt + total_time_SWH + total_time_STW_with_transfer, color="lightgray", alpha=0.2, zorder=0, label="Stand to Walk Transition")
+plt.axvspan(t_stacked_Return[-1] - (dt + total_time_SWH + total_time_STW_with_transfer), t_stacked_Return[-1] - 1, color="lightgray", alpha=0.2, zorder=0)
 plt.axvline(x=dt, color='k', linestyle='--', linewidth=0.5)
 plt.axvline(x=dt + total_time_SWH, color='k', linestyle='--', linewidth=0.5)
 plt.axvline(x=dt + total_time_SWH + total_time_STW_with_transfer, color='k', linestyle='--', linewidth=0.5)
 plt.axvline(x=dt + total_time_SWH + total_time_STW_with_transfer + total_time_with_transfer, color='k', linestyle='--', linewidth=0.5)
 plt.axvline(x=dt + total_time_SWH + total_time_STW_with_transfer + total_time_with_transfer + total_time_STW_with_transfer, color='k', linestyle='--', linewidth=0.5)
 plt.axvline(x=dt + total_time_SWH + total_time_STW_with_transfer + total_time_with_transfer + total_time_STW_with_transfer + total_time_SWH, color='k', linestyle='--', linewidth=0.5)
+plt.tick_params(axis='both', labelsize=LABEL_SIZE)
+plt.legend(loc="lower center", ncol=6, fontsize=LEGEND_SIZE, framealpha=0.9, bbox_to_anchor=(0.5, -0.15))
+plt.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.savefig(os.path.join(os.path.dirname(__file__), 'Z_Position_Return.png'), dpi=300, bbox_inches='tight')
 plt.show()
 
 
