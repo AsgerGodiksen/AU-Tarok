@@ -1,4 +1,7 @@
-
+########################################################################
+### NOT TESTED AND VALIDATED YET, USE WITH CAUTION! ###
+########################################################################
+# Only included as a possible starting point for future work
 
 class KalmanFilter:
     """

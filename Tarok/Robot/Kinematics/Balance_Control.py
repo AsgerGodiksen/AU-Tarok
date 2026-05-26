@@ -1,3 +1,8 @@
+########################################################################
+### NOT TESTED AND VALIDATED YET, USE WITH CAUTION! ###
+########################################################################
+# Only included as a possible starting point for future work
+
 from Robot.Kinematics.Kalman_Filter import KalmanFilter
 from Robot.Kinematics.Pitch_And_Roll import Inverse_Pitch, Inverse_Roll
 
