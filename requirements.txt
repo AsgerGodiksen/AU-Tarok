@@ -1,7 +1,0 @@
-gpiozero==2.0.1
-matplotlib==3.10.8
-numpy==2.4.3
-python_can==4.6.1
-scipy==1.17.1
-smbus2==0.6.0
-yourdfpy==0.0.60
