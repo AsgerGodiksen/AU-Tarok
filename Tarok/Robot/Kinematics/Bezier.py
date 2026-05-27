@@ -586,7 +586,6 @@ def Building_Stand_To_Walk_Trajectories(Swing_Time_Scalar, Swing_Time_Steps, Pha
     Building the trajectories for the transition from stand to walk.
     Specific for each leg.
     All trajectories represented in the body frame.
-    Does not include the transfer phase - add it using the Bezier_Add_Transfer_Phase function
     
     Args:
         Swing_Time_Scalar (float): The Swing Time
