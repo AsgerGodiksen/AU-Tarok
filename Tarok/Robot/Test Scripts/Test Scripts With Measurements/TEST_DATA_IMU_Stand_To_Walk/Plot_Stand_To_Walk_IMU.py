@@ -191,7 +191,7 @@ output_dir = os.path.join(os.path.dirname(csv_path), f"Plots_For_Tests_{test_num
 os.makedirs(output_dir, exist_ok=True)
 
 fig_path = os.path.join(output_dir, f"{base_name}_Pitch_Roll_{timestamp}.png")
-fig.savefig(fig_path, dpi=150, bbox_inches="tight")
+fig.savefig(fig_path, dpi=600, bbox_inches="tight")
 print(f"Saved: {os.path.relpath(fig_path, DATA_DIR)}")
 
 report_path = os.path.join(output_dir, f"{base_name}_Report_{timestamp}.txt")

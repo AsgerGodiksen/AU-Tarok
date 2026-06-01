@@ -112,8 +112,8 @@ fig2.tight_layout()
 fig2.subplots_adjust(bottom=0.09)
 
 base_name = os.path.splitext(os.path.basename(csv_path))[0]
-fig1.savefig(os.path.join(DATA_DIR, f"{base_name}_Torque.png"), dpi=150, bbox_inches="tight")
-fig2.savefig(os.path.join(DATA_DIR, f"{base_name}_Position.png"), dpi=150, bbox_inches="tight")
+fig1.savefig(os.path.join(DATA_DIR, f"{base_name}_Torque.png"), dpi=600, bbox_inches="tight")
+fig2.savefig(os.path.join(DATA_DIR, f"{base_name}_Position.png"), dpi=600, bbox_inches="tight")
 print(f"Saved: {base_name}_Torque.png and {base_name}_Position.png")
 
 plt.show()

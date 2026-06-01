@@ -43,6 +43,8 @@ TICK_SIZE   = 13
 TITLE_SIZE  = 13
 LEGEND_SIZE = 13
 
+FIG2_DPI = 600
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 1.  Load measured test data
@@ -280,6 +282,14 @@ fig2.legend(
 )
 fig2.tight_layout()
 fig2.subplots_adjust(bottom=0.09)
+
+out_fig2 = os.path.join(
+    DATA_DIR,
+    f"PID_Comparison_Error_{'_vs_'.join(str(n) for n in tests)}.png",
+)
+fig2.savefig(out_fig2, dpi=FIG2_DPI)
+print(f"Figure 2 saved: {os.path.basename(out_fig2)}")
+
 
 
 # ══════════════════════════════════════════════════════════════════════════════

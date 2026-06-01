@@ -309,7 +309,7 @@ def process_file(csv_path: str) -> None:
         (fig6, "Desired_vs_Measured"),
     ]:
         fig_path = os.path.join(output_dir, f"{base_name}_{label}_{timestamp}.png")
-        fig.savefig(fig_path, dpi=150, bbox_inches="tight")
+        fig.savefig(fig_path, dpi=600, bbox_inches="tight")
         print(f"  Saved: {os.path.relpath(fig_path, DATA_DIR)}")
 
     report_path = os.path.join(output_dir, f"{base_name}_Report_{timestamp}.txt")

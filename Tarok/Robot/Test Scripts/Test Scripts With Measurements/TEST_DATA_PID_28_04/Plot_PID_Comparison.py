@@ -42,6 +42,9 @@ TICK_SIZE   = 13
 TITLE_SIZE  = 13
 LEGEND_SIZE = 13
 
+FIG2_DPI = 600
+FIG3_DPI = 600
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 1.  Load measured test data
@@ -243,7 +246,7 @@ for leg, ax in leg_axes2.items():
     ax.axhline(0, color="black", linewidth=0.8, linestyle=":", zorder=2)
     ax.set_title(f"{leg} Leg", fontsize=TITLE_SIZE, fontweight="bold")
     ax.set_ylabel(r"Error ($^\circ$)", fontsize=LABEL_SIZE)
-    ax.set_ylim(-0.15, 0.15)
+    ax.set_ylim(-0.1, 0.1)
     ax.set_xlim(left=0)
     ax.grid(True, alpha=0.3)
     ax.tick_params(labelsize=TICK_SIZE)
@@ -274,6 +277,13 @@ fig2.legend(
 )
 fig2.tight_layout()
 fig2.subplots_adjust(bottom=0.09)
+
+out_fig2 = os.path.join(
+    DATA_DIR,
+    f"PID_Comparison_Error_{'_vs_'.join(str(n) for n in tests)}.png",
+)
+fig2.savefig(out_fig2, dpi=FIG2_DPI)
+print(f"Figure 2 saved: {os.path.basename(out_fig2)}")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -327,6 +337,13 @@ fig3.legend(
 )
 fig3.tight_layout()
 fig3.subplots_adjust(bottom=0.09)
+
+out_fig3 = os.path.join(
+    DATA_DIR,
+    f"PID_Comparison_Torque_{'_vs_'.join(str(n) for n in tests)}.png",
+)
+fig3.savefig(out_fig3, dpi=FIG3_DPI)
+print(f"Figure 3 saved: {os.path.basename(out_fig3)}")
 
 
 # ══════════════════════════════════════════════════════════════════════════════

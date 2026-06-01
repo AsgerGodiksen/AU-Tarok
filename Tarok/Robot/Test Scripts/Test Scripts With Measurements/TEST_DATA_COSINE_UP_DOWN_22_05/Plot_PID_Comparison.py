@@ -42,6 +42,8 @@ TICK_SIZE   = 13
 TITLE_SIZE  = 13
 LEGEND_SIZE = 13
 
+FIG2_DPI = 600
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 1.  Load measured test data
@@ -239,6 +241,7 @@ for leg, ax in leg_axes2.items():
     ax.set_title(f"{leg} Leg", fontsize=TITLE_SIZE, fontweight="bold")
     ax.set_ylabel(r"Error ($^\circ$)", fontsize=LABEL_SIZE)
     ax.set_xlim(left=0)
+    ax.set_ylim(-0.5, 0.5)
     ax.grid(True, alpha=0.3)
     ax.tick_params(labelsize=TICK_SIZE)
 
@@ -363,7 +366,7 @@ fig1_path = os.path.join(DATA_DIR, f"PID_Comparison_Fig1_MeasVsRef_{test_tag}_{t
 fig2_path = os.path.join(DATA_DIR, f"PID_Comparison_Fig2_Error_{test_tag}_{timestamp}.png")
 
 fig1.savefig(fig1_path, dpi=150, bbox_inches="tight")
-fig2.savefig(fig2_path, dpi=150, bbox_inches="tight")
+fig2.savefig(fig2_path, dpi=FIG2_DPI, bbox_inches="tight")
 print(f"Figure 1 saved to {os.path.basename(fig1_path)}")
 print(f"Figure 2 saved to {os.path.basename(fig2_path)}")
 

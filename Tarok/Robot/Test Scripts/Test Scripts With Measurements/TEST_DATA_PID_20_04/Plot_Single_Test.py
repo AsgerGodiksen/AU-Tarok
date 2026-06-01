@@ -54,7 +54,7 @@ def plot_test(csv_path, output_name):
     plt.tight_layout()
     fig_t.subplots_adjust(bottom=0.1)
     out_t = os.path.join(DATA_DIR, f"{output_name}_Torque.png")
-    fig_t.savefig(out_t, dpi=150)
+    fig_t.savefig(out_t, dpi=600)
     plt.close(fig_t)
     print(f"Saved: {out_t}")
 
