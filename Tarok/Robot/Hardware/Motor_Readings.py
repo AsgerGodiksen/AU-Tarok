@@ -87,7 +87,8 @@ def Read_Torque_Current(bus, id):
     return torque_current, torque
 
 
-def Read_Encoder_Postion(bus,id):
+def Read_Encoder_Position(bus,id):
+    # THIS ARE THE ONE WE DONT USE
     # Thios method is used to find out where the encoder is positionen in the +- 32767 degree span
     data = [0x9C,0x00,0x00,0x00,0x00,0x00,0x00,0x00]
     # Using Command 0x9C from the motor Protocol
@@ -119,53 +120,10 @@ def Read_Encoder_Postion(bus,id):
 
     return encoder_position
 
-# OLD VERSION READ_ANGLE (Old and new works identical as far as we know)
-'''
+
+
 def Read_Angle(bus,id):
-
-    data = [0x92,0x00,0x00,0x00,0x00,0x00,0x00,0x00]
-    
-    send_msg = can.Message(
-                        arbitration_id=id, 
-                        data=data, 
-                        is_extended_id=False)
-    
-    bus.send(send_msg)
-    sleep(0.0001)
-    msg = bus.recv(4)    
-    if msg is None:
-        # print("No response received.")    # only print for debug - slows prcoess down
-        return None
-    
-    can_data = msg.data  # this is a bytes object (or bytearray)
-
-    # Build 64-bit integer from bytes 1-7 (like in C++)
-    multi_angle_position = (
-        (0x00 << 56)
-        | (can_data[7] << 48)
-        | (can_data[6] << 40)
-        | (can_data[5] << 32)
-        | (can_data[4] << 24)
-        | (can_data[3] << 16)
-        | (can_data[2] << 8)
-        | can_data[1]
-    )
-
-    # If MSB (bit 63) of byte[7] is set, sign-extend
-    if can_data[7] & 0x80:
-        # Convert to signed 64-bit
-        multi_angle_position -= 1 << 56
-
-    encoder_dec = multi_angle_position
-    angle_float = float(encoder_dec) / 900.0
-
-    # print(f"Encoder value: {angle_float}")
-    return angle_float
-'''
-
-# NEW VERSION READ_ANGLE (Old and new works identical as far as we know)
-def Read_Angle(bus,id):
- 
+    # THIS ARE THE ONE THAT ARE USED IN THE MAIN CODE
     data = [0x92,0x00,0x00,0x00,0x00,0x00,0x00,0x00]
     
     send_msg = can.Message(
