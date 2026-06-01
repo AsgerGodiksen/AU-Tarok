@@ -1,3 +1,6 @@
+## This file contains functions for reading various parameters from the motors of the robot via CAN bus messages.
+
+
 import time
 import can
 import struct

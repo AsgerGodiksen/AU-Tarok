@@ -1,4 +1,6 @@
 # Helper functions for trajectory generation
+
+# Import Libraies
 import numpy as np
 
 # Function for cosine interpolation

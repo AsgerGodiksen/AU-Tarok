@@ -1,5 +1,4 @@
-# This version is a copy of the one located in Test Simulations Final on 17/02 2026
-# It might be subject to later change 
+## This file contains functions for controlling the motors of the robot via CAN bus messages.
 
 import time
 import can
@@ -7,7 +6,7 @@ import re
 import binascii
 import struct
 
-# Default values From Manufacturing
+# Default PI values From Manufacturing for the Actuators.
 PID_DEFAULTS = {
     'angle_kp':  100,
     'angle_ki':  100,

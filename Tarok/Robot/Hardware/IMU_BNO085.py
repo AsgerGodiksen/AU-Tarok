@@ -1,9 +1,19 @@
+
+# This file contains functions for reading the IMU data
+# And converting them into the correct frame for the robot to use in the control algorithms.
+
+
+# Imported Libraries
 import time
 import numpy as np
 import smbus2
+
 from adafruit_bno08x.i2c import BNO08X_I2C
 from adafruit_bno08x import BNO_REPORT_ROTATION_VECTOR
 from numpy.typing import NDArray
+
+# The following imports are for the IMU and I2C communication,
+# which may not be available on all platforms (e.g., Windows).
 try:
     from .SMBUS2I2C import SMBus2I2C   # when imported as package member
 except ImportError:

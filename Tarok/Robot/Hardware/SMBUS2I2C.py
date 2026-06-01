@@ -1,3 +1,9 @@
+
+## This file is used as an interface, since in used I2C communication, 
+# in the Adafruit Blinka library does not work properly on the Raspberry Pi 5.
+
+
+# Import Libraries
 import time
 import smbus2
 from adafruit_bno08x.i2c import BNO08X_I2C

@@ -1,5 +1,12 @@
+
+# This file contains functions for generating the Bezier Trajectory for the swing and stand phase of the robot.
+
+
+# Imported Libraries
 import numpy as np
 from scipy.special import comb
+
+# Importing functions from other files
 from Robot.Kinematics import Inverse_Kinematics
 from Robot.Kinematics.Interpolation import cos_interp, cos_interp_dot
 

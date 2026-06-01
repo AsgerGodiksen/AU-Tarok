@@ -1,11 +1,16 @@
+# This file contains functions for reading the battery voltage and calculating the remaining percentage based on the voltage of each cell.
+# It uses a mapping of voltage to percentage based on the battery datasheet for one cell. 
+
+
+# Imported Libraries
 import can
 from time import sleep, time
-#from Motor_Readings import*
-#from Motor_Controls import*
+
+
+# Imports from other files
 from .Motor_Readings import*
 
-# This code will be used to find the input voltage to the actuators
-#class BatteryProcentageCalculator:
+
 def Voltage_Mapping():
     # Voltage to Procentage Mapping.
     # Values are found from the battery datasheet for one cell

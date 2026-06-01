@@ -1,10 +1,15 @@
 # Jacobian of quadruped robot
+
+# Import Libraies
 import numpy as np
 
+
+#####
 # Constant parameters used:
     # L1 = 0.078 m (length of the first leg segment)
     # L2 = 0.20 m (length of the second leg segment)
     # L3 = 0.30 m (length of the third leg segment)
+#####
 
 def Jacobian(theta1,theta2,theta3, Leg):
     # Input:

@@ -1,12 +1,19 @@
-# Constant Transforms from body frame to leg base frames
+
+# This file containg the constant transforms between the used frame in the robot
+# ONLY BETWEEN BODY AND LEG BASE FRAMES
+# AND
+# BODY AND IMU FRAME
+
+# import Libraries
 import numpy as np
 from scipy.spatial.transform import Rotation
 
+#####
 # Constant parameters used:
     # l_k = 0.7048 m (length of body in kinematic model)
     # w_k = 0.220 m (width of body in kinematic model)
 # Note, often l_k/2 and w_k/2 are used in the transforms.
-
+#####
 
 def TB_0(P_0, Leg):
     """ 
@@ -183,10 +190,6 @@ def RIMU_B(q_B):
     # Rotate orientation from body frame to IMU frame
     q_IMU = qIMU_B * q_B
     return q_IMU.as_quat()
-
-
-
-
 
 
 

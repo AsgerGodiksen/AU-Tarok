@@ -1,6 +1,11 @@
 # Forward kinematics of quadruped robot
+# With transforms between body frame and leg base frames
+
+# Import Libraries
 import numpy as np
 
+
+#########
 # Constant parameters used:
     # L1 = 0.078 m (length of the first leg segment)
     # L2 = 0.20 m (length of the second leg segment)

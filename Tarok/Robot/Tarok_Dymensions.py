@@ -1,4 +1,5 @@
-# In this File the dimensions of TAROK is found 
+# This File gives an overview of the Dymensions for Tarok
+
 
 import numpy as np
 

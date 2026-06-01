@@ -1,5 +1,11 @@
-# In this document the math for Pitch and Roll are implemented.
+########################################################################
+### NOT TESTED AND VALIDATED YET, USE WITH CAUTION! ###
+########################################################################
+# Only included as a possible starting point for future work
+
 # See Master Project for the math derivations and for an illustration
+# IN this file the math are worng and not the same as in the Master Project
+
 
 from math import pi, cos, sin, atan
 
