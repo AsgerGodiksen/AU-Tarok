@@ -583,7 +583,7 @@ plt.tick_params(axis='both', labelsize=LABEL_SIZE)
 plt.legend(loc="lower center", ncol=6, fontsize=LEGEND_SIZE, framealpha=0.9, bbox_to_anchor=(0.5, -0.15))
 plt.grid(True, alpha=0.3)
 plt.tight_layout()
-plt.savefig(os.path.join(os.path.dirname(__file__), 'X_Position_Return.png'), dpi=300, bbox_inches='tight')
+plt.savefig(os.path.join(os.path.dirname(__file__), 'X_Position_Return.png'), dpi=600, bbox_inches='tight')
 
 
 
@@ -609,7 +609,7 @@ plt.tick_params(axis='both', labelsize=LABEL_SIZE)
 plt.legend(loc="lower center", ncol=6, fontsize=LEGEND_SIZE, framealpha=0.9, bbox_to_anchor=(0.5, -0.15))
 plt.grid(True, alpha=0.3)
 plt.tight_layout()
-plt.savefig(os.path.join(os.path.dirname(__file__), 'Y_Position_Return.png'), dpi=300, bbox_inches='tight')
+plt.savefig(os.path.join(os.path.dirname(__file__), 'Y_Position_Return.png'), dpi=600, bbox_inches='tight')
 
 plt.figure(figsize=(14, 8))
 plt.plot(t_stacked_Return, FL_Trajectory_Stacked_Return[2, :], label='FL')
@@ -632,7 +632,7 @@ plt.tick_params(axis='both', labelsize=LABEL_SIZE)
 plt.legend(loc="lower center", ncol=6, fontsize=LEGEND_SIZE, framealpha=0.9, bbox_to_anchor=(0.5, -0.15))
 plt.grid(True, alpha=0.3)
 plt.tight_layout()
-plt.savefig(os.path.join(os.path.dirname(__file__), 'Z_Position_Return.png'), dpi=300, bbox_inches='tight')
+plt.savefig(os.path.join(os.path.dirname(__file__), 'Z_Position_Return.png'), dpi=600, bbox_inches='tight')
 plt.show()
 
 
