@@ -6,6 +6,7 @@ Aarhus University have previous designed and manufactured a quadruped robot and 
 This page main goal is ensure a better knowlage sharing for this project.
 
 <img src="imgs/Tarok - Total Assemply.png" alt="Robot" width="300"/>
+<img src="imgs/Physically Tarok.png" alt="Physical Robot" width="300"/>
 
 ## Highlights of the current version:
 - High-performance and reliable hardware interface for the 12 actuators
