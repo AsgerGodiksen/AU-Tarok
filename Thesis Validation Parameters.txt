@@ -1,0 +1,31 @@
+These are the parameters used for the tests used for the validation of the Bezier Walk Gait in the  experimental chapter in the Master's thesis by Asger and Mikkel.
+For the validation of the bezier walk gait (section 6.1)
+
+These parameters can be used in:
+Stand_To_Walk_TorquePos_Log.py (done for the actual validation test)
+Test_Bezier_Transfer_With_Stand.py (same motion as validation test but without data logging)
+Tarok.py (State machine)
+
+PI Parameters = {
+    'angle_kp':  120,
+    'angle_ki':  90,
+    'speed_kp':  60,
+    'speed_ki':  80,
+    'torque_kp': 60,
+    'torque_ki': 60
+}
+
+Parameters in run script (one of the 3 above):
+x_offset = 0.025
+y_offset = 0.035
+Swing_Time_Scalar = 1
+Transfer_Time_Scalar = 1.5
+STW_Swing_Time_Scalar = 2.5
+
+Parameters in Bezier.py:
+Scaling_Factor_X = 0.15
+Scaling_Factor_Y = 0.4
+Offset = 0.24
+x_offset = 0.05  (In Building_Stand_To_Walk_Trajectories function)
+y_offset = 0.045 (In Building_Stand_To_Walk_Trajectories function)
+Stand_To_Walk_Transfer_Time = 3 (In Building_Stand_To_Walk_Transition_Trajectory function)

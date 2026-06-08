@@ -12,7 +12,7 @@ import struct
 import csv
 import concurrent.futures
 from Robot import *
-#from Logger_Functions import *
+from Logger_Functions import *
 
 # CAN initialization in terminal: "for i in 0 1 2 3; do sudo ip link set dev can$i up type can bitrate 1000000 && sudo ip link set can$i txqueuelen 1000; done"
 

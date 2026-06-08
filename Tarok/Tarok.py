@@ -13,6 +13,7 @@
 # Press "U" to switch to up/down state, press "S" to switch back to standing pose state
 # Press "W" to switch to walking gait state, press "S" to switch back to standing pose state
 # Press "R" to switch to reverse walking gait state, press "S" to switch back to standing pose state
+# Press "v" to switch to wave state, press "S" to switch back to standing pose state
 
 # Additional states can be added as needed
 
