@@ -5,7 +5,7 @@ This project aims to build a new quadruped robot for Aarhus University insprided
 Aarhus University have previous designed and manufactured a quadruped robot and this project aim to build on the lessons leared from that project.
 This page main goal is ensure a better knowlage sharing for this project.
 
-
+<img src="imgs/Tarok - Total Assemply.png" alt="Robot" width="300"/>
 
 ## Highlights of the current version:
 - High-performance and reliable hardware interface for the 12 actuators
