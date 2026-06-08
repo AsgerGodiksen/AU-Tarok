@@ -751,5 +751,11 @@ def update(num):
 
     return lineFL, lineFR, lineHL, lineHR
 ani = animation.FuncAnimation(fig, update, frames=(len(t_stacked_Return)), init_func=init,
-                              interval=1, blit=True)
+                              interval=4, blit=True)
+ani.save(
+    os.path.join(os.path.dirname(__file__), 'Stand_To_Walk_Animation.mp4'),
+    writer='ffmpeg',
+    fps=30,
+    dpi=150
+)
 plt.show()
