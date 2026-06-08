@@ -8,13 +8,16 @@ This page main goal is ensure a better knowlage sharing for this project.
 <p align="center">
   <img src="imgs/Tarok - Total Assemply.png" alt="Robot" width="300"/>
   <img src="imgs/Physically Tarok.PNG" alt="Physical Robot" width="300"/>
-</p>/>
+</p>
 
 ## Highlights of the current version:
 - High-performance and reliable hardware interface for the 12 actuators
 - Code is structured in modules
 - All slicer settings for the manufactured parts are saved
+- Allmost everything is 3D printed using PLA
+- All used datasheets can be found in the Tarok/Robot/Documentation folder
 - Kinematics, are derived, verified and validated
+
 
 
 ## How to Acces the Onshape project
