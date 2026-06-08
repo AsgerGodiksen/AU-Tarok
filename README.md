@@ -1,8 +1,36 @@
-# AU - Tarok
-This project aims to build a new quadruped for Aarhus University insprided by the biomehanics of a Horse.
+# Aarhus University - Tarok
+
+This project aims to build a new quadruped robot for Aarhus University insprided by the biomehanics of a Horse.
 
 Aarhus University have previous designed and manufactured a quadruped robot and this project aim to build on the lessons leared from that project.
+This page main goal is ensure a better knowlage sharing for this project.
 
-Where the previous mistakes will be fixed and other design choises is taken for the developmend of a new and better quadruped based on the locomotion of a Horse. 
+<p align="center">
+  <img src="imgs/Tarok - Total Assemply.png" alt="Robot" width="300"/>
+  <img src="imgs/Physically Tarok.PNG" alt="Physical Robot" width="300"/>
+</p>
 
-This page main goal is ensure a better knowlage sharing for this project, based on the lack of same from the earlier project with the expisting quadruped
+## Highlights of the current version:
+- High-performance and reliable hardware interface for the 12 actuators
+- Code is structured in modules
+- All slicer settings for the manufactured parts are saved
+- Allmost everything is 3D printed using PLA
+- All used datasheets can be found in the Tarok/Robot/Documentation folder
+- Kinematics, are derived, verified and validated
+
+
+
+## How to Acces the Onshape project
+The project have been designed in Onshape. The ownership of the project have been transforred to the 'Robotics Lab' Pilots Onshape account. 
+To get in contact with the Pilot you can start by writing the following mail:
+Asgergodiksen@yahoo.dk
+
+## Take a look at our Demo
+
+### Crawl Gait Demo
+Watch a demonstration of the Tarok performing a static gait walking forward.
+
+[Click here to watch](https://www.youtube.com/watch?v=l9DppjplLe0).
+
+
+

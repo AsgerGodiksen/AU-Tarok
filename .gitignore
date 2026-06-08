@@ -2,6 +2,7 @@ Tarok_Enviroment/
 .vscode/
 __pycache__/
 dev_ws/
+imgs/
 
 
 # onshape-to-robot API credentials
