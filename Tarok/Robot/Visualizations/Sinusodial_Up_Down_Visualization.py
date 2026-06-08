@@ -8,7 +8,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.animation as animation
+import matplotlib
 import time
+
+matplotlib.rcParams["font.family"] = "Liberation Serif"
+
+LABEL_SIZE  = 17
+TICK_SIZE   = 13
+TITLE_SIZE  = 13
+LEGEND_SIZE = 10
+
+COLORS = {'FL': 'blue', 'FR': 'red', 'HL': 'green', 'HR': 'orange'}
 
 
 from Robot.Kinematics.Inverse_Kinematics import*
@@ -217,12 +227,13 @@ ax.set_zlim(-0.5, 0)
 ax.set_xlabel('X (m)')
 ax.set_ylabel('Y (m)')
 ax.set_zlabel('Z (m)')
-ax.set_title('Leg Trajectories Up/Down Motion')
-ax.view_init(elev=20, azim=45, roll=0,)
-lineFL, = ax.plot([], [], [], 'o-', lw=2)
-lineFR, = ax.plot([], [], [], 'o-', lw=2)
-lineHL, = ax.plot([], [], [], 'o-', lw=2)
-lineHR, = ax.plot([], [], [], 'o-', lw=2)
+ax.set_title('Sinusoidal Up/Down Motion', fontsize=TITLE_SIZE)
+ax.view_init(elev=20, azim=225)
+lineFL, = ax.plot([], [], [], 'o-', lw=2, color=COLORS['FL'], label='FL')
+lineFR, = ax.plot([], [], [], 'o-', lw=2, color=COLORS['FR'], label='FR')
+lineHL, = ax.plot([], [], [], 'o-', lw=2, color=COLORS['HL'], label='HL')
+lineHR, = ax.plot([], [], [], 'o-', lw=2, color=COLORS['HR'], label='HR')
+ax.legend(loc='upper right', fontsize=LEGEND_SIZE)
 def init():
     lineFL.set_data([], [])
     lineFL.set_3d_properties([])
@@ -291,11 +302,11 @@ def update(num):
 
     return lineFL, lineFR, lineHL, lineHR
 ani = animation.FuncAnimation(fig, update, frames=len(t), init_func=init,
-                              interval=1, blit=True)
+                              interval=0.1, blit=True)
 ani.save(
-    os.path.join(os.path.dirname(__file__), 'Sinusodial_Up_Down_Animation.mp4'),
+    os.path.join(os.path.dirname(__file__), 'Sinusodial_Up_Down_Animation.mov'),
     writer='ffmpeg',
-    fps=30,
+    fps=120,
     dpi=150
 )
 

@@ -668,7 +668,7 @@ ax.set_zlim(-0.5, 0)
 ax.set_xlabel('X (m)')
 ax.set_ylabel('Y (m)')
 ax.set_zlabel('Z (m)')
-ax.set_title('Stand to Walk Motion')
+ax.set_title('Stand to Walk To Stand Motion')
 ax.view_init(elev=20, azim=225)
 lineFL, = ax.plot([], [], [], 'o-', lw=2, color=COLORS['FL'], label='FL')
 lineFR, = ax.plot([], [], [], 'o-', lw=2, color=COLORS['FR'], label='FR')
@@ -751,11 +751,11 @@ def update(num):
 
     return lineFL, lineFR, lineHL, lineHR
 ani = animation.FuncAnimation(fig, update, frames=(len(t_stacked_Return)), init_func=init,
-                              interval=4, blit=True)
+                              interval=0.1, blit=True)
 ani.save(
-    os.path.join(os.path.dirname(__file__), 'Stand_To_Walk_Animation.mp4'),
+    os.path.join(os.path.dirname(__file__), 'Stand_To_Walk_To_Stand_Animation.mp4'),
     writer='ffmpeg',
-    fps=30,
+    fps=120,
     dpi=150
 )
 plt.show()
