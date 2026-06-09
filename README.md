@@ -27,7 +27,7 @@ To get in contact with the Pilot you can start by writing the following mail:
 
 ## Take a look at our Demo
 
-### Crawl Gait Demo
+### Bézier Walk Gait Demo
 Watch a demonstration of the Tarok performing a static gait walking forward.
 
 [Click here to watch](https://www.youtube.com/watch?v=l9DppjplLe0).
