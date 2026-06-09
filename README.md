@@ -23,7 +23,7 @@ This page main goal is ensure a better knowlage sharing for this project.
 ## How to Acces the Onshape project
 The project have been designed in Onshape. The ownership of the project have been transforred to the 'Robotics Lab' Pilots Onshape account. 
 To get in contact with the Pilot you can start by writing the following mail:
-Asgergodiksen@yahoo.dk
+202305716@post.au.dk
 
 ## Take a look at our Demo
 
