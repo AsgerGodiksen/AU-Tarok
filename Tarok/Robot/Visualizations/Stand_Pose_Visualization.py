@@ -13,6 +13,16 @@ from Robot.Kinematics.Constant_Transforms import*
 from Robot.Kinematics.Jacobian import*
 
 import matplotlib.pyplot as plt
+import matplotlib
+
+matplotlib.rcParams["font.family"] = "Liberation Serif"
+
+LABEL_SIZE  = 17
+TICK_SIZE   = 13
+TITLE_SIZE  = 13
+LEGEND_SIZE = 10
+
+COLORS = {'FL': 'blue', 'FR': 'red', 'HL': 'green', 'HR': 'orange'}
 
 
 l_k = 0.7048  # Length of body in kinematic model (meters)
@@ -94,7 +104,6 @@ P0_end_HR = TB_0(P0_end_HR, 'HR')
 # Plotting
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
-plt.title('Initial Position Configuration')
 ax.view_init(elev=20, azim=225)
 
 def get_xyz(p):
@@ -109,13 +118,19 @@ def plot_leg(ax, p1, p2, p3, p4, color, label):
     zs = [get_xyz(p)[2] for p in [p1, p2, p3, p4]]
     ax.plot(xs, ys, zs, 'o-', lw=2, color=color, label=label)
 
-plot_leg(ax, P0_1_FL, P0_2_FL, P0_3_FL, P0_end_FL, color='blue',   label='FL')
-plot_leg(ax, P0_1_FR, P0_2_FR, P0_3_FR, P0_end_FR, color='red',    label='FR')
-plot_leg(ax, P0_1_HL, P0_2_HL, P0_3_HL, P0_end_HL, color='green',  label='HL')
-plot_leg(ax, P0_1_HR, P0_2_HR, P0_3_HR, P0_end_HR, color='orange', label='HR')
+plot_leg(ax, P0_1_FL, P0_2_FL, P0_3_FL, P0_end_FL, color=COLORS['FL'], label='FL')
+plot_leg(ax, P0_1_FR, P0_2_FR, P0_3_FR, P0_end_FR, color=COLORS['FR'], label='FR')
+plot_leg(ax, P0_1_HL, P0_2_HL, P0_3_HL, P0_end_HL, color=COLORS['HL'], label='HL')
+plot_leg(ax, P0_1_HR, P0_2_HR, P0_3_HR, P0_end_HR, color=COLORS['HR'], label='HR')
+ax.set_xlim(-0.5, 0.5)
+ax.set_ylim(-0.5, 0.5)
+ax.set_zlim(-0.5, 0)
 ax.set_xlabel('X (m)')
 ax.set_ylabel('Y (m)')
 ax.set_zlabel('Z (m)')
-ax.legend()
+ax.set_title('Stand Pose', fontsize=TITLE_SIZE)
+ax.tick_params(axis='both', labelsize=TICK_SIZE)
+ax.legend(loc='upper right', fontsize=LEGEND_SIZE)
 plt.tight_layout()
+plt.savefig(os.path.join(os.path.dirname(__file__), 'Stand_Pose.png'), dpi=600)
 plt.show()
