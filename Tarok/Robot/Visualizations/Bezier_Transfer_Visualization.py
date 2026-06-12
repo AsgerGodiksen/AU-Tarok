@@ -12,6 +12,14 @@ from Robot import*
 
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+import matplotlib
+
+matplotlib.rcParams["font.family"] = "Liberation Serif"
+
+LABEL_SIZE  = 17
+TICK_SIZE   = 13
+TITLE_SIZE  = 13
+LEGEND_SIZE = 10
 
 # Old: CAN initialization in terminal: "sudo ip link set dev canX up type can bitrate 1000000" - with "X" being 0, 1, 2 and 3 for each bus
 # New: CAN initialization in terminal: "for i in 0 1 2 3; do sudo ip link set dev can$i up type can bitrate 1000000 && sudo ip link set can$i txqueuelen 1000; done"
@@ -299,6 +307,15 @@ def update(num):
     return lineFL, lineFR, lineHL, lineHR
 ani = animation.FuncAnimation(fig, update, frames=(Total_Time_Steps_with_transfer), init_func=init,
                               interval=1, blit=True)
+
+ani.save(
+    os.path.join(os.path.dirname(__file__), 'Bezier_Transfer_Animation.mov'),
+    writer='ffmpeg',
+    fps=120,
+    dpi=150
+)
+
+
 plt.show()
 
 
